@@ -22,10 +22,14 @@ class ParadoxMod:
         if not self.mod_base_dir:
             self.mod_base_dir = path.parent
         
-        self.categories:list[GenericCategory] = []
+        self.categories:dict[str, GenericCategory] = {}
         self.error_categories:list[GenericCategory] = []
-        
-        self.categories.append(Events(self.mod_base_dir))
+
+        for category in implemented_arr:
+            obj = category(self.mod_base_dir)
+            self.categories[type(obj).__name__] = obj
+        # self.categories{Events.__name__:Events(self.mod_base_dir)}
+        # self.categories.append({Events()__name__:Events(self.mod_base_dir)})
         # self._collect_categories()
 
     def _collect_mod_info(self):

@@ -37,6 +37,8 @@ class ContentsPanel(QWidget):
             self._add_nodes(self.tree.invisibleRootItem(), block.nodes)
         elif isinstance(block, GenericBlock):
             self._add_nodes(self.tree.invisibleRootItem(), block.children)
+        elif isinstance(block, dict):
+            self._add_nodes(self.tree.invisibleRootItem(), block)
 
     def _add_nodes(self, parent_item, nodes):
         """
@@ -60,12 +62,15 @@ class ContentsPanel(QWidget):
                     self._add_nodes(item, node.value.children)
 
             # Block/List
-            elif hasattr(node, "children"):
+            elif isinstance(node, GenericBlock) or isinstance(node, dict):
+            # elif hasattr(node, "children") or hasattr(node, "keys"):
                 # Use key as the label in column 0, blank in column 1
                 item = QTreeWidgetItem([str(node.key), ""])
                 parent_item.addChild(item)
-                self._add_nodes(item, node.children)
-
+                if isinstance(node, GenericBlock):
+                    self._add_nodes(item, node.children)
+                elif isinstance(node, dict):
+                    self._add_nodes(item, node.values())
             # Atomic value without KeyValue
             else:
                 value_str = self._value_to_str(node)

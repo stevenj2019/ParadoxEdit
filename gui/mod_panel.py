@@ -15,7 +15,6 @@ class ModPanel(QWidget):
 
         self.tree.setColumnCount(1)
 
-        
         header = self.tree.header()
         header.setSectionResizeMode(0, QHeaderView.Stretch)
 
@@ -42,9 +41,8 @@ class ModPanel(QWidget):
         categories_parent = QTreeWidgetItem(["Categories"])
         root.addChild(categories_parent)
 
-        for category in self.mod.categories:
-            category_name = type(category).__name__
-            cat_item = QTreeWidgetItem([category_name])
+        for category in self.mod.categories.keys():
+            cat_item = QTreeWidgetItem([category])
             categories_parent.addChild(cat_item)
 
         root.setExpanded(True)

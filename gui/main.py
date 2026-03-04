@@ -2,7 +2,7 @@ from PyQt5.QtWidgets import QMainWindow, QSplitter
 from PyQt5.QtCore import Qt
 from gui.mod_panel import ModPanel
 from gui.contents_panel import ContentsPanel
-
+from gui.interactions import connect_main_events
 class MainWindow(QMainWindow):
     def __init__(self, mod):
         super().__init__()
@@ -21,3 +21,5 @@ class MainWindow(QMainWindow):
         splitter.addWidget(self.left_panel)
         splitter.addWidget(self.right_panel)
         splitter.setSizes([200, 600])
+
+        connect_main_events(self)
