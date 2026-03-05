@@ -1,0 +1,1 @@
+# def clear_all_file

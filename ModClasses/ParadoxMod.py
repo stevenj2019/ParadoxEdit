@@ -4,12 +4,20 @@ from pathlib import Path
 import concurrent.futures
 
 from ParadoxParser import ParadoxScriptParser as PDXFile
-from ParadoxParser.ParadoxNodes import GenericKeyValue
+from ParadoxParser.ParadoxNodes import GenericKeyValue, GenericNode
 from .ParadoxCategory import GenericCategory
 from .ParadoxCategory import EventCategory as Events
 
 implemented_arr = [Events]
 #path should point to a descriptor file, 
+
+class DummyPDXFile(PDXFile):
+    def __init__(self, name):
+        self.filepath = Path("")
+        self.filename = name
+        # self.encoding = encoding
+        self.nodes: list[GenericNode] = []
+
 class ParadoxMod:
     def __init__(self, path:str|os.PathLike):
         path = Path(path)
@@ -27,6 +35,7 @@ class ParadoxMod:
 
         for category in implemented_arr:
             obj = category(self.mod_base_dir)
+            obj._organise()
             self.categories[type(obj).__name__] = obj
         # self.categories{Events.__name__:Events(self.mod_base_dir)}
         # self.categories.append({Events()__name__:Events(self.mod_base_dir)})

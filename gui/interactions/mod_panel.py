@@ -1,21 +1,34 @@
 from PyQt5.QtWidgets import QMenu
 from PyQt5.QtCore import Qt
 from gui.interactions.utility import is_leaf
+from ModClasses.ParadoxCategory import EventCategory, GenericCategory
+from ParadoxParser import ParadoxScriptParser
+from gui.interactions.context_menus import event_file_context
+from gui import util
 def connect_mod_panel_events(main_window):
     tree = main_window.left_panel.tree
 
-    #this is so rigid, that it crahes on descriptor
-    #also when i load a dict in, it just posts the filenames rather than the actual objects, annoyingly (i think im loading it in the wrong place....)
     def on_tree_click(item, column):
         if is_leaf(item):
-            # obj = main_window.mod.categories[key] if key in main_window.mod_categories.keys() else None
-            print("KEY:", item.text(0))
-            obj = main_window.mod.categories[item.text(0)]
+            obj = item.data(0, Qt.UserRole)
             if obj:
-                # assign it to right panel
-                obj._organise()
-                main_window.right_panel.load_block(obj.category_data)
+                if not isinstance(obj, ParadoxScriptParser):
+                    obj._organise()
+                main_window.right_panel.load_block(obj)
 
+    def on_tree_right_click(position):
+        item = tree.itemAt(position)
+        if not item:
+            return 
+
+        obj = item.data(0, Qt.UserRole)
+        if not obj:
+            return 
+        event_file_context(main_window, item, obj)
+
+    #left click event
     tree.itemClicked.connect(on_tree_click)
 
-    # treeSetContextMenuPolicy(Qt.CustomContextMenu)
+    #right click event
+    tree.setContextMenuPolicy(Qt.CustomContextMenu)
+    tree.customContextMenuRequested.connect(on_tree_right_click)

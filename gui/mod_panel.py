@@ -1,7 +1,9 @@
 # gui/mod_panel.py
 from PyQt5.QtWidgets import QWidget, QVBoxLayout, QTreeWidget, QTreeWidgetItem, QHeaderView
 from PyQt5.QtCore import Qt
-
+from ParadoxParser import ParadoxScriptParser
+# from gui.widgets import ModPanelClickableItem
+from gui.util import build_category_list
 
 class ModPanel(QWidget):
     def __init__(self, mod):
@@ -35,17 +37,22 @@ class ModPanel(QWidget):
 
         # Descriptor node
         descriptor_item = QTreeWidgetItem(["Descriptor"])
+        descriptor_item.setData(0, Qt.UserRole, self.mod.descriptor_object)
         root.addChild(descriptor_item)
 
         # Categories parent
         categories_parent = QTreeWidgetItem(["Categories"])
         root.addChild(categories_parent)
 
-        for category in self.mod.categories.keys():
-            cat_item = QTreeWidgetItem([category])
-            categories_parent.addChild(cat_item)
+        for c_key, c_val in self.mod.categories.items():            
+            cat_sub = QTreeWidgetItem([c_key])
+            cat_sub.setData(0, Qt.UserRole, c_val)
+            for file, obj in c_val.category_data.items():
+                cat_sub.addChild(build_category_list(file, obj))
 
-        root.setExpanded(True)
+            categories_parent.addChild(cat_sub)
+        
+        root.setExpanded(True)        
         categories_parent.setExpanded(True)
 
         # i will place this elsewhere eventually

@@ -52,7 +52,7 @@ class ContentsPanel(QWidget):
                 item = QTreeWidgetItem(["Comment", value_str])
                 parent_item.addChild(item)
             # KeyValue
-            if node.__class__.__name__ == "GenericKeyValue":
+            elif node.__class__.__name__ == "GenericKeyValue":
                 value_str = self._value_to_str(node.value)
                 item = QTreeWidgetItem([str(node.key), value_str])
                 parent_item.addChild(item)
