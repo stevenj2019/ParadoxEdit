@@ -47,7 +47,7 @@ class ModPanel(QWidget):
         for c_key, c_val in self.mod.categories.items():            
             cat_sub = QTreeWidgetItem([c_key])
             cat_sub.setData(0, Qt.UserRole, c_val)
-            for file, obj in c_val.category_data.items():
+            for file, obj in c_val.files.items():
                 cat_sub.addChild(build_category_list(file, obj))
 
             categories_parent.addChild(cat_sub)

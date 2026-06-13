@@ -35,11 +35,8 @@ class ParadoxMod:
 
         for category in implemented_arr:
             obj = category(self.mod_base_dir)
-            obj._organise()
+            # obj._organise()
             self.categories[type(obj).__name__] = obj
-        # self.categories{Events.__name__:Events(self.mod_base_dir)}
-        # self.categories.append({Events()__name__:Events(self.mod_base_dir)})
-        # self._collect_categories()
 
     def _collect_mod_info(self):
         self.mod_name = next(
@@ -47,10 +44,9 @@ class ParadoxMod:
             if isinstance(node, GenericKeyValue) and node.key == "name"), None
         )
         self.mod_base_dir = next(
-            (Path(node.value.value) for node in self.descriptor_object.nodes
-            if isinstance(node, GenericKeyValue) and node.key == "file"), None
+            (Path(node.value.value.strip('"')) for node in self.descriptor_object.nodes
+            if isinstance(node, GenericKeyValue) and node.key == "path"), None
         )
-
     # def _collect_categories(self):
     #     def init_category(CategoryClass):
     #         try:

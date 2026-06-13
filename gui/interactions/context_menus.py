@@ -1,4 +1,5 @@
 from PyQt5.Qt import QMainWindow, QMenu, QTreeWidget
+from PyQt5.QtGui import QCursor
 from ModClasses.ParadoxCategory import EventCategory, GenericCategory
 from gui.util import (clear_children, build_category_list, get_safe_mode_opposed_text, 
                       apply_to_all_files, save_file)
@@ -38,4 +39,5 @@ def event_file_context(parent:QMainWindow, tree_item:QTreeWidget, obj:EventCateg
     # menu.addSeperator()
     menu.addSection("Event Options")
     # menu.addAction("Logger Injection")
-    menu.exec_(parent.mapToGlobal(parent.cursor().pos()))
+    # menu.exec_(parent.mapToGlobal(parent.cursor().pos()))
+    menu.exec_(QCursor.pos())

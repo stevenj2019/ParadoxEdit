@@ -12,8 +12,8 @@ def connect_mod_panel_events(main_window):
         if is_leaf(item):
             obj = item.data(0, Qt.UserRole)
             if obj:
-                if not isinstance(obj, ParadoxScriptParser):
-                    obj._organise()
+                # if not isinstance(obj, ParadoxScriptParser):
+                    # obj._organise()
                 main_window.right_panel.load_block(obj)
 
     def on_tree_right_click(position):
