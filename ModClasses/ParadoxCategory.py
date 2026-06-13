@@ -1,20 +1,30 @@
 import os 
 from pathlib import Path
 from ParadoxParser.ParadoxNodes import GenericNode, GenericBlock, GenericKeyValue
+from .ParadoxCategoryItem import GenericCategoryItem, EventCategoryItem
 from ParadoxParser import ParadoxScriptParser as PDXFile
-
+from ModClasses.util import Action
+from Backend.Generic import clear_comments, clear_whitespace
+from Backend.Events import event_log_injection
 class GenericCategory:
-    def __init__(self, base:os.PathLike, paths:list[os.PathLike]):
-        # self.files:list[PDXFile] = []
-        self.files:dict[str, PDXFile] = {}
-        # self.category_data:dict[str, PDXFile] = {}
+    @classmethod
+    def context_sections(cls):        
+        return { 
+            "PDX Script Options": [
+                Action("Clear Comments", clear_comments),
+                Action("Clear Whitespace", clear_whitespace)
+            ]
+        }
+    
+    def __init__(self, base:os.PathLike, paths:list[os.PathLike], item_class:GenericCategoryItem):
+        self.item_class = item_class
+        self.files:dict[str, GenericCategoryItem] = {}
         for path in paths:
             self._read_directory(os.path.join(base, path))
 
     def _read_file(self, file):
         self._parse_file(file)
         
-    #default is to collect all. path is wrong lol
     def _read_directory(self, path):
         for root, dirs, files in os.walk(path):
             for name in dirs:
@@ -22,16 +32,13 @@ class GenericCategory:
             for name in files:
                 self._parse_files(Path(os.path.join(root, name)))
 
-    def _parse_files(self, path:os.PathLike)->PDXFile:
-        self.files[path.name] = PDXFile(path)
-        # self.files.append(PDXFile(path))
+    def _parse_files(self, path:os.PathLike)->GenericCategoryItem:
+        self.files[path.name] = self.item_class(PDXFile(path))
     
     # def _organise(self)->GenericBlock:
         # self.category_data = { f.filename: f for f in self.files }
         # return 
     
-    def _context_menu_items():
-        return
 
 #can do now
 # class HistoryCategory() history/
@@ -40,5 +47,13 @@ class GenericCategory:
 
 EVENT_ERROR_KEYS = ("missing_data", "missing_id", "missing_namespace") 
 class EventCategory(GenericCategory):
+    @classmethod
+    def context_sections(cls):
+        return {
+            **super().context_sections(),
+            "Event Options":[
+                Action("Inject Logs", event_log_injection)
+            ]
+        }
     def __init__(self, mod_path:os.PathLike):
-        super().__init__(mod_path, ["events/"])
+        super().__init__(mod_path, ["events/"], EventCategoryItem)

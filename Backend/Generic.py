@@ -1,10 +1,9 @@
 from ParadoxParser import ParadoxScriptParser as PDXFile
 from ParadoxParser.ParadoxNodes import GenericBlock, GenericComment
 from PyQt5.QtWidgets import QMainWindow
+from Backend.traverse import iter_files
 
-def clear_comments(parent:QMainWindow, file:PDXFile):
-    file.file_saved = False
-    parent.been_modified = True
+def clear_comments(file:PDXFile):
     def remove_comments(node):
         if isinstance(node, GenericBlock):
             node.children = [c for c in node.children if not isinstance(c, GenericComment)]
@@ -14,3 +13,5 @@ def clear_comments(parent:QMainWindow, file:PDXFile):
         if isinstance(root, GenericBlock):
             root.traverse(remove_comments)
             
+def clear_whitespace(file:PDXFile):
+    pass

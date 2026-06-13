@@ -5,10 +5,7 @@ from PyQt5.QtWidgets import QMainWindow
 immediate_log_string = "\"[GetDateText]: [ROOT.id] has received the event {}\""
 options_log_string =  "\"[GetDateText]: [ROOT.id] has chosen the option {}\""
 
-def event_log_injection(parent: QMainWindow, file:PDXFile):
-    file.file_saved = False
-    parent.been_modified = True
-
+def event_log_injection(file:PDXFile):
     event_nodes = [node for node in file.nodes if isinstance(node, GenericBlock)]
     for event_block in event_nodes:
         immediate_log = False

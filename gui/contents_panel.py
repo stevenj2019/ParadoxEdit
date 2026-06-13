@@ -1,14 +1,9 @@
 # gui/contents_panel.py
 from PyQt5.QtWidgets import QWidget, QLabel, QVBoxLayout, QTreeWidget, QTreeWidgetItem
 from ModClasses.ParadoxMod import ParadoxMod
+from ModClasses.ParadoxCategoryItem import GenericCategoryItem
 from ParadoxParser import ParadoxScriptParser
 from ParadoxParser.ParadoxNodes import GenericBlock
-# class ContentsPanel(QWidget):
-#     def __init__(self, mod=None):
-#         super().__init__()
-#         layout = QVBoxLayout()
-#         layout.addWidget(QLabel("Contents Panel placeholder"))
-#         self.setLayout(layout)
 
 #test this at some point, GPT made it 
 class ContentsPanel(QWidget):
@@ -33,10 +28,16 @@ class ContentsPanel(QWidget):
         """
         self.current_block = block
         self.tree.clear()
+        #descriptor
         if isinstance(block, ParadoxScriptParser):
             self._add_nodes(self.tree.invisibleRootItem(), block.nodes)
+        #categoryitem
+        elif isinstance(block, GenericCategoryItem):
+            self._add_nodes(self.tree.invisibleRootItem(), block.obj.nodes)
+        #?????
         elif isinstance(block, GenericBlock):
             self._add_nodes(self.tree.invisibleRootItem(), block.children)
+        #????
         elif isinstance(block, dict):
             self._add_nodes(self.tree.invisibleRootItem(), block)
 

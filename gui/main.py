@@ -13,7 +13,8 @@ class MainWindow(QMainWindow):
         super().__init__()
         self.mod = mod
         self.safe_mode:bool = True #disable to stop generating .bak
-        self.been_modified:bool = False
+        # self.been_modified:bool = False #idk if i need this
+        self.bulk_warning_shown:bool = False
 
         self.setWindowTitle("ParadoxEdit")
         splitter = QSplitter(Qt.Horizontal)
