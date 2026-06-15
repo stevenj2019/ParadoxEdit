@@ -1,8 +1,9 @@
-from PyQt5.QtWidgets import QApplication, QMainWindow, QTreeWidgetItem
+from PyQt5.QtWidgets import QApplication, QMainWindow, QTreeWidgetItem, QLabel, QWidgetAction
 from PyQt5.QtCore import Qt
 from ParadoxParser import ParadoxScriptParser as PDXFile
 from ModClasses.ParadoxCategory import GenericCategory
 import qdarktheme
+
 def clear_children(parent_item: QTreeWidgetItem):
     """
     Removes all child items of a given parent item in place.
@@ -24,6 +25,20 @@ def toggle_dark_mode(self):
     self.config.change_setting(dark_mode = not self.config.dark_mode)
     app = QApplication.instance()
     app.setStyleSheet(qdarktheme.load_stylesheet("dark" if self.config.dark_mode else "light"))
+
+def add_menu_heading(menu, text):
+    # heading = menu.addAction(text)
+    # heading.setEnabled(False)
+    
+    label = QLabel(text)
+    label.setStyleSheet("""
+        font-weight:bold;
+        padding: 4px 12px;
+    """)
+    action = QWidgetAction(menu)
+    action.setDefaultWidget(label)
+    menu.addAction(action)
+    menu.addSeparator()
 
 def save_file(parent:QMainWindow, file:PDXFile):
     file.file_saved = True

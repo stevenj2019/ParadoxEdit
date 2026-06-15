@@ -1,11 +1,14 @@
 # gui/mod_panel.py
+from PyQt5.QtGui import QCursor
 from PyQt5.QtWidgets import QWidget, QVBoxLayout, QTreeWidget, QTreeWidgetItem, QHeaderView
-from PyQt5.QtCore import Qt
-from ParadoxParser import ParadoxScriptParser
-# from gui.widgets import ModPanelClickableItem
-from gui.util import build_category_list
+from PyQt5.QtCore import Qt, pyqtSignal
+from ParadoxParser import ParadoxScriptParser as PDXScript
+from gui.util import build_category_list, add_menu_heading
+from traverse import apply_to_target
 
 class ModPanel(QWidget):
+    request_load_block = pyqtSignal(object)
+    request_context_menu = pyqtSignal(object, object)
     def __init__(self, mod):
         super().__init__()
         self.mod = mod
@@ -27,6 +30,7 @@ class ModPanel(QWidget):
         layout.addWidget(self.tree)
 
         self._populate_tree()
+        self._connect_events()
 
     def _populate_tree(self):
         self.tree.clear()
@@ -61,3 +65,67 @@ class ModPanel(QWidget):
             print("Failed categories:")
             for name in self.mod.error_categories:
                 print(f" - {name}")
+
+    #this should not be here....
+    # def global_options(self, parent, menu):
+    #     menu.addSection("Editor")
+    #     menu.addAction("Toggle Dark Mode", lambda:toggle_dark_mode(parent))
+    #     menu.addAction(f"{get_safe_mode_opposed_text(parent)} Safe Mode", lambda:toggle_safe_mode_warning(parent))
+
+    # def build_context_menu(self, parent, selected):
+    #     menu = QMenu(parent)
+    #     self.global_options(parent, menu)
+    #     if not isinstance(selected, PDXScript):
+    #         sections = selected.context_sections()
+    #         for section_name, actions in sections.items():
+    #             menu.addSection(section_name)
+    #             for action in actions:
+    #                 menu.addAction(
+    #                     action.text,
+    #                     lambda checked=False, a=action:
+    #                     apply_to_target(a.callback, parent, selected)
+    #                 )        
+    #     menu.exec_(QCursor.pos())
+
+    def populate_context_menu(self, menu, parent, selected):
+        if isinstance(selected, PDXScript):
+            return
+        
+        for section_name, actions in selected.context_sections().items():
+            menu.addSection(section_name)
+            add_menu_heading(menu, section_name)
+            for action in actions:
+                menu.addAction(
+                    action.text,
+                    lambda checked=False, a=action:
+                    apply_to_target(a.callback, parent, selected)
+                )
+
+    def _connect_events(self):
+        tree = self.tree
+
+        def on_tree_click(item, column):
+            if item.childCount() == 0:
+                obj = item.data(0, Qt.UserRole)
+                # if obj and self.main_window:
+                #     self.main_window.right_panel.load_block(obj)
+                if obj:
+                    self.request_load_block.emit(obj)
+
+        def on_tree_right_click(position):
+            item = tree.itemAt(position)
+            if not item:
+                return
+
+            obj = item.data(0, Qt.UserRole)
+            if not obj:
+                return
+
+            # self.build_context_menu(self.main_window, obj)
+            self.request_context_menu.emit(self, obj) #this line
+            
+        tree.itemClicked.connect(on_tree_click)
+
+        tree.setContextMenuPolicy(Qt.CustomContextMenu)
+        tree.customContextMenuRequested.connect(on_tree_right_click)
+    
