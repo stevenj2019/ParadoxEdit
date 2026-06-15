@@ -68,11 +68,12 @@ class ModPanel(QWidget):
             menu.addSection(section_name)
             add_menu_heading(menu, section_name)
             for action in actions:
-                menu.addAction(
+                option = menu.addAction(
                     action.text,
                     lambda checked=False, a=action:
                     apply_to_target(a.callback, parent, selected)
                 )
+                option.setEnabled(action.enabled)
 
     def _connect_events(self):
         tree = self.tree

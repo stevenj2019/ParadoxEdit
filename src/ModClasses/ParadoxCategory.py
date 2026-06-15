@@ -4,24 +4,24 @@ from ParadoxParser.ParadoxNodes import GenericNode, GenericBlock, GenericKeyValu
 from .ParadoxCategoryItem import GenericCategoryItem, EventCategoryItem
 from ParadoxParser import ParadoxScriptParser as PDXFile
 from ModClasses.util import Action
-from Backend.Generic import clear_comments, clear_whitespace
+from Backend.Generic import clear_comments, clear_whitespace, save_file
 from Backend.Events import event_log_injection
 class GenericCategory:
-    @classmethod
-    def context_sections(cls):        
-        return { 
-            "PDX Script Options": [
-                Action("Clear Comments", clear_comments),
-                Action("Clear Whitespace", clear_whitespace)
-            ]
-        }
-    
     def __init__(self, base:os.PathLike, paths:list[os.PathLike], item_class:GenericCategoryItem):
         self.item_class = item_class
         self.files:dict[str, GenericCategoryItem] = {}
         for path in paths:
             self._read_directory(os.path.join(base, path))
 
+    def context_sections(self):        
+        return { 
+            "PDX Script Options": [
+                # Action("Save Changes", save_file, any(b.has_been_modified for b in self.files.values())),
+                Action("Clear Comments", clear_comments, True),
+                Action("Clear Whitespace", clear_whitespace, True)
+            ]
+        }
+    
     def _read_file(self, file):
         self._parse_file(file)
         
@@ -42,13 +42,13 @@ class GenericCategory:
 
 EVENT_ERROR_KEYS = ("missing_data", "missing_id", "missing_namespace") 
 class EventCategory(GenericCategory):
-    @classmethod
-    def context_sections(cls):
+    def __init__(self, mod_path:os.PathLike):
+        super().__init__(mod_path, ["events/"], EventCategoryItem)
+
+    def context_sections(self):
         return {
             **super().context_sections(),
             "Event Options":[
-                Action("Inject Logs", event_log_injection)
+                Action("Inject Logs", event_log_injection, True)
             ]
         }
-    def __init__(self, mod_path:os.PathLike):
-        super().__init__(mod_path, ["events/"], EventCategoryItem)

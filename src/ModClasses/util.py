@@ -5,3 +5,4 @@ from typing import Callable
 class Action:
     text: str
     callback: Callable
+    enabled: bool
