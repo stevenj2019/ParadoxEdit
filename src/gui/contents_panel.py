@@ -96,18 +96,3 @@ class ContentsPanel(QWidget):
                 return node._get_value()
             case _:
                 return (str(getattr(node, "value", node)))
-        # if cls_name == "GenericString":
-        #     return node.value
-        # elif cls_name == "GenericToken":
-        #     return node.value
-        # elif cls_name == "GenericInt":
-        #     return str(node.value)
-        # elif cls_name == "GenericFloat":
-        #     return str(node.value)
-        # elif cls_name == "GenericBool":
-        #     return "yes" if node.value else "no"
-        # elif cls_name == "GenericKeyValue":
-        #     return self._value_to_str(node.value)
-        # else:
-        #     # fallback
-        #     return str(getattr(node, "value", node))
