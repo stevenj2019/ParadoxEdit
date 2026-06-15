@@ -5,21 +5,22 @@ from PyQt5.QtWidgets import QMainWindow
 immediate_log_string = "\"[GetDateText]: [ROOT.id] has received the event {}\""
 options_log_string =  "\"[GetDateText]: [ROOT.id] has chosen the option {}\""
 
+#Currently not working right, not adding log to the options, but does create and add to immediate
 def event_log_injection(file:PDXFile):
     event_nodes = [node for node in file.nodes if isinstance(node, GenericBlock)]
     for event_block in event_nodes:
         immediate_log = False
         event_id_value = next(
             child.value.value
-            for child in event_block
+            for child in event_block.children
             if isinstance(child, GenericKeyValue) and child.key == "id"
         )
         log_string = immediate_log_string.format(event_id_value)
 
-        immediate_block = next((child for child in event_block.children if child.key == "immediate"), None)
+        immediate_block = next((child for child in event_block.children if isinstance(child, GenericKeyValue) and child.key == "immediate"), None)
         if not immediate_block:
             immediate_block = GenericBlock("immediate")
-            insert_index = next(i for i, c in enumerate(event_block.children) if c.key == "option"), len(event_block.children)
+            insert_index = next((i for i, c in enumerate(event_block.children) if isinstance(c, GenericKeyValue) and c.key == "option"), len(event_block.children))
             event_block.children.insert(insert_index, immediate_block)
 
         immediate_block_logs = [child for child in immediate_block.children if child.key == "log"]
@@ -31,7 +32,7 @@ def event_log_injection(file:PDXFile):
         if not immediate_log:
             immediate_block.children.insert(0, GenericKeyValue("log", GenericString(log_string)))
 
-        option_blocks = filter(lambda c: c.key == "option", event_block.children) #gets option = { } from the event
+        option_blocks = filter(lambda c: isinstance(c, GenericKeyValue) and c.key == "option", event_block.children) #gets option = { } from the event
         for option_block in option_blocks:                                        #iters them
             option_log = False                                                    #sets false flag
             # for node in option_block.children:                                    #iters through the keyvalues dont think this is needed

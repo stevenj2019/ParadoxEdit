@@ -11,8 +11,10 @@ def iter_files(target):
     else:
         raise TypeError(f"Cannot iterate from {type(target).__name__}")
     
-def apply_to_target(action, parent, target): #can add *args and *kwargs (dont think i need to)
+def apply_to_target(action, parent, target):
     if bulk_operation_warning(parent):
         for file in iter_files(target):
             file.has_been_modified = True
-            action(parent, file.obj)
+            action(file.obj)
+            parent.right_panel.load_block(file.obj)
+            
