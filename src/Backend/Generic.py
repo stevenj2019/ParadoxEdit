@@ -1,7 +1,6 @@
 from ParadoxParser import ParadoxScriptParser as PDXFile
 from ParadoxParser.ParadoxNodes import GenericBlock, GenericComment
 from PyQt5.QtWidgets import QMainWindow
-from Backend.traverse import iter_files
 
 def clear_comments(file:PDXFile):
     def remove_comments(node):

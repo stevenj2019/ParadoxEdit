@@ -1,6 +1,6 @@
 from PyQt5.Qt import QMenu
 from PyQt5.QtGui import QCursor
-from Backend.traverse import apply_to_target
+from traverse import apply_to_target
 from gui.warning_messages import toggle_safe_mode_warning
 from gui.util import get_safe_mode_opposed_text
 

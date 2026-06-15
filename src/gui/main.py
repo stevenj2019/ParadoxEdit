@@ -9,9 +9,10 @@ from gui.interactions import connect_main_events
 #this absolutely, works, but the vategories need a hell of a lot more work, 
 # i need to integrate ._organise() somewhere, 
 class MainWindow(QMainWindow):
-    def __init__(self, mod):
+    def __init__(self, mod, config):
         super().__init__()
         self.mod = mod
+        self.config = config
         self.safe_mode:bool = True #disable to stop generating .bak
         # self.been_modified:bool = False #idk if i need this
         self.bulk_warning_shown:bool = False

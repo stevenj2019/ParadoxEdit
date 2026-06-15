@@ -1,6 +1,26 @@
+import os
 from PyQt5.QtWidgets import QFileDialog, QMessageBox
+from pathlib import Path
+from Configuration import ConfigurationFile
+def select_hoi4_install_directory(parent=None):
+    options = QFileDialog.Options()
+    options |= QFileDialog.ReadOnly
+    filepath = QFileDialog.getExistingDirectory(
+        parent,
+        "Select Paradox Game install directory",
+        "",
+        QFileDialog.ShowDirsOnly
+    )
+    if not filepath:
+        QMessageBox.warning(parent, "No folder selected", "You did not select an install folder")
+        return
+    path = Path(filepath)
+    if not (path / "pdx_launcher").is_dir():
+        QMessageBox.warning(parent, "Invalid folder selected", "This directory does not contain pdx_launcher")
+        return
+    return filepath
 
-def select_and_load_mod(parent=None):
+def select_mod_file(parent=None, config:ConfigurationFile=None):
     """
     Opens a file dialog for selecting a .mod file,
     loads it into a ParadoxMod instance, and returns it.
@@ -10,19 +30,19 @@ def select_and_load_mod(parent=None):
     filepath, _ = QFileDialog.getOpenFileName(
         parent,
         "Select Paradox descriptor.mod file",
-        "",
+        "" if not config.mod_file_path else str(config.mod_file_path),
         "Paradox Mod Files (*.mod);;All Files (*)",
         options=options
     )
 
     if not filepath:
         QMessageBox.warning(parent, "No file selected", "You did not select a mod file.")
-        return None
+        return None, None
 
     try:
         from ModClasses.ParadoxMod import ParadoxMod
         mod = ParadoxMod(filepath)
-        return mod
+        return mod, filepath
     except Exception as e:
         QMessageBox.critical(parent, "Failed to load mod", f"Error: {e}")
-        return None
+        return None, None
