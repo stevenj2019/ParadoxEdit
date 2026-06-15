@@ -49,7 +49,7 @@ class MainWindow(QMainWindow):
         add_menu_heading(menu, "Editor")
         menu.addAction("Toggle Dark Mode", lambda:toggle_dark_mode(self))
         menu.addAction(f"{get_safe_mode_opposed_text(self)} Safe Mode", lambda:toggle_safe_mode_warning(self))
-
+        
         panel.populate_context_menu(menu, self, selected)
 
         menu.exec_(QCursor.pos())

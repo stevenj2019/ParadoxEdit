@@ -14,3 +14,9 @@ def clear_comments(file:PDXFile):
             
 def clear_whitespace(file:PDXFile):
     pass
+
+def save_file(parent, file:PDXFile):
+    file.file_saved = True
+    if parent.safe_mode:
+        file._backup_file()
+    file._to_pdx_script_file() #change to ._to_pdx_file() when i fix ParadoxParser token:var issue

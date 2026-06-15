@@ -7,10 +7,8 @@ from Configuration import ConfigurationFile
 from pathlib import Path
 import qdarktheme
 
-# qdarktheme.enable_hi_dpi()
 app = QApplication([])
 config = ConfigurationFile()
-# qdarktheme.setup_theme("dark" if config.dark_mode else "light")
 app.setStyleSheet(qdarktheme.load_stylesheet("dark" if config.dark_mode else "light"))
 if not config.initalised:
     install_location = select_hoi4_install_directory()

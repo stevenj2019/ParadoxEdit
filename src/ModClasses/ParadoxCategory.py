@@ -34,11 +34,6 @@ class GenericCategory:
 
     def _parse_files(self, path:os.PathLike)->GenericCategoryItem:
         self.files[path.name] = self.item_class(PDXFile(path))
-    
-    # def _organise(self)->GenericBlock:
-        # self.category_data = { f.filename: f for f in self.files }
-        # return 
-    
 
 #can do now
 # class HistoryCategory() history/
