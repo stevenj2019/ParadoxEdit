@@ -92,6 +92,8 @@ class ContentsPanel(QWidget):
                 return "yes" if node.value else "no"
             case "GenericKeyValue":
                 return self._value_to_str(node.value)
+            case "GenericComparator":
+                return node._get_value()
             case _:
                 return (str(getattr(node, "value", node)))
         # if cls_name == "GenericString":
