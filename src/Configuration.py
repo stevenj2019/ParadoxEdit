@@ -9,6 +9,7 @@ class ConfigurationFile:
         self.game_install_path:Path = None
         self.mod_file_path:Path = None
         self.safe_mode:bool = None
+        self.dark_mode:bool = None
 
         if self.file_path.exists():
             self.initalised = True
@@ -26,7 +27,8 @@ class ConfigurationFile:
         return {
             'safe_mode': self.safe_mode,
             'game_install_path': str(self.game_install_path),
-            "mod_file_path": str(self.mod_file_path)
+            'mod_file_path': str(self.mod_file_path),
+            'dark_mode': self.dark_mode
         }
     
     def read_file(self):
@@ -34,12 +36,15 @@ class ConfigurationFile:
         self.safe_mode = settings['safe_mode']
         self.game_install_path = Path(settings['game_install_path'])
         self.mod_file_path = Path(settings['mod_file_path'])
+        self.dark_mode = settings['dark_mode']
 
     def create_file(self):
         self.safe_mode = True
-        self.initalised = True
+        self.dark_mode = False
         self.file_path.parent.mkdir(exist_ok=True, parents=True)
         self.file_path.touch()
+
+        self.initalised = True
 
     def write_file(self):
         with open(self.file_path, "w") as CONFIG_FILE:

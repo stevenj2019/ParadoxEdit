@@ -5,9 +5,13 @@ from gui.main import MainWindow
 from gui.file_dialogue import select_hoi4_install_directory, select_mod_file  # still optional
 from Configuration import ConfigurationFile
 from pathlib import Path
+import qdarktheme
 
-config = ConfigurationFile()
+# qdarktheme.enable_hi_dpi()
 app = QApplication([])
+config = ConfigurationFile()
+# qdarktheme.setup_theme("dark" if config.dark_mode else "light")
+app.setStyleSheet(qdarktheme.load_stylesheet("dark" if config.dark_mode else "light"))
 if not config.initalised:
     install_location = select_hoi4_install_directory()
     if install_location:

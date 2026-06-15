@@ -1,9 +1,8 @@
-from PyQt5.QtWidgets import QMainWindow, QSplitter
+from PyQt5.QtWidgets import QApplication, QMainWindow, QSplitter
 from PyQt5.QtCore import Qt
 from gui.mod_panel import ModPanel
 from gui.contents_panel import ContentsPanel
 from gui.interactions import connect_main_events
-
 
 #basic shit works, click a relevant mod item, itll get the attached object anf load it to the right,
 #this absolutely, works, but the vategories need a hell of a lot more work, 
