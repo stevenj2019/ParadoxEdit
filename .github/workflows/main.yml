@@ -7,27 +7,39 @@ on:
     branches: [ main ]
 
 jobs:
-  build:
-    runs-on: ubuntu-latest
-    permissions:
-      contents: write
+  # build:
+  #   runs-on: ubuntu-latest
+  #   permissions:
+  #     contents: write
+  #   steps:
+  #   - uses: actions/checkout@v4
+
+  #   - name: Get Release SHA
+  #     id: vars
+  #     run: echo "sha_short=$(git rev-parse --short HEAD)" >> $GITHUB_OUTPUT
+
+  #   - name: Package Application - Windows
+  #     uses: JackMcKew/pyinstaller-action-windows@main
+  #     with:
+  #       path: src
+
+  #   - name: Upload Artifact - Windows
+  #     uses: actions/upload-artifact@v4
+  #     with:
+  #       name: PDXEdit
+  #       path: src/dist/windows
+  pyinstaller-build:
+    runs-on: windows-latest
     steps:
-    - uses: actions/checkout@v4
-
-    - name: Get Release SHA
-      id: vars
-      run: echo "sha_short=$(git rev-parse --short HEAD)" >> $GITHUB_OUTPUT
-
-    - name: Package Application - Windows
-      uses: JackMcKew/pyinstaller-action-windows@main
+    - name: Create Executable
+      uses: sayyid5416/pyinstaller@v1
       with:
-        path: src
-
-    - name: Upload Artifact - Windows
-      uses: actions/upload-artifact@v4
-      with:
-        name: PDXEdit
-        path: src/dist/windows
+        python_ver: '3.12.3'
+        pyinstaller_ver: '==6.21.0'
+        spec: 'PDXEdit.spec'
+        requirements: 'src/requirements.txt'
+        upload_exe_with_name: "PDXEdit"
+        options: "--onefile --windowed"
 
     - name: Create Release
       id: create_release
