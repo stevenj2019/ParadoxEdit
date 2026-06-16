@@ -10,7 +10,7 @@ class GenericCategoryItem:
     def context_sections(self):
         return { 
             "PDX Script Options": [
-                # Action("Save Changes", save_file, self.has_been_modified),
+                Action("Save Changes", save_file, self.has_been_modified),
                 Action("Clear Comments", clear_comments, True),
                 Action("Clear Whitespace", clear_whitespace, True)
             ]

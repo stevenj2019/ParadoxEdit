@@ -1,13 +1,14 @@
-from ParadoxParser import ParadoxLocParser as PDXFile
 from ParadoxParser.ParadoxNodes import GenericBlock, GenericString, GenericKeyValue, GenericComment
-from PyQt5.QtWidgets import QMainWindow
+# from ModClasses.ParadoxCategoryItem import GenericCategoryItem
 
 immediate_log_string = "\"[GetDateText]: [ROOT.id] has received the event {}\""
 options_log_string =  "\"[GetDateText]: [ROOT.id] has chosen the option {}\""
 
 #Currently not working right, not adding log to the options, but does create and add to immediate
-def event_log_injection(file:PDXFile):
-    event_nodes = [node for node in file.nodes if isinstance(node, GenericBlock)]
+# def event_log_injection(file:GenericCategoryItem):
+def event_log_injection(file):
+    script = file.obj
+    event_nodes = [node for node in script.nodes if isinstance(node, GenericBlock)]
     for event_block in event_nodes:
         immediate_log = False
         event_id_value = next(

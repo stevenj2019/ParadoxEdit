@@ -34,3 +34,9 @@ def add_menu_heading(menu, text):
     action.setDefaultWidget(label)
     menu.addAction(action)
     menu.addSeparator()
+
+def get_main_winow():
+    app = QApplication.instance()
+    for widget in app.topLevelWidgets():
+        if isinstance(widget, QMainWindow):
+            return widget

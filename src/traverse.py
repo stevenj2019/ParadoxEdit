@@ -15,6 +15,6 @@ def apply_to_target(action, parent, target):
     if bulk_operation_warning(parent):
         for file in iter_files(target):
             file.has_been_modified = True
-            action(file.obj)
+            action(file)
             parent.right_panel.load_block(file.obj)
             
