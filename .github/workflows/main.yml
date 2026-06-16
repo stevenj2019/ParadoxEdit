@@ -36,7 +36,7 @@ jobs:
       with:
         python_ver: '3.12.3'
         pyinstaller_ver: '==6.21.0'
-        spec: 'PDXEdit.spec'
+        spec: 'src/PDXEdit.spec'
         requirements: 'src/requirements.txt'
         upload_exe_with_name: "PDXEdit"
         options: "--onefile --windowed"
