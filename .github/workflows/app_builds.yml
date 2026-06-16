@@ -36,7 +36,7 @@ jobs:
       - name: Build DMG
         if: matrix.os == 'macos-latest'
         run: |
-          hdiutil create PDXEdit.dmg -srcfolder dist/PDXEdit.app
+          hdiutil create PDXEdit.dmg -srcfolder dist/PDXEdit
 
       - name: Upload Artifact
         uses: actions/upload-artifact@v4
