@@ -40,6 +40,11 @@ jobs:
         requirements: 'src/requirements.txt'
         upload_exe_with_name: "PDXEdit"
         # options: "--onefile --windowed"
+
+    - name: Get Release SHA
+      id: vars
+      run: echo "sha_short=$(git rev-parse --short HEAD)" >> $GITHUB_OUTPUT
+
     - name: Create Release
       id: create_release
       uses: actions/create-release@v1
