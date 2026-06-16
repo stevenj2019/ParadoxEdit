@@ -31,7 +31,7 @@ def toggle_safe_mode_warning(parent):
     if parent.safe_mode:
         reply = QMessageBox.question(
             parent, 
-            "warning", 
+            "Warning", 
             "This will disable safe mode, which allows for .bak generation on files modified.", 
             QMessageBox.Yes | QMessageBox.No
         )
@@ -40,3 +40,20 @@ def toggle_safe_mode_warning(parent):
     else:
         parent.safe_mode = not parent.safe_mode
 
+def GFX_file_copying_warn(parent):
+    reply = QMessageBox.question(
+        parent, 
+        "Warning",
+        "Wether or not you save the file, the code will not delete source files, you must do this manually if you proceed.",
+        QMessageBox.Yes | QMessageBox.No
+    )
+    return reply == QMessageBox.Yes
+
+def GFX_is_focus_upload(parent):
+    reply = QMessageBox.question(
+        parent, 
+        "Generate _shines",
+        "Are these icons intended for use in Focus Trees?",
+        QMessageBox.Yes | QMessageBox.No
+    )
+    return reply == QMessageBox.Yes

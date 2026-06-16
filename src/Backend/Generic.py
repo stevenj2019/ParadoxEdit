@@ -1,6 +1,6 @@
 from ParadoxParser import ParadoxScriptParser as PDXFile
 from ParadoxParser.ParadoxNodes import GenericBlock, GenericComment
-from gui.util import get_main_winow
+from gui.util import get_main_window
 
 def clear_comments(file):
     def remove_comments(node):
@@ -22,7 +22,7 @@ def save_all_files_in_category(category):
 
 def save_file(file):
     file.has_been_modified = False
-    parent = get_main_winow()
+    parent = get_main_window()
     if parent.safe_mode:
         file.obj._backup_file()
     file.obj._to_pdx_file()

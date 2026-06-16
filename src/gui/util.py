@@ -35,7 +35,10 @@ def add_menu_heading(menu, text):
     menu.addAction(action)
     menu.addSeparator()
 
-def get_main_winow():
+def get_app_instance():
+    return QApplication.instance()
+
+def get_main_window():
     app = QApplication.instance()
     for widget in app.topLevelWidgets():
         if isinstance(widget, QMainWindow):

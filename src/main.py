@@ -17,7 +17,7 @@ if not config.initalised:
         config.change_setting(game_install_path=Path(install_location))
     else:
         exit()
-mod, path = select_mod_file(None, config)
+mod, path = select_mod_file(config=config)
 if not mod:
     exit()
 config.change_setting(mod_file_path=Path(path).parent)

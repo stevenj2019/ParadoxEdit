@@ -30,7 +30,8 @@ class GenericCategory:
             for name in dirs:
                 self._read_directory(Path(os.path.join(root, name)))
             for name in files:
-                if not self.file_type or self.file_type in name: 
+                if ((not self.file_type or name.endswith(self.file_type)) 
+                     and not name.endswith(".bak")):
                     self._parse_files(Path(os.path.join(root, name)))
 
     def _parse_files(self, path:os.PathLike)->GenericCategoryItem:

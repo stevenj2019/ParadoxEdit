@@ -1,5 +1,4 @@
 # gui/mod_panel.py
-from PyQt5.QtGui import QCursor
 from PyQt5.QtWidgets import QWidget, QVBoxLayout, QTreeWidget, QTreeWidgetItem, QHeaderView
 from PyQt5.QtCore import Qt, pyqtSignal
 from ParadoxParser import ParadoxScriptParser as PDXScript

@@ -37,7 +37,7 @@ class GFXCategoryItem(GenericCategoryItem):
         return {
             **super().context_sections(), 
             "GFX Options":[
-                Action("Add New GFX", GFX.add_new_GFX, False),#not implemented
+                Action("Add New GFX", GFX.add_new_GFX, True),
                 Action("Add missing _shines", GFX.add_missing_shines, True) #not implemented
             ]
         }
