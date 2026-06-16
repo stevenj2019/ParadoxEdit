@@ -7,8 +7,8 @@ from ParadoxParser import ParadoxScriptParser as PDXFile
 from ParadoxParser.ParadoxNodes import GenericKeyValue, GenericNode
 from .ParadoxCategory import GenericCategory
 from .ParadoxCategory import EventCategory as Events
-
-implemented_arr = [Events]
+from .ParadoxCategory import GFXCategory as GFX
+implemented_arr = [Events, GFX]
 #path should point to a descriptor file, 
 
 class DummyPDXFile(PDXFile):

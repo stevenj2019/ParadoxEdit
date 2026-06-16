@@ -1,11 +1,9 @@
-from ParadoxParser.ParadoxNodes import GenericBlock, GenericString, GenericKeyValue, GenericComment
-# from ModClasses.ParadoxCategoryItem import GenericCategoryItem
+from ParadoxParser.ParadoxNodes import GenericBlock, GenericString, GenericKeyValue
 
 immediate_log_string = "\"[GetDateText]: [ROOT.id] has received the event {}\""
 options_log_string =  "\"[GetDateText]: [ROOT.id] has chosen the option {}\""
 
 #Currently not working right, not adding log to the options, but does create and add to immediate
-# def event_log_injection(file:GenericCategoryItem):
 def event_log_injection(file):
     script = file.obj
     event_nodes = [node for node in script.nodes if isinstance(node, GenericBlock)]

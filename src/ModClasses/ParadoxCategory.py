@@ -1,14 +1,14 @@
 import os 
 from pathlib import Path
-from ParadoxParser.ParadoxNodes import GenericNode, GenericBlock, GenericKeyValue
-from .ParadoxCategoryItem import GenericCategoryItem, EventCategoryItem
+from .ParadoxCategoryItem import GenericCategoryItem, EventCategoryItem, GFXCategoryItem
 from ParadoxParser import ParadoxScriptParser as PDXFile
 from ModClasses.util import Action
-from Backend.Generic import clear_comments, clear_whitespace, save_file
-from Backend.Events import event_log_injection
+from Backend import Generic, Events
+
 class GenericCategory:
-    def __init__(self, base:os.PathLike, paths:list[os.PathLike], item_class:GenericCategoryItem):
-        self.item_class = item_class
+    def __init__(self, base:os.PathLike, paths:list[os.PathLike], item_class:GenericCategoryItem, file_type:str=None):
+        self.file_type = file_type
+        self.item_class:GenericCategoryItem = item_class
         self.files:dict[str, GenericCategoryItem] = {}
         for path in paths:
             self._read_directory(os.path.join(base, path))
@@ -16,9 +16,9 @@ class GenericCategory:
     def context_sections(self):        
         return { 
             "PDX Script Options": [
-                Action("Save Changes", save_file, any(b.has_been_modified for b in self.files.values())),
-                Action("Clear Comments", clear_comments, True),
-                Action("Clear Whitespace", clear_whitespace, True)
+                Action("Save Changes", Generic.save_file, any(b.has_been_modified for b in self.files.values())),
+                Action("Clear Comments", Generic.clear_comments, True),
+                Action("Clear Whitespace", Generic.clear_whitespace, True)
             ]
         }
     
@@ -30,17 +30,13 @@ class GenericCategory:
             for name in dirs:
                 self._read_directory(Path(os.path.join(root, name)))
             for name in files:
-                self._parse_files(Path(os.path.join(root, name)))
+                if not self.file_type or self.file_type in name: 
+                    self._parse_files(Path(os.path.join(root, name)))
 
     def _parse_files(self, path:os.PathLike)->GenericCategoryItem:
         self.files[path.name] = self.item_class(PDXFile(path))
 
-#can do now
-# class HistoryCategory() history/
-# need imageviewer/dds viewer
-# class gfx/
-
-EVENT_ERROR_KEYS = ("missing_data", "missing_id", "missing_namespace") 
+# EVENT_ERROR_KEYS = ("missing_data", "missing_id", "missing_namespace") might do, might not
 class EventCategory(GenericCategory):
     def __init__(self, mod_path:os.PathLike):
         super().__init__(mod_path, ["events/"], EventCategoryItem)
@@ -49,6 +45,15 @@ class EventCategory(GenericCategory):
         return {
             **super().context_sections(),
             "Event Options":[
-                Action("Inject Logs", event_log_injection, True)
+                Action("Inject Logs", Events.event_log_injection, False)#doesnt work right
             ]
+        }
+    
+class GFXCategory(GenericCategory):
+    def __init__(self, mod_path:os.PathLike):
+        super().__init__(mod_path, ["interface/"], GFXCategoryItem, ".gfx")
+
+    def context_sections(self):
+        return {
+            **super().context_sections()
         }

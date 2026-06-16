@@ -1,14 +1,11 @@
-from PyQt5.QtWidgets import QApplication, QMainWindow, QSplitter
+from PyQt5.QtWidgets import QMainWindow, QSplitter
 from PyQt5.QtCore import Qt
 from PyQt5.Qt import QMenu
 from PyQt5.QtGui import QCursor
-from ModClasses.ParadoxCategory import GenericCategory
-from ModClasses.ParadoxCategoryItem import GenericCategoryItem
 from gui.mod_panel import ModPanel
 from gui.contents_panel import ContentsPanel
 from gui.util import get_safe_mode_opposed_text, toggle_dark_mode, add_menu_heading
 from gui.warning_messages import toggle_safe_mode_warning
-from Backend.Generic import save_file, save_all_files_in_category
 
 class MainWindow(QMainWindow):
     def __init__(self, mod, config):
