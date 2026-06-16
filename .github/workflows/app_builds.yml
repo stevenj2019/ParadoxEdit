@@ -96,7 +96,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           upload_url: ${{ steps.release.outputs.upload_url }}
-          asset_path: release/PDXEdit-ubuntu-latest/PDXEdit
+          asset_path: release/PDXEdit
           asset_name: PDXEdit
           asset_content_type: application/octet-stream
 
