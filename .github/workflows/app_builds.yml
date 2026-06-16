@@ -10,8 +10,8 @@ jobs:
       matrix:
         os:
           - ubuntu-latest
-        #   - windows-latest
-        #   - macos-latest
+          - windows-latest
+          - macos-latest
     runs-on: ${{ matrix.os }}
 
     steps:
@@ -68,21 +68,21 @@ jobs:
           draft: false
           prerelease: false
 
-    #   - name: Download Windows exe
-    #     uses: actions/download-artifact@v4
-    #     with:
-    #       name: PDXEdit-ubuntu-latest
-    #       path: release/
+      - name: Download Windows exe
+        uses: actions/download-artifact@v4
+        with:
+          name: PDXEdit-ubuntu-latest
+          path: release/
 
-    #   - name: Attach Windows exe to release
-    #     uses: actions/upload-release-asset@v1
-    #     env:
-    #       GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-    #     with:
-    #       upload_url: ${{ steps.release.outputs.upload_url }}
-    #       asset_path: release/PDXEdit-windows-latest/PDXEdit.exe
-    #       asset_name: PDXEdit.exe
-    #       asset_content_type: application/vnd.microsoft.portable-executable
+      - name: Attach Windows exe to release
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.release.outputs.upload_url }}
+          asset_path: release/DXEdit.exe
+          asset_name: PDXEdit.exe
+          asset_content_type: application/vnd.microsoft.portable-executable
 
       - name: Download Linux binary
         uses: actions/download-artifact@v4
@@ -100,19 +100,19 @@ jobs:
           asset_name: PDXEdit
           asset_content_type: application/octet-stream
 
-    #   - name: Download MacOSX app
-    #     uses: actions/download-artifact@v4
-    #     with:
-    #       name: PDXEdit-ubuntu-latest
-    #       path: release/
+      - name: Download MacOSX app
+        uses: actions/download-artifact@v4
+        with:
+          name: PDXEdit-ubuntu-latest
+          path: release/
 
-    #   - name: Attach MacOSX app to release
-    #     uses: actions/upload-release-asset@v1
-    #     env:
-    #       GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-    #     with:
-    #       upload_url: ${{ steps.release.outputs.upload_url }}
-    #       asset_path: release/PDXEdit-macos-latest/PDXEdit.dmg
-    #       asset_name: PDXEdit.dmg
-    #       asset_content_type: application/x-apple-diskimage
+      - name: Attach MacOSX app to release
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.release.outputs.upload_url }}
+          asset_path: release/PDXEdit.dmg
+          asset_name: PDXEdit.dmg
+          asset_content_type: application/x-apple-diskimage
 
