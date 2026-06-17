@@ -103,7 +103,7 @@ jobs:
       - name: Download MacOSX app
         uses: actions/download-artifact@v4
         with:
-          name: PDXEdit-ubuntu-latest
+          name: PDXEdit-macos-latest
           path: release/
 
       - name: Attach MacOSX app to release
