@@ -2,6 +2,7 @@ from PyQt5.QtWidgets import QApplication, QMainWindow, QTreeWidgetItem, QLabel, 
 from PyQt5.QtCore import Qt
 import qdarktheme
 
+from Configuration import ConfigurationFile
 def clear_children(parent_item: QTreeWidgetItem):
     """
     Removes all child items of a given parent item in place.
@@ -18,11 +19,10 @@ def build_category_list(key,val)->QTreeWidgetItem:
 def get_safe_mode_opposed_text(parent:QMainWindow):
     return "Disable" if parent.safe_mode else "Enable"
 
-
-def toggle_dark_mode(self):
-    self.config.change_setting(dark_mode = not self.config.dark_mode)
+def toggle_dark_mode(config:ConfigurationFile):
+    config.change_setting(dark_mode = not(config.dark_mode))
     app = QApplication.instance()
-    app.setStyleSheet(qdarktheme.load_stylesheet("dark" if self.config.dark_mode else "light"))
+    app.setStyleSheet(qdarktheme.load_stylesheet("dark" if config.dark_mode else "light"))
 
 def add_menu_heading(menu, text):    
     label = QLabel(text)

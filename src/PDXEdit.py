@@ -1,27 +1,35 @@
 #all imports for mod loading here
 from sys import exit
-from PyQt5.QtWidgets import QApplication
+from PyQt5.QtWidgets import QApplication, QDialog
 from gui.main import MainWindow
-from gui.file_dialogue import select_hoi4_install_directory, select_mod_file  # still optional
+from gui.settings import SettingsWindow
+from gui.file_dialogue import select_mod_file
+from gui.warning_messages import could_not_load_mod_critical
 from Configuration import ConfigurationFile
-from pathlib import Path
 import qdarktheme
 
 app = QApplication([])
 config = ConfigurationFile()
 app.setStyleSheet(qdarktheme.load_stylesheet("dark" if config.dark_mode else "light"))
 if not config.initalised:
-    install_location = select_hoi4_install_directory()
-    if install_location:
-        config.create_file()
-        config.change_setting(game_install_path=Path(install_location))
-    else:
+    settings = SettingsWindow("PDXEdit Setup", config)
+    if settings.exec_() == QDialog.Accepted:    
+        mod_path = select_mod_file(config=config)
+        try:
+            from ModClasses.ParadoxMod import ParadoxMod
+            mod = ParadoxMod(mod_path)
+        except Exception as e:
+            error = could_not_load_mod_critical(e)
+            error.exec_()
+            exit()
+else:
+    mod_path = select_mod_file(config=config)
+    try:
+        from ModClasses.ParadoxMod import ParadoxMod
+        mod = ParadoxMod(mod_path)
+    except Exception as e:
+        error = could_not_load_mod_critical(e)
         exit()
-mod, path = select_mod_file(config=config)
-if not mod:
-    exit()
-config.change_setting(mod_file_path=Path(path).parent)
-config.write_file()
 window = MainWindow(mod, config)
 window.show()
 app.exec_()

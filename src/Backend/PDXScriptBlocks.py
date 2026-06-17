@@ -1,5 +1,8 @@
 from ParadoxParser.ParadoxNodes import (GenericBlock, GenericKeyValue, GenericString, GenericBool,
-                                        GenericInt, GenericFloat)
+                                        GenericInt, GenericFloat, GenericComment)
+#comment for focus icons
+def generate_focus_icon_comment_block(name):
+    return GenericComment(f"Focus Icon for:{name}")
 #generic icon
 def generate_GFX_block(name, path):
     return GenericBlock(

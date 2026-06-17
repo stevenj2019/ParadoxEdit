@@ -1,4 +1,30 @@
 from PyQt5.QtWidgets import QMessageBox
+import traceback
+def could_not_load_mod_critical(exc: Exception):
+    msg = QMessageBox()
+    msg.setIcon(QMessageBox.Critical)
+    msg.setWindowTitle("Mod Could not be loaded")
+    msg.setText("PDXEdit was unable to load your mod")
+
+    msg.setDetailedText(traceback.format_exc())
+    msg.exec_()
+    # return QMessageBox.critical(
+    #     None,
+    #     "Mod Could not be loaded"
+    # )
+
+def settings_error_critical(game_dir_error:bool, mod_dir_error:bool):
+    text = "The following Problems prevent saving:"
+    if game_dir_error:
+        text += "Game install directory could not find pdx_launcher, is invalid"
+    if mod_dir_error:
+        text =+ "Mod folder does not contain any .mod files, is invalid"
+    return QMessageBox.critical(
+        None, 
+        "Error(s) in settings",
+        text,
+        QMessageBox.Ok
+    )
 
 def bulk_operation_warning(parent):
     if not parent.bulk_warning_shown:
@@ -44,7 +70,7 @@ def GFX_file_copying_warn(parent):
     reply = QMessageBox.question(
         parent, 
         "Warning",
-        "Wether or not you save the file, the code will not delete source files, you must do this manually if you proceed.",
+        "Wether or not you save the file, the code will not delete source files, you must do this manually if you proceed, but change your mind",
         QMessageBox.Yes | QMessageBox.No
     )
     return reply == QMessageBox.Yes
