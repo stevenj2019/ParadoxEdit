@@ -71,7 +71,7 @@ jobs:
       - name: Download Windows exe
         uses: actions/download-artifact@v4
         with:
-          name: PDXEdit-ubuntu-latest
+          name: PDXEdit-windows-latest
           path: release/
 
       - name: Attach Windows exe to release
