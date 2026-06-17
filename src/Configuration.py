@@ -5,7 +5,6 @@ from platformdirs import user_config_dir
 class ConfigurationFile:
     def __init__(self):
         self.file_path:Path = Path(user_config_dir("PDXEdit"), "config.json")
-        print(self.file_path)
         self.game_install_path:Path = None
         self.mod_file_path:Path = None
         self.safe_mode:bool = None
