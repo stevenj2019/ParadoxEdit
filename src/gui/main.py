@@ -49,25 +49,6 @@ class MainWindow(QMainWindow):
 
         menu.exec_(QCursor.pos())
 
-#OLD
-# class MainTopBar(QWidget):
-#     def __init__(self, parent):
-#         super().__init__(parent)
-
-#         self.setFixedHeight(40)
-#         self.layout = QHBoxLayout(self)
-#         self.layout.setContentsMargins(10, 0, 0, 0)
-        
-#         self.settings_button = QPushButton("Settings")
-#         self.settings_button.clicked.connect(self.open_settings_window)
-#         self.layout.addWidget(self.settings_button)
-
-#         self.layout.addStretch()
-
-#     def open_settings_window(self):
-#         settings = SettingsWindow("PDXEdit Settings", get_main_window().config)
-#         settings.exec_()
-
 class MainTopBar(QToolBar):
     def __init__(self, parent):
         super().__init__(parent)
@@ -78,12 +59,8 @@ class MainTopBar(QToolBar):
         settings_action.triggered.connect(self.open_settings_window)
         self.addAction(settings_action)
 
-        # self.settings_button = QPushButton("Settings")
-        # self.settings_button.clicked.connect(self.open_settings_window)
-        # self.layout.addWidget(self.settings_button)
-
-        # self.layout.addStretch()
-
     def open_settings_window(self):
         settings = SettingsWindow("PDXEdit Settings", get_main_window().config)
         settings.exec_()
+
+        

@@ -83,3 +83,12 @@ def GFX_is_focus_upload(parent):
         QMessageBox.Yes | QMessageBox.No
     )
     return reply == QMessageBox.Yes
+
+def invalid_GFX_file_warning(parent):
+    reply = QMessageBox.question(
+        parent, 
+        "Invalid .gfx file provided",
+        "This .gfx file lacks a SpriteTypes block, Syntax Error.", 
+        QMessageBox.Ok
+    )
+    return
