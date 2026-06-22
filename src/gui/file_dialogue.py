@@ -12,13 +12,6 @@ def select_hoi4_install_directory():
         "",
         QFileDialog.ShowDirsOnly
     )
-    # if not filepath:
-    #     QMessageBox.warning(None, "No folder selected", "You did not select an install folder")
-    #     return
-    # path = Path(filepath)
-    # if not (path / "pdx_launcher").is_dir():
-    #     QMessageBox.warning(None, "Invalid folder selected", "This directory does not contain pdx_launcher")
-    #     return
 
 def select_mod_directory():
     options = QFileDialog.Option()
@@ -55,7 +48,7 @@ def gfx_files_folder_selector(parent):
         str(Path.home()),
         QFileDialog.ShowDirsOnly
     )
-    return filepath, filepath==True
+    return filepath, Path(filepath).exists()
 
 def gfx_save_folder_selector(parent):
     options = QFileDialog.Options()
@@ -66,4 +59,4 @@ def gfx_save_folder_selector(parent):
         str(parent.mod.mod_base_dir / "gfx"),
         QFileDialog.ShowDirsOnly
     )
-    return filepath, filepath==True
+    return filepath, Path(filepath).exists()
