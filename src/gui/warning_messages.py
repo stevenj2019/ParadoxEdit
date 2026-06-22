@@ -8,10 +8,6 @@ def could_not_load_mod_critical(exc: Exception):
 
     msg.setDetailedText(traceback.format_exc())
     msg.exec_()
-    # return QMessageBox.critical(
-    #     None,
-    #     "Mod Could not be loaded"
-    # )
 
 def settings_error_critical(game_dir_error:bool, mod_dir_error:bool):
     text = "The following Problems prevent saving:"
@@ -83,6 +79,14 @@ def GFX_is_focus_upload(parent):
         QMessageBox.Yes | QMessageBox.No
     )
     return reply == QMessageBox.Yes
+
+def GFX_load_and_store_are_same():
+    return QMessageBox.warning(
+        None, 
+        "Warning",
+        "Source and Destination folders are identical, this operation will be terminated",
+        QMessageBox.Ok
+    )
 
 def invalid_GFX_file_warning(parent):
     reply = QMessageBox.question(

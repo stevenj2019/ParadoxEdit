@@ -1,4 +1,4 @@
-from gui.warning_messages import GFX_file_copying_warn, GFX_is_focus_upload, invalid_GFX_file_warning
+from gui.warning_messages import GFX_file_copying_warn, GFX_is_focus_upload, invalid_GFX_file_warning, GFX_load_and_store_are_same
 from gui.file_dialogue import gfx_files_folder_selector, gfx_save_folder_selector
 from gui.util import get_main_window
 from ParadoxParser.ParadoxNodes import GenericBlock, GenericComment
@@ -24,8 +24,13 @@ def copy_files_to_new_directory(save_to, image_list:list):
         else:
             new_filename = img.name
         new_img = Path(os.path.join(save_to, new_filename))
-        shutil.copyfile(img, new_img)
-        image_paths.append(new_img)
+
+        try:
+            shutil.copyfile(img, new_img)
+            image_paths.append(new_img)
+        except shutil.SameFileError:
+            GFX_load_and_store_are_same()
+            return
     return image_paths
 
 def add_new_GFX(file):
@@ -45,7 +50,8 @@ def add_new_GFX(file):
 			return
 		image_list = image_collection_loop(list(), path)
 		sprites = copy_files_to_new_directory(save_path, image_list)
-
+		if not sprites:
+			return
 		generate_shines = GFX_is_focus_upload(get_main_window())
 		sprite_blocks = list()
 		base_dir = get_main_window().mod.mod_base_dir

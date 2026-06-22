@@ -16,5 +16,5 @@ def apply_to_target(action, parent, target):
         for file in iter_files(target):
             file.has_been_modified = True
             action(file)
-            parent.right_panel.load_block(file.obj)
+            parent.contents_panel.load_block(file.obj)
             
