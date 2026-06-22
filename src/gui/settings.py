@@ -24,7 +24,7 @@ class SettingsWindow(QDialog):
         self.game_install_path_element_button.clicked.connect(self.browse_game_install_path)
         self.form.addRow(self.game_install_path_label, self.game_install_path_element)
 
-        self.mod_install_path_label = QLabel("Paradox Game Path:")
+        self.mod_install_path_label = QLabel("Paradox Mods Path:")
         self.mod_install_path_element = QHBoxLayout()
         self.mod_install_path_element_text = QLineEdit()
         self.mod_install_path_element_text.setText(str(self.config.mod_file_path))
