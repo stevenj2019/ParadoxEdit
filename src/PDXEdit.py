@@ -1,7 +1,7 @@
 #all imports for mod loading here
 from sys import exit
 from PyQt5.QtWidgets import QApplication, QDialog
-from gui.main import MainWindow
+from gui import MainWindow
 from gui.settings import SettingsWindow
 from gui.file_dialogue import select_mod_file
 from gui.warning_messages import could_not_load_mod_critical
