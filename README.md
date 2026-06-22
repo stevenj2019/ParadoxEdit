@@ -4,7 +4,7 @@ x-Edit Styled utility, packaged with scripts to modify certiain paradox objects/
 ### **Fair Warning, this is currently non-stable, i STRONGLY suggest to keep safe_mode active. this generates .bak files.**
 
 ## Current Functionality
-until i make a more complete version, this branch will be restrained to specific functionality i have already done: e.g. clearing comments/whitespace, adding GFX, fixing missing _shines (Not yet working), event log injection (Not yet working)
+until i make a more complete version, this branch will be restrained to specific functionality i have already done: e.g. clearing comments/whitespace, adding GFX, fixing missing _shines , event log injection (Not yet working)
 truthfully, i dont see a case for micro-edits this way, but i will work on out "for science" mostly, 
 
 ## Want to copy/contribute

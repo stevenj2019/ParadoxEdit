@@ -84,7 +84,6 @@ def add_missing_shines(file):
 									 		GFX_icon(sprite["name"], sprite["texturefile"]),
 											GFX_shine_icon(sprite["name"], sprite["texturefile"])])
 			file.obj.nodes = [GenericBlock("spriteTypes", focus_icon_blocks)]
-			breakpoint()
 		else:
 			pass
       
