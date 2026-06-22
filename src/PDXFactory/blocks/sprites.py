@@ -49,7 +49,7 @@ def GFX_shine_icon(name, path):
     return GenericBlock(
         "SpriteType", 
         [
-            GenericKeyValue("name", GenericString(f"\"{name.replace("\"", "")}_shine\"")),
+            GenericKeyValue("name", GenericString(f"{name}_shine")),
             GenericKeyValue("texturefile", GenericString(str(path))),
             GenericKeyValue("effectFile", GenericString("gfx/FX/buttonstate.lua")),
             GenericKeyValue("legacy_lazy_load", GenericBool(False)),

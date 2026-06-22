@@ -1,3 +1,8 @@
+#debug import ParadoxParser
+# from pathlib import Path
+# import sys
+# sys.path.insert(0, str(Path(__file__).resolve().parent.parent.parent / "ParadoxParser"))
+
 #all imports for mod loading here
 from sys import exit
 from PyQt5.QtWidgets import QApplication, QDialog
