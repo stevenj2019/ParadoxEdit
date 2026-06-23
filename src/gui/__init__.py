@@ -228,7 +228,8 @@ class ContentsPanel(QWidget):
             self._add_nodes(self.tree.invisibleRootItem(), block)
 
         self.tree.expandAll()
-
+        self.tree.resizeColumnToContents(0)
+        
     def _add_nodes(self, parent_item, nodes):
         """
         Recursive helper to add nodes to the QTreeWidget.
