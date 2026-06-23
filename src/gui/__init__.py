@@ -42,7 +42,7 @@ class MainWindow(QMainWindow):
         
         self.mod_panel.request_load_block.connect(self.contents_panel.load_block)
         self.mod_panel.request_context_menu.connect(self.show_context_menu)
-
+        self.contents_panel.request_context_menu.connect(self.contents_panel.populate_context_menu)
         splitter.setSizes([200, 600])
 
     def show_context_menu(self, panel, selected):
@@ -165,6 +165,7 @@ class ModPanel(QWidget):
         tree.customContextMenuRequested.connect(on_tree_right_click)
     
 class ContentsPanel(QWidget):
+    request_context_menu = pyqtSignal(object)
     def __init__(self, parent:ParadoxMod=None):
         super().__init__()
 
@@ -174,9 +175,38 @@ class ContentsPanel(QWidget):
         self.tree = QTreeWidget()
         self.tree.setColumnCount(2)
         self.tree.setHeaderLabels(["Key", "Value"])
+        self.tree_fully_expanded = False
         layout.addWidget(self.tree)
 
         self.current_block = None
+        self._connect_events()
+
+    def _connect_events(self):
+        tree = self.tree
+
+        def on_tree_right_click(item):
+            self.request_context_menu.emit(self)
+
+        tree.setContextMenuPolicy(Qt.CustomContextMenu)
+        tree.customContextMenuRequested.connect(on_tree_right_click)
+        
+    def populate_context_menu(self, panel): #may need to re-add selected later
+        # if isinstance(selected, PDXScript):
+        #     return
+        menu = QMenu()
+        menu.addAction("Expand All", lambda:self.tree.expandAll())
+        menu.addAction("Collapse All", lambda:self.tree.collapseAll())
+        menu.exec_(QCursor.pos())
+        # for section_name, actions in selected.context_sections().items():
+        #     menu.addSection(section_name)
+        #     add_menu_heading(menu, section_name)
+        #     for action in actions:
+        #         option = menu.addAction(
+        #             action.text,
+        #             lambda checked=False, a=action:
+        #             apply_to_target(a.callback, parent, selected)
+        #         )
+        #         option.setEnabled(action.enabled)
 
     def load_block(self, block):
         """
@@ -196,6 +226,8 @@ class ContentsPanel(QWidget):
         #????
         elif isinstance(block, dict):
             self._add_nodes(self.tree.invisibleRootItem(), block)
+
+        self.tree.expandAll()
 
     def _add_nodes(self, parent_item, nodes):
         """
