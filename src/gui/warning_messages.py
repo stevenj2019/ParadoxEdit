@@ -89,10 +89,17 @@ def GFX_load_and_store_are_same():
     )
 
 def invalid_GFX_file_warning(parent):
-    reply = QMessageBox.question(
+    return QMessageBox.question(
         parent, 
         "Invalid .gfx file provided",
         "This .gfx file lacks a SpriteTypes block, Syntax Error.", 
         QMessageBox.Ok
     )
-    return
+
+def change_rejected_warning(message):
+    return QMessageBox.warning(
+        None, 
+        "Warning",
+        message,
+        QMessageBox.Ok
+    )

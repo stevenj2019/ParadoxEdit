@@ -1,21 +1,22 @@
-from PyQt5.QtWidgets import (QMainWindow, QWidget, QSplitter, QVBoxLayout, QToolBar, QAction, QTreeWidget, QTreeWidgetItem, QHeaderView, QComboBox, QLineEdit)
+from PyQt5.QtWidgets import (QApplication, QMainWindow, QWidget, QSplitter, QVBoxLayout, QToolBar, QAction, QTreeWidget, QTreeWidgetItem, QHeaderView, QComboBox, QLineEdit)
 from PyQt5.QtCore import Qt, pyqtSignal
 from PyQt5.Qt import QMenu
-from PyQt5.QtGui import QCursor, QFontMetrics
+from PyQt5.QtGui import QCursor
 
 
 from ModClasses.ParadoxMod import ParadoxMod
-from ModClasses.ParadoxCategoryItem import GenericCategoryItem
-from ModClasses.util import NodeUIConfig
 from ParadoxParser import ParadoxScriptParser as PDXScript
 from ParadoxParser.ParadoxNodes import GenericBlock, GenericBool, GenericKeyValue, GenericComment, GenericString, GenericToken, GenericInt, GenericFloat
 
 from gui.cell_editors import text_editor, bool_dropdown, int_editor, float_editor
 from gui.settings import SettingsWindow
-from gui.warning_messages import toggle_safe_mode_warning
+from gui.warning_messages import toggle_safe_mode_warning, change_rejected_warning
 from gui.util import get_safe_mode_opposed_text, toggle_dark_mode, add_menu_heading, get_main_window, build_category_list
 from traverse import apply_to_target
 
+NODE = Qt.UserRole
+IS_LOADED = Qt.UserRole + 1
+IS_BLOCK = Qt.UserRole + 2
 class MainWindow(QMainWindow):
     def __init__(self, mod, config):
         super().__init__()
@@ -104,7 +105,7 @@ class ModPanel(QWidget):
         self.tree.addTopLevelItem(root)
 
         descriptor_item = QTreeWidgetItem(["Descriptor"])
-        descriptor_item.setData(0, Qt.UserRole, self.mod.descriptor_object)
+        descriptor_item.setData(0, NODE, self.mod.descriptor_object)
         root.addChild(descriptor_item)
 
         categories_parent = QTreeWidgetItem(["Categories"])
@@ -112,7 +113,7 @@ class ModPanel(QWidget):
 
         for c_key, c_val in self.mod.categories.items():            
             cat_sub = QTreeWidgetItem([c_key])
-            cat_sub.setData(0, Qt.UserRole, c_val)
+            cat_sub.setData(0, NODE, c_val)
             for file, obj in c_val.files.items():
                 cat_sub.addChild(build_category_list(file, obj))
 
@@ -146,7 +147,7 @@ class ModPanel(QWidget):
 
         def on_tree_click(item, column):
             if item.childCount() == 0:
-                obj = item.data(0, Qt.UserRole)
+                obj = item.data(0, NODE)
                 if obj:
                     self.request_load_block.emit(obj)
 
@@ -155,7 +156,7 @@ class ModPanel(QWidget):
             if not item:
                 return
 
-            obj = item.data(0, Qt.UserRole)
+            obj = item.data(0, NODE)
             if not obj:
                 return
 
@@ -183,6 +184,9 @@ class ContentsPanel(QWidget):
         self.current_block = None
         self._connect_events()
 
+        self._node_to_item = dict()
+        self._item_initialised = set()
+
         self.cell_editors = {
             GenericComment: text_editor,
             GenericString:  text_editor,
@@ -190,14 +194,14 @@ class ContentsPanel(QWidget):
             GenericInt:     int_editor,
             GenericFloat:   float_editor
         }
+
+        self.tree.itemDoubleClicked.connect(self._on_item_double_click)
+
     def _connect_events(self):
-        tree = self.tree
-
-        def on_tree_right_click(item):
+        def _on_tree_right_click(item):
             self.request_context_menu.emit(self)
-
-        tree.setContextMenuPolicy(Qt.CustomContextMenu)
-        tree.customContextMenuRequested.connect(on_tree_right_click)
+        self.tree.setContextMenuPolicy(Qt.CustomContextMenu)
+        self.tree.customContextMenuRequested.connect(_on_tree_right_click)
         
     def load_block(self, block):
         """
@@ -234,7 +238,8 @@ class ContentsPanel(QWidget):
 
     def _build_block(self, parent_item, node):
         item = QTreeWidgetItem([str(node.key), ""])
-        item.setData(0, Qt.UserRole, node)
+        item.setData(0, NODE, node)
+        item.setData(0, IS_BLOCK, True)
         parent_item.addChild(item)
 
         self._add_nodes(item, node.children)
@@ -245,18 +250,41 @@ class ContentsPanel(QWidget):
             value_node = node.value
         else:
             value_node = node
-            if not label:
-                value_label = type(node).__name__ 
-                print(f"{type(node)} has no key, or label injected.")
-            else:
-                value_label = label
-        item = QTreeWidgetItem([value_label, ""])
-        item.setData(0, Qt.UserRole, node)
+            value_label = label or type(node).__name__
+
+        item = QTreeWidgetItem([value_label, str(value_node._get_value())])
+        item.setData(0, NODE, node)
         parent_item.addChild(item)
 
-        editor_fn = self.cell_editors.get(type(value_node))
-        if editor_fn:
-            self.tree.setItemWidget(item, 1, editor_fn(value_node))
+    def _on_item_double_click(self, item, column):
+        if column == 1: #value was clicked.
+            if not item.data(0, IS_BLOCK):
+                node = item.data(0, NODE)
+                if not node:
+                    return
+                node_value = node.value if isinstance(node, GenericKeyValue) else node
+                def emit(raw):
+                    self._commit_edit(item, node_value, raw)
+
+                editor = self._create_editor(node_value, emit)
+
+                self.tree.setItemWidget(item, 1, editor)
+                editor.setFocus()
+
+    def _commit_edit(self, item, node, raw):
+        if raw:
+            node.value = raw
+            self.tree.removeItemWidget(item, 1)
+            item.setText(1, str(node._get_value()))
+
+    def _create_editor(self, node, fn):
+        if isinstance(node, GenericKeyValue):
+            node = node.value
+        editor_fn = self.cell_editors.get(type(node))
+        if not editor_fn: 
+            print (f"{node} has no editor, correct?")
+            return None
+        return editor_fn(node, fn)
 
     def populate_context_menu(self, panel): #may need to re-add selected later
         selected = self.tree.currentItem()
