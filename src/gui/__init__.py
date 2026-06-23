@@ -10,13 +10,13 @@ from ParadoxParser.ParadoxNodes import GenericBlock, GenericBool, GenericKeyValu
 
 from gui.cell_editors import text_editor, bool_dropdown, int_editor, float_editor
 from gui.settings import SettingsWindow
-from gui.warning_messages import toggle_safe_mode_warning, change_rejected_warning
+from gui.warning_messages import toggle_safe_mode_warning
 from gui.util import get_safe_mode_opposed_text, toggle_dark_mode, add_menu_heading, get_main_window, build_category_list
 from traverse import apply_to_target
 
 NODE = Qt.UserRole
-IS_LOADED = Qt.UserRole + 1
-IS_BLOCK = Qt.UserRole + 2
+IS_BLOCK = Qt.UserRole + 1
+
 class MainWindow(QMainWindow):
     def __init__(self, mod, config):
         super().__init__()
@@ -315,3 +315,4 @@ class ContentsPanel(QWidget):
         root_item.setExpanded(True)
         recurse(root_item, 0)
         self.tree.setUpdatesEnabled(True)
+        self.tree.resizeColumnToContents(0)
