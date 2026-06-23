@@ -1,14 +1,16 @@
-from PyQt5.QtWidgets import (QMainWindow, QWidget, QSplitter, QVBoxLayout, QToolBar, QAction, QTreeWidget, QTreeWidgetItem, QHeaderView)
+from PyQt5.QtWidgets import (QMainWindow, QWidget, QSplitter, QVBoxLayout, QToolBar, QAction, QTreeWidget, QTreeWidgetItem, QHeaderView, QComboBox, QLineEdit)
 from PyQt5.QtCore import Qt, pyqtSignal
 from PyQt5.Qt import QMenu
-from PyQt5.QtGui import QCursor
+from PyQt5.QtGui import QCursor, QFontMetrics
 
 
 from ModClasses.ParadoxMod import ParadoxMod
 from ModClasses.ParadoxCategoryItem import GenericCategoryItem
+from ModClasses.util import NodeUIConfig
 from ParadoxParser import ParadoxScriptParser as PDXScript
-from ParadoxParser.ParadoxNodes import GenericBlock
+from ParadoxParser.ParadoxNodes import GenericBlock, GenericBool, GenericKeyValue, GenericComment, GenericString, GenericToken, GenericInt, GenericFloat
 
+from gui.cell_editors import text_editor, bool_dropdown, int_editor, float_editor
 from gui.settings import SettingsWindow
 from gui.warning_messages import toggle_safe_mode_warning
 from gui.util import get_safe_mode_opposed_text, toggle_dark_mode, add_menu_heading, get_main_window, build_category_list
@@ -181,6 +183,13 @@ class ContentsPanel(QWidget):
         self.current_block = None
         self._connect_events()
 
+        self.cell_editors = {
+            GenericComment: text_editor,
+            GenericString:  text_editor,
+            GenericBool:    bool_dropdown,
+            GenericInt:     int_editor,
+            GenericFloat:   float_editor
+        }
     def _connect_events(self):
         tree = self.tree
 
@@ -190,90 +199,91 @@ class ContentsPanel(QWidget):
         tree.setContextMenuPolicy(Qt.CustomContextMenu)
         tree.customContextMenuRequested.connect(on_tree_right_click)
         
-    def populate_context_menu(self, panel): #may need to re-add selected later
-        # if isinstance(selected, PDXScript):
-        #     return
-        menu = QMenu()
-        menu.addAction("Expand All", lambda:self.tree.expandAll())
-        menu.addAction("Collapse All", lambda:self.tree.collapseAll())
-        menu.exec_(QCursor.pos())
-        # for section_name, actions in selected.context_sections().items():
-        #     menu.addSection(section_name)
-        #     add_menu_heading(menu, section_name)
-        #     for action in actions:
-        #         option = menu.addAction(
-        #             action.text,
-        #             lambda checked=False, a=action:
-        #             apply_to_target(a.callback, parent, selected)
-        #         )
-        #         option.setEnabled(action.enabled)
-
     def load_block(self, block):
         """
         Load a GenericBlock into the tree for display.
         """
         self.current_block = block
         self.tree.clear()
-        #descriptor
-        if isinstance(block, PDXScript):
-            self._add_nodes(self.tree.invisibleRootItem(), block.nodes)
-        #categoryitem
-        elif isinstance(block, GenericCategoryItem):
-            self._add_nodes(self.tree.invisibleRootItem(), block.obj.nodes)
-        #?????
-        elif isinstance(block, GenericBlock):
-            self._add_nodes(self.tree.invisibleRootItem(), block.children)
-        #????
-        elif isinstance(block, dict):
-            self._add_nodes(self.tree.invisibleRootItem(), block)
+        self.tree.setUpdatesEnabled(False)
+        self.tree.blockSignals(True)
 
-        self.tree.expandAll()
-        self.tree.resizeColumnToContents(0)
-        
-    def _add_nodes(self, parent_item, nodes):
-        """
-        Recursive helper to add nodes to the QTreeWidget.
-        """
-        for node in nodes:
-            if node.__class__.__name__ == "GenericComment":
-                value_str = self._value_to_str(node.value)
-                item = QTreeWidgetItem(["Comment", value_str])
-                parent_item.addChild(item)
-            elif node.__class__.__name__ == "GenericKeyValue":
-                value_str = self._value_to_str(node.value)
-                item = QTreeWidgetItem([str(node.key), value_str])
-                parent_item.addChild(item)
-
-                if hasattr(node.value, "children"):
-                    self._add_nodes(item, node.value.children)
-
-            elif isinstance(node, GenericBlock) or isinstance(node, dict):
-                item = QTreeWidgetItem([str(node.key), ""])
-                parent_item.addChild(item)
-                if isinstance(node, GenericBlock):
-                    self._add_nodes(item, node.children)
-                elif isinstance(node, dict):
-                    self._add_nodes(item, node.values())
+        try:
+            if isinstance(block, PDXScript):
+                self._add_nodes(self.tree.invisibleRootItem(), block.nodes)
             else:
-                value_str = self._value_to_str(node)
-                item = QTreeWidgetItem(["", value_str])
-                parent_item.addChild(item)
+                self._add_nodes(self.tree.invisibleRootItem(), block.obj.nodes)
 
-    def _value_to_str(self, node):
-        """
-        Convert a value node to string for display.
-        """
-        cls_name = node.__class__.__name__
-        match cls_name:
-            case "GenericString"|"GenericToken"|"GenericComment":
-                return node.value
-            case "GenericInt"|"GenericFloat":
-                return str(node.value)
-            case "GenericBool":
-                return "yes" if node.value else "no"
-            case "GenericKeyValue":
-                return self._value_to_str(node.value)
-            case "GenericComparator":
-                return node._get_value()
-            case _:
-                return (str(getattr(node, "value", node)))
+        finally:
+            self.tree.blockSignals(False)
+            self.tree.setUpdatesEnabled(True)
+        self.set_expansion_rule(mode="depth", depth_limit=1)
+        self.tree.resizeColumnToContents(0)
+
+    def _add_nodes(self, parent_item, nodes):
+        for node in nodes:
+            match node:
+                case GenericBlock(): #works (kinda? headers are there, and some children)
+                    self._build_block(parent_item, node)
+                case GenericComment(): #works
+                    self._build_row(parent_item, node, "Comment")
+                case GenericString(): #works
+                    self._build_row(parent_item, node, "Array Value")
+                case GenericKeyValue(): #doesnt work
+                    self._build_row(parent_item, node)
+
+    def _build_block(self, parent_item, node):
+        item = QTreeWidgetItem([str(node.key), ""])
+        item.setData(0, Qt.UserRole, node)
+        parent_item.addChild(item)
+
+        self._add_nodes(item, node.children)
+
+    def _build_row(self, parent_item, node, label=""):
+        if isinstance(node, GenericKeyValue):
+            value_label = node.key
+            value_node = node.value
+        else:
+            value_node = node
+            if not label:
+                value_label = type(node).__name__ 
+                print(f"{type(node)} has no key, or label injected.")
+            else:
+                value_label = label
+        item = QTreeWidgetItem([value_label, ""])
+        item.setData(0, Qt.UserRole, node)
+        parent_item.addChild(item)
+
+        editor_fn = self.cell_editors.get(type(value_node))
+        if editor_fn:
+            self.tree.setItemWidget(item, 1, editor_fn(value_node))
+
+    def populate_context_menu(self, panel): #may need to re-add selected later
+        selected = self.tree.currentItem()
+        menu = QMenu()
+        menu.addAction("Expand All", lambda:self.set_expansion_rule(mode="all")) #crashes(or rather hangs indefinitely)
+        menu.addAction("Collapse All", lambda:self.set_expansion_rule(mode="depth", depth_limit=1)) 
+        menu.addAction("Expand This", lambda:self.set_expansion_rule(mode="all", root_item=selected))
+        menu.exec_(QCursor.pos())
+
+    def set_expansion_rule(self, mode="depth", depth_limit=1, root_item=None):
+        self.tree.setUpdatesEnabled(False)
+        if root_item is None:
+            root_item = self.tree.invisibleRootItem()
+
+        def recurse(item, depth):
+            for i in range(item.childCount()):
+                child = item.child(i)
+                if mode == "all":
+                    child.setExpanded(True)
+                elif mode == "none":
+                    child.setExpanded(False)
+                elif mode == "depth":
+                    child.setExpanded(depth < depth_limit)
+                elif mode == "from_node":
+                    child.setExpanded(True)
+                recurse(child, depth+1)
+        
+        root_item.setExpanded(True)
+        recurse(root_item, 0)
+        self.tree.setUpdatesEnabled(True)
