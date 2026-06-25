@@ -1,6 +1,6 @@
 import os 
 from pathlib import Path
-from .categoryItems import GenericCategoryItem, EventCategoryItem, GFXCategoryItem
+from .CategoryItems import GenericCategoryItem, EventCategoryItem, GFXCategoryItem
 from ParadoxParser import ParadoxScriptParser as PDXFile
 from gui.menus import Action
 from Backend import Generic, Events
