@@ -12,7 +12,6 @@ class ContextMenu(QMenu):
         self._build_context_menu()
 
     def _build_context_menu(self):
-        # self.menu = QMenu()
         for item in self.menu_def:
             if isinstance(item, ActionGroup):
                 self._build_menu(item)

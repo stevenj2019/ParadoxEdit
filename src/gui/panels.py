@@ -8,6 +8,7 @@ from ParadoxParser.ParadoxNodes import GenericBlock, GenericKeyValue, GenericCom
 
 from gui.constants import FILE, NODE, IS_BLOCK
 from gui.menus.context_menu import ContextMenu
+from gui.menus import Action, ActionGroup
 
 class ModPanel(QWidget):
     request_load_block = pyqtSignal(object)
@@ -105,9 +106,8 @@ class ContentsPanel(QWidget):
 
         self.tree.itemDoubleClicked.connect(self._on_item_double_click)
         self.tree.setContextMenuPolicy(Qt.CustomContextMenu)
-        self.tree.customContextMenuRequested.connect(self.populate_context_menu)
+        self.tree.customContextMenuRequested.connect(self.build_context_menu)
 
-        
     def _load_block(self, block):
         """
         Load a GenericBlock into the tree for display.
@@ -167,16 +167,21 @@ class ContentsPanel(QWidget):
                 if node:
                     self.edit_open_request.emit(self.tree, item, node)
 
-    # def build_context_menu(self, panel):
+    def build_context_menu(self, pos):
+        item = self.tree.itemAt(pos)
+        if not item:
+            return
+        menu = ContextMenu(self.tree, self._get_context_menu_options(item))
+        menu.exec_(self.tree.viewport().mapToGlobal(pos))
 
-
-    def populate_context_menu(self, panel): #may need to re-add selected later
-        selected = self.tree.currentItem()
-        menu = QMenu()
-        menu.addAction("Expand All", lambda:self.set_expansion_rule(mode="all")) #crashes(or rather hangs indefinitely)
-        menu.addAction("Collapse All", lambda:self.set_expansion_rule(mode="depth", depth_limit=1)) 
-        menu.addAction("Expand This", lambda:self.set_expansion_rule(mode="all", root_item=selected))
-        menu.exec_(QCursor.pos())
+    def _get_context_menu_options(self, item):
+        return [
+            ActionGroup("Tree Options", [
+                Action("Expand All", lambda:self.set_expansion_rule(mode="all"), True),
+                Action("Collapse All", lambda:self.set_expansion_rule(mode="depth", depth_limit=1), True),
+                Action("Expand This", lambda:self.set_expansion_rule(mode="all", root_item=item), True),
+            ])
+        ]
 
     def set_expansion_rule(self, mode="depth", depth_limit=1, root_item=None):
         self.tree.setUpdatesEnabled(False)
