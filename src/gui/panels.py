@@ -124,9 +124,7 @@ class ContentsPanel(QWidget):
         self.tree_fully_expanded = False
         layout.addWidget(self.tree)
 
-        self.active_editor_session = InlineEditSession()
-        # self.active_editor = None
-        # self.active_editor_item = None
+        self.editor_session = InlineEditSession()
         QApplication.instance().installEventFilter(self)
         self._connect_events()
 
@@ -211,9 +209,7 @@ class ContentsPanel(QWidget):
 
                 self._close_editor()
                 editor = self._create_editor(node_value, emit)
-                self.active_editor_session.start(item, editor)
-                # self.active_editor = editor
-                # self.active_editor_item = item
+                self.editor_session.start(item, editor)
 
                 self.tree.setItemWidget(item, 1, editor)
                 editor.setFocus()
@@ -234,16 +230,10 @@ class ContentsPanel(QWidget):
         return editor_fn(node, fn)
 
     def _close_editor(self):
-        if self.active_editor_session.active():
-            self.tree.removeItemWidget(self.active_editor_session.source, 1)
-            self.active_editor_session.editor.deleteLater()
-            self.active_editor_session.cancel()
-            
-        # self.active_editor_session.cancel()
-        # if self.active_editor and self.active_editor_item:
-        #     self.tree.removeItemWidget(self.active_editor_item, 1)
-        #     self.active_editor.deleteLater()
-        #     self.active_editor = False
+        if self.editor_session.active():
+            self.tree.removeItemWidget(self.editor_session.source, 1)
+            self.editor_session.editor.deleteLater()
+            self.editor_session.cancel()
 
     def populate_context_menu(self, panel): #may need to re-add selected later
         selected = self.tree.currentItem()
