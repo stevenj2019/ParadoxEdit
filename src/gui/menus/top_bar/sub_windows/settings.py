@@ -1,7 +1,7 @@
 from PyQt5.QtWidgets import QDialog, QFormLayout, QHBoxLayout, QLabel, QCheckBox, QLineEdit, QPushButton, QDialogButtonBox
 from pathlib import Path
-from gui.file_dialogue import select_hoi4_install_directory, select_mod_directory
-from gui.warning_messages import settings_error_critical
+from gui.dialogues.file_dialogue import select_hoi4_install_directory, select_mod_directory
+from gui.dialogues.warning_messages import settings_error_critical
 from gui.util import toggle_dark_mode
 from Configuration import ConfigurationFile
 
@@ -54,7 +54,6 @@ class SettingsWindow(QDialog):
     def browse_game_install_path(self):
         path = select_hoi4_install_directory()
         if path:
-            # self.config.change_setting(game_install_path=Path(path))
             self.game_install_path_element_text.setText(path)
 
     def browse_mod_install_path(self):

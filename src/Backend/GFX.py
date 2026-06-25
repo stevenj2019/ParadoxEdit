@@ -1,5 +1,5 @@
-from gui.warning_messages import GFX_file_copying_warn, GFX_is_focus_upload, invalid_GFX_file_warning, GFX_load_and_store_are_same
-from gui.file_dialogue import gfx_files_folder_selector, gfx_save_folder_selector
+from gui.dialogues.warning_messages import GFX_file_copying_warn, GFX_is_focus_upload, invalid_GFX_file_warning, GFX_load_and_store_are_same
+from gui.dialogues.file_dialogue import gfx_files_folder_selector, gfx_save_folder_selector
 from gui.util import get_main_window
 from ParadoxParser.ParadoxNodes import GenericBlock, GenericComment
 from PDXFactory.blocks.sprites import GFX_icon, GFX_shine_icon

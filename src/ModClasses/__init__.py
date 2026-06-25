@@ -5,18 +5,11 @@ import concurrent.futures
 
 from ParadoxParser import ParadoxScriptParser as PDXFile
 from ParadoxParser.ParadoxNodes import GenericKeyValue, GenericNode
-from .ParadoxCategory import GenericCategory
-from .ParadoxCategory import EventCategory as Events
-from .ParadoxCategory import GFXCategory as GFX
+from .Categories import GenericCategory
+from .Categories import EventCategory as Events
+from .Categories import GFXCategory as GFX
 implemented_arr = [Events, GFX]
 #path should point to a descriptor file, 
-
-class DummyPDXFile(PDXFile):
-    def __init__(self, name):
-        self.filepath = Path("")
-        self.filename = name
-        # self.encoding = encoding
-        self.nodes: list[GenericNode] = []
 
 class ParadoxMod:
     def __init__(self, path:str|os.PathLike):
@@ -37,6 +30,20 @@ class ParadoxMod:
             obj = category(self.mod_base_dir)
             # obj._organise()
             self.categories[type(obj).__name__] = obj
+
+    def iter_file(self):
+        files = []
+        for category in self.categories:
+            for file in category.iter_files():
+                files.expand(file)
+        return files
+    
+    def _get_saving_targets(self, modified_only:bool = True):
+        save_targets = []
+        for category in self.categories:
+            for file in category.iter_files():
+                if file.has_been_modified:
+                    save_targets.append(file)
 
     def _collect_mod_info(self):
         self.mod_name = next(

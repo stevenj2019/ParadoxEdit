@@ -1,6 +1,6 @@
 from PyQt5.QtWidgets import QLineEdit, QComboBox
 from PyQt5.QtGui import QFontMetrics
-from gui.warning_messages import change_rejected_warning
+from gui.dialogues.warning_messages import change_rejected_warning
 def text_editor(node, emit):
     widget = QLineEdit(str(node.value))
     width = QFontMetrics(widget.font()).horizontalAdvance(widget.text())+20

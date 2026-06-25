@@ -1,17 +1,18 @@
 from ParadoxParser import ParadoxScriptParser as PDXFile
-from ModClasses.util import Action
-from Backend.Generic import clear_comments, clear_whitespace, save_file
-from Backend.Events import event_log_injection
+from gui.menus import Action
 from Backend import Generic, Events, GFX
+
 class GenericCategoryItem:
     def __init__(self, pdx_obj:PDXFile):
         self.obj = pdx_obj
         self.has_been_modified:bool = False
 
+    def iter_files(self):
+        yield self
+        
     def context_sections(self):
         return { 
             "PDX Script Options": [
-                Action("Save Changes", save_file, self.has_been_modified),
                 Action("Clear Comments", Generic.clear_comments, True),
                 Action("Clear Whitespace", Generic.clear_whitespace, True)
             ]
@@ -38,6 +39,6 @@ class GFXCategoryItem(GenericCategoryItem):
             **super().context_sections(), 
             "GFX Options":[
                 Action("Add New GFX", GFX.add_new_GFX, True),
-                Action("Add missing _shines", GFX.add_missing_shines, True) #not implemented
+                Action("Add missing _shines", GFX.add_missing_shines, True)
             ]
         }

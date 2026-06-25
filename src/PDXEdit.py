@@ -7,9 +7,9 @@
 from sys import exit
 from PyQt5.QtWidgets import QApplication, QDialog
 from gui import MainWindow
-from gui.settings import SettingsWindow
-from gui.file_dialogue import select_mod_file
-from gui.warning_messages import could_not_load_mod_critical
+from gui.menus.top_bar.sub_windows.settings import SettingsWindow
+from gui.dialogues.file_dialogue import select_mod_file
+from gui.dialogues.warning_messages import could_not_load_mod_critical
 from Configuration import ConfigurationFile
 import qdarktheme
 
@@ -18,23 +18,9 @@ config = ConfigurationFile()
 app.setStyleSheet(qdarktheme.load_stylesheet("dark" if config.dark_mode else "light"))
 if not config.initalised:
     settings = SettingsWindow("PDXEdit Setup", config)
-    if settings.exec_() == QDialog.Accepted:    
-        mod_path = select_mod_file(config=config)
-        try:
-            from ModClasses.ParadoxMod import ParadoxMod
-            mod = ParadoxMod(mod_path)
-        except Exception as e:
-            error = could_not_load_mod_critical(e)
-            error.exec_()
-            exit()
-else:
-    mod_path = select_mod_file(config=config)
-    try:
-        from ModClasses.ParadoxMod import ParadoxMod
-        mod = ParadoxMod(mod_path)
-    except Exception as e:
-        error = could_not_load_mod_critical(e)
+    if not settings.exec_() == QDialog.Accepted:
         exit()
-window = MainWindow(mod, config)
+
+window = MainWindow(config)
 window.show()
 app.exec_()

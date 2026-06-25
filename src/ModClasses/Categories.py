@@ -1,8 +1,8 @@
 import os 
 from pathlib import Path
-from .ParadoxCategoryItem import GenericCategoryItem, EventCategoryItem, GFXCategoryItem
+from .categoryItems import GenericCategoryItem, EventCategoryItem, GFXCategoryItem
 from ParadoxParser import ParadoxScriptParser as PDXFile
-from ModClasses.util import Action
+from gui.menus import Action
 from Backend import Generic, Events
 
 class GenericCategory:
@@ -13,10 +13,12 @@ class GenericCategory:
         for path in paths:
             self._read_directory(os.path.join(base, path))
 
-    def context_sections(self):        
+    def iter_files(self):
+        return self.files.values()
+    
+    def context_sections(self):
         return { 
             "PDX Script Options": [
-                Action("Save Changes", Generic.save_file, any(b.has_been_modified for b in self.files.values())),
                 Action("Clear Comments", Generic.clear_comments, True),
                 Action("Clear Whitespace", Generic.clear_whitespace, True)
             ]
