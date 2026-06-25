@@ -1,4 +1,5 @@
 from PyQt5.QtCore import Qt
 
-NODE = Qt.UserRole
-IS_BLOCK = Qt.UserRole + 1
+FILE = Qt.UserRole
+NODE = Qt.UserRole + 1
+IS_BLOCK = Qt.UserRole + 2

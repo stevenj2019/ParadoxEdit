@@ -2,7 +2,7 @@ import os
 from pathlib import Path
 from .CategoryItems import GenericCategoryItem, EventCategoryItem, GFXCategoryItem
 from ParadoxParser import ParadoxScriptParser as PDXFile
-from gui.menus import Action
+from gui.menus import ActionGroup, Action
 from Backend import Generic, Events
 
 class GenericCategory:
@@ -17,12 +17,12 @@ class GenericCategory:
         return self.files.values()
     
     def context_sections(self):
-        return { 
-            "PDX Script Options": [
+        return [
+            ActionGroup("PDX Script Options", [
                 Action("Clear Comments", Generic.clear_comments, True),
                 Action("Clear Whitespace", Generic.clear_whitespace, True)
-            ]
-        }
+            ])
+        ]
     
     def _read_file(self, file):
         self._parse_file(file)
@@ -45,18 +45,18 @@ class EventCategory(GenericCategory):
         super().__init__(mod_path, ["events/"], EventCategoryItem)
 
     def context_sections(self):
-        return {
-            **super().context_sections(),
-            "Event Options":[
-                Action("Inject Logs", Events.event_log_injection, False)#doesnt work right
-            ]
-        }
+        return [
+            *super().context_sections(),
+            # "Event Options":[
+            #     Action("Inject Logs", Events.event_log_injection, False)#doesnt work right
+            # ]
+        ]
     
 class GFXCategory(GenericCategory):
     def __init__(self, mod_path:os.PathLike):
         super().__init__(mod_path, ["interface/"], GFXCategoryItem, ".gfx")
 
     def context_sections(self):
-        return {
-            **super().context_sections()
-        }
+        return [
+            *super().context_sections()
+        ]

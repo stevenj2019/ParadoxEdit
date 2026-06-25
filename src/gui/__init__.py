@@ -21,35 +21,33 @@ class MainWindow(QMainWindow):
         #MainWindow
         self.setWindowTitle("ParadoxEdit")
         QApplication.instance().installEventFilter(self)
+        self.global_edit_cancel_request.connect(self.editor_session.cancel_request)
+        
         #TopBar
         self.topbar = MainTopBar(self)
         self.addToolBar(self.topbar)
-        #Splitter
-        self.splitter = QSplitter(Qt.Horizontal)
-        self.setCentralWidget(self.splitter)
-        #ModPanel(left)
-        self.mod_panel = ModPanel()
-        self.mod_panel.setMinimumWidth(150)
-        self.mod_panel.request_context_menu.connect(self.show_context_menu)
-        self.splitter.addWidget(self.mod_panel)
-        #ContentsPanel
-        self.contents_panel = ContentsPanel()
-        self.contents_panel.setMinimumWidth(300)
-        self.contents_panel.request_context_menu.connect(self.contents_panel.populate_context_menu)
-        self.splitter.addWidget(self.contents_panel)
-
-        #Signal Connections
-        self.global_edit_cancel_request.connect(self.editor_session.cancel_request)
-        self.contents_panel.edit_open_request.connect(self.editor_session.open_request)
-
         self.topbar.mod_loaded_signal.connect(self._load_mod_to_gui)
-        self.mod_panel.request_load_block.connect(self._load_file)
-        self.contents_panel.request_context_menu.connect(self.contents_panel.populate_context_menu)
-        self.mod_panel.request_bulkable_operation.connect(self._apply_bulkable_operation)
         self.topbar.save_open_signal.connect(lambda:self._save_file(self.mod_panel.open_file))
         self.topbar.save_all_changed_signal.connect(lambda:self._save_files(True))
         self.topbar.save_all_signal.connect(lambda:self._save_files(False))
         
+        #Splitter
+        self.splitter = QSplitter(Qt.Horizontal)
+        self.setCentralWidget(self.splitter)
+        
+        #ModPanel(left)
+        self.mod_panel = ModPanel()
+        self.mod_panel.setMinimumWidth(150)
+        self.splitter.addWidget(self.mod_panel)
+        self.mod_panel.request_load_block.connect(self._load_file)
+        self.mod_panel.request_bulkable_operation.connect(self._apply_bulkable_operation)
+        
+        #ContentsPanel
+        self.contents_panel = ContentsPanel()
+        self.contents_panel.setMinimumWidth(300)
+        self.splitter.addWidget(self.contents_panel)
+        self.contents_panel.edit_open_request.connect(self.editor_session.open_request)
+
         self.splitter.setSizes([200, 600])
         self.showMaximized()
 

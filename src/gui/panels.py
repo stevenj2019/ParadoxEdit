@@ -6,13 +6,13 @@ from PyQt5.QtGui import QCursor
 from ParadoxParser import ParadoxScriptParser as PDXScript
 from ParadoxParser.ParadoxNodes import GenericBlock, GenericKeyValue, GenericComment, GenericString, GenericToken
 
-from gui.util import build_category_list, add_menu_heading
-from gui.constants import NODE, IS_BLOCK
+from gui.constants import FILE, NODE, IS_BLOCK
+from gui.menus.context_menu import ContextMenu
 
 class ModPanel(QWidget):
     request_load_block = pyqtSignal(object)
-    request_context_menu = pyqtSignal(object, object)
     request_bulkable_operation = pyqtSignal(object, object)
+    load_file = pyqtSignal()
     def __init__(self):
         super().__init__()
         self.mod = None
@@ -33,7 +33,10 @@ class ModPanel(QWidget):
         
         layout.addWidget(self.tree)
 
-        self._connect_events()
+        self.tree.itemClicked.connect(self._on_element_click)
+
+        self.tree.setContextMenuPolicy(Qt.CustomContextMenu)
+        self.tree.customContextMenuRequested.connect(self.build_context_menu)
 
     def _populate_tree(self, mod):
         self.tree.clear()
@@ -42,7 +45,7 @@ class ModPanel(QWidget):
         self.tree.addTopLevelItem(root)
 
         descriptor_item = QTreeWidgetItem(["Descriptor"])
-        descriptor_item.setData(0, NODE, mod.descriptor_object)
+        descriptor_item.setData(0, FILE, mod.descriptor_object)
         root.addChild(descriptor_item)
         self.open_file = descriptor_item
 
@@ -51,13 +54,16 @@ class ModPanel(QWidget):
 
         for c_key, c_val in mod.categories.items():
             cat_sub = QTreeWidgetItem([c_key])
-            cat_sub.setData(0, NODE, c_val)
+            cat_sub.setData(0, FILE, c_val)
             for file, obj in c_val.files.items():
-                cat_sub.addChild(build_category_list(file, obj))
+                widget = QTreeWidgetItem([file])
+                widget.setText(0, file)
+                widget.setData(0, FILE, obj)
+                cat_sub.addChild(widget)
 
             categories_parent.addChild(cat_sub)
         
-        root.setExpanded(True)        
+        root.setExpanded(True)
         categories_parent.setExpanded(True)
 
         if mod.error_categories:
@@ -65,51 +71,26 @@ class ModPanel(QWidget):
             for name in mod.error_categories:
                 print(f" - {name}")
 
-    def populate_context_menu(self, menu, parent, selected):
-        if isinstance(selected, PDXScript):
+    def build_context_menu(self, pos):
+        item = self.tree.itemAt(pos)
+        if not item:
             return
-        
-        for section_name, actions in selected.context_sections().items():
-            menu.addSection(section_name)
-            add_menu_heading(menu, section_name)
-            for action in actions:
-                option = menu.addAction(
-                    action.text,
-                    lambda checked=False, a=action:
-                    self.request_bulkable_operation.emit(a.callback, selected)
-                )
-                option.setEnabled(action.enabled)
+        selected = item.data(0, FILE)
+        if not selected:
+            return
+        menu = ContextMenu(self.tree, selected.context_sections())
+        menu.exec_(self.tree.viewport().mapToGlobal(pos))
 
-    #TODO: untangle this mess
-    def _connect_events(self):
-        tree = self.tree
+    def _on_element_click(self, item, column):
+        if item.data(0, IS_BLOCK):
+            return
+        file = item.data(0, FILE)
+        if file:
+            self.open_file = file
+            self.request_load_block.emit(file)
 
-        def on_tree_click(item, column):
-            if item.childCount() == 0:
-                obj = item.data(0, NODE)
-                self.open_file = item #added this
-                if obj:
-                    self.request_load_block.emit(obj)
-
-        def on_tree_right_click(position):
-            item = tree.itemAt(position)
-            if not item:
-                return
-
-            obj = item.data(0, NODE)
-            if not obj:
-                return
-
-            self.request_context_menu.emit(self, obj) 
-            
-        tree.itemClicked.connect(on_tree_click)
-
-        tree.setContextMenuPolicy(Qt.CustomContextMenu)
-        tree.customContextMenuRequested.connect(on_tree_right_click)
-    
 class ContentsPanel(QWidget):
     edit_open_request = pyqtSignal(object, object, object)
-    request_context_menu = pyqtSignal(object)
     def __init__(self):
         super().__init__()
 
@@ -122,15 +103,10 @@ class ContentsPanel(QWidget):
         self.tree_fully_expanded = False
         layout.addWidget(self.tree)
 
-        self._connect_events()
-
         self.tree.itemDoubleClicked.connect(self._on_item_double_click)
-
-    def _connect_events(self):
-        def _on_tree_right_click(item):
-            self.request_context_menu.emit(self)
         self.tree.setContextMenuPolicy(Qt.CustomContextMenu)
-        self.tree.customContextMenuRequested.connect(_on_tree_right_click)
+        self.tree.customContextMenuRequested.connect(self.populate_context_menu)
+
         
     def _load_block(self, block):
         """
@@ -190,6 +166,9 @@ class ContentsPanel(QWidget):
                 node = item.data(0, NODE)
                 if node:
                     self.edit_open_request.emit(self.tree, item, node)
+
+    # def build_context_menu(self, panel):
+
 
     def populate_context_menu(self, panel): #may need to re-add selected later
         selected = self.tree.currentItem()

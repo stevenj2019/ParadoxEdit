@@ -1,19 +1,18 @@
-from PyQt5.QtWidgets import QToolBar, QMenu, QAction
+from PyQt5.QtWidgets import QMainWindow, QMenu, QLabel, QWidgetAction, QAction
 from PyQt5.QtCore import pyqtSignal #this will be needed, need to figure it out first lol
 
 from gui.menus import Action, ActionGroup
 
 class ContextMenu(QMenu):
     request_edit_session_complete = pyqtSignal()
-    def __init__(self, parent):
+    def __init__(self, parent:QMainWindow, menu_def:list):
         super().__init__(parent)
-        
-        self.menu_def:list = []
-
-    def _get_context_menu(self):
-        self.menu_def
+        self.controller = parent
+        self.menu_def:list = menu_def
+        self._build_context_menu()
 
     def _build_context_menu(self):
+        # self.menu = QMenu()
         for item in self.menu_def:
             if isinstance(item, ActionGroup):
                 self._build_menu(item)
@@ -21,13 +20,20 @@ class ContextMenu(QMenu):
                 self._build_button(self, item)
 
     def _build_menu(self, group):
-        menu = QMenu(group.text, self)
+        label = QLabel(group.text)
+        label.setStyleSheet("""
+            font-weight:bold;
+            padding: 4px 12px;
+        """)
+        action = QWidgetAction(self)
+        action.setDefaultWidget(label)
+        self.addAction(action)
+        self.addSeparator()
         for item in group.actions:
-            self._build_button(menu, item)
-        self.addAction(menu.menuAction())
+            self._build_button(item)
 
-    def _build_button(self, menu, item):
+    def _build_button(self, item):
         action = QAction(item.text, self)
-        action.triggered.conntect(item.callback)
-        menu.addAction(action)
+        action.triggered.connect(item.callback)
+        self.addAction(action)
 
