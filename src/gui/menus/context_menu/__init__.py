@@ -4,7 +4,7 @@ from PyQt5.QtCore import pyqtSignal #this will be needed, need to figure it out 
 from gui.menus import Action, ActionGroup
 
 class ContextMenu(QMenu):
-    request_interaction_session_end = pyqtSignal()
+    request_edit_session_complete = pyqtSignal()
     def __init__(self, parent):
         super().__init__(parent)
         

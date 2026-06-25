@@ -5,7 +5,7 @@ from gui.menus.top_bar.actions import build_topbar_actions
 from gui.menus import Action, ActionGroup
 
 class MainTopBar(QToolBar):
-    request_interaction_session_end = pyqtSignal()
+    request_edit_session_complete = pyqtSignal()
     mod_loaded_signal = pyqtSignal(object)
     save_open_signal = pyqtSignal()
     save_all_changed_signal = pyqtSignal()
