@@ -1,4 +1,3 @@
-from gui.util import get_main_window
 from gui.dialogues.file_dialogue import select_mod_file
 from gui.dialogues.warning_messages import could_not_load_mod_critical
 from gui.menus.top_bar.sub_windows.settings import SettingsWindow
@@ -12,8 +11,7 @@ def build_topbar_actions(toolbar):
     """
 
     def open_mod():
-        config = get_main_window().config
-        mod_path = select_mod_file(config=config)
+        mod_path = select_mod_file(config=toolbar.controller.config)
 
         try:
             mod = ParadoxMod(mod_path)
@@ -24,10 +22,7 @@ def build_topbar_actions(toolbar):
         toolbar.mod_loaded_signal.emit(mod)
 
     def open_settings():
-        settings = SettingsWindow(
-            "PDXEdit Settings",
-            get_main_window().config
-        )
+        settings = SettingsWindow("PDXEdit Settings", config=toolbar.controller.config)
         settings.exec_()
 
     return [

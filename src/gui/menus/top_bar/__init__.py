@@ -13,6 +13,7 @@ class MainTopBar(QToolBar):
     
     def __init__(self, parent):
         super().__init__(parent)
+        self.controller = parent
         self.setMovable(False)
         self.actions = {}
         self.menu_def = build_topbar_actions(self)
