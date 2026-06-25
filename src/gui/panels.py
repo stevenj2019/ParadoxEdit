@@ -1,10 +1,10 @@
-from PyQt5.QtWidgets import (QApplication, QWidget, QVBoxLayout, QHeaderView, QTreeWidget, QTreeWidgetItem)
-from PyQt5.QtCore import Qt, pyqtSignal, QEvent
+from PyQt5.QtWidgets import (QWidget, QVBoxLayout, QHeaderView, QTreeWidget, QTreeWidgetItem)
+from PyQt5.QtCore import Qt, pyqtSignal
 from PyQt5.Qt import QMenu
 from PyQt5.QtGui import QCursor
 
 from ParadoxParser import ParadoxScriptParser as PDXScript
-from ParadoxParser.ParadoxNodes import GenericBlock, GenericBool, GenericKeyValue, GenericComment, GenericString, GenericInt, GenericFloat, GenericToken
+from ParadoxParser.ParadoxNodes import GenericBlock, GenericKeyValue, GenericComment, GenericString, GenericToken
 
 from gui.util import build_category_list, add_menu_heading
 from gui.constants import NODE, IS_BLOCK
@@ -159,7 +159,7 @@ class ContentsPanel(QWidget):
                     self._build_block(parent_item, node)
                 case GenericComment():
                     self._build_row(parent_item, node, "Comment")
-                case GenericString():
+                case GenericString()|GenericToken():
                     self._build_row(parent_item, node, "Array Value")
                 case GenericKeyValue():
                     self._build_row(parent_item, node)

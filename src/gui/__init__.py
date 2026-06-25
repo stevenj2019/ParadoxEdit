@@ -18,16 +18,15 @@ class MainWindow(QMainWindow):
         self.safe_mode:bool = config.safe_mode
         self.bulk_warning_shown:bool = False
 
+        #MainWindow
         self.setWindowTitle("ParadoxEdit")
-
+        QApplication.instance().installEventFilter(self)
         #TopBar
         self.topbar = MainTopBar(self)
         self.addToolBar(self.topbar)
-
         #Splitter
         self.splitter = QSplitter(Qt.Horizontal)
         self.setCentralWidget(self.splitter)
-
         #ModPanel(left)
         self.mod_panel = ModPanel()
         self.mod_panel.setMinimumWidth(150)
@@ -42,8 +41,6 @@ class MainWindow(QMainWindow):
         #Signal Connections
         self.global_edit_cancel_request.connect(self.editor_session.cancel_request)
         self.contents_panel.edit_open_request.connect(self.editor_session.open_request)
-        # self.contents_panel.request_editor_session_complete.connect() cant test
-        # self.contents_panel.edit_cancel_request.connect(self.editor_session.cancel_request) not needed
 
         self.topbar.mod_loaded_signal.connect(self._load_mod_to_gui)
         self.mod_panel.request_load_block.connect(self._load_file)
@@ -55,7 +52,6 @@ class MainWindow(QMainWindow):
         
         self.splitter.setSizes([200, 600])
         self.showMaximized()
-        QApplication.instance().installEventFilter(self)
 
     def eventFilter(self, obj, event):
         def _focus_inside_editor():
@@ -74,7 +70,6 @@ class MainWindow(QMainWindow):
             QEvent.MouseButtonPress, 
             QEvent.MouseButtonDblClick
         ):
-            # print(f"OBJ:{obj}, FOCUS:{QApplication.focusWidget()}")
             if _focus_inside_editor():
                 return super().eventFilter(obj, event)
             
@@ -91,7 +86,6 @@ class MainWindow(QMainWindow):
         self.mod = mod
         self.mod_panel._populate_tree(mod)
         self._load_file(mod.descriptor_object)
-        # self.contents_panel._load_block(mod.descriptor_object)
         self.topbar._enable_actions()
 
     def _apply_bulkable_operation(self, action, target):
@@ -102,7 +96,6 @@ class MainWindow(QMainWindow):
         self._refresh_contents()
 
     def _load_file(self, file):
-        # if self.editor_session.active:
         self.editor_session.cancel_request(reason="file switch")
         self.contents_panel._load_block(file.obj)
 

@@ -1,10 +1,8 @@
 import os
 from pathlib import Path
-# import threading
-import concurrent.futures
 
 from ParadoxParser import ParadoxScriptParser as PDXFile
-from ParadoxParser.ParadoxNodes import GenericKeyValue, GenericNode
+from ParadoxParser.ParadoxNodes import GenericKeyValue
 from .CategoryItems import GenericCategoryItem
 from .Categories import GenericCategory
 from .Categories import EventCategory as Events

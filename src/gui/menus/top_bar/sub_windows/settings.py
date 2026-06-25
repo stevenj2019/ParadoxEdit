@@ -1,9 +1,12 @@
-from PyQt5.QtWidgets import QDialog, QFormLayout, QHBoxLayout, QLabel, QCheckBox, QLineEdit, QPushButton, QDialogButtonBox
 from pathlib import Path
+import qdarktheme
+
+from PyQt5.QtWidgets import QApplication, QDialog, QFormLayout, QHBoxLayout, QLabel, QCheckBox, QLineEdit, QPushButton, QDialogButtonBox
+
+from Configuration import ConfigurationFile
+
 from gui.dialogues.file_dialogue import select_hoi4_install_directory, select_mod_directory
 from gui.dialogues.warning_messages import settings_error_critical
-from gui.util import toggle_dark_mode
-from Configuration import ConfigurationFile
 
 class SettingsWindow(QDialog):
     def __init__(self, title:str, config:ConfigurationFile):
@@ -45,7 +48,7 @@ class SettingsWindow(QDialog):
         self.dark_mode_check.setChecked(self.config.dark_mode)
         self.dark_mode_label.setBuddy(self.dark_mode_check)
         self.form.addRow(self.dark_mode_label, self.dark_mode_check)
-        self.dark_mode_check.toggled.connect(self.set_dark_mode)
+        self.dark_mode_check.toggled.connect(self.toggle_dark_mode)
 
         self.button = QDialogButtonBox(QDialogButtonBox.Save)
         self.form.addRow(self.button)
@@ -61,8 +64,10 @@ class SettingsWindow(QDialog):
         if path:
             self.mod_install_path_element_text.setText(path)
     
-    def set_dark_mode(self, checked:bool):
-        toggle_dark_mode(self.config)
+    def toggle_dark_mode(self):
+        self.config.change_setting(dark_mode = not(self.config.dark_mode))
+        app = QApplication.instance()
+        app.setStyleSheet(qdarktheme.load_stylesheet("dark" if self.config.dark_mode else "light"))
 
     def submit_form(self):
         game_dir_error = False

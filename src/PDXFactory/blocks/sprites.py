@@ -1,6 +1,5 @@
 from ParadoxParser.ParadoxNodes import (GenericBlock, GenericKeyValue, GenericString,
-                                        GenericComment, GenericInt, GenericFloat, 
-                                        GenericBool)
+                                        GenericInt, GenericFloat, GenericBool)
 def GFX_icon(name, path):
     return GenericBlock(
         "SpriteType",
