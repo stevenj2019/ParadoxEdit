@@ -1,4 +1,4 @@
-from PyQt5.QtWidgets import QToolBar, QMenu, QAction
+from PyQt5.QtWidgets import QMainWindow, QToolBar, QMenu, QAction
 from PyQt5.QtCore import pyqtSignal
 
 from gui.menus.top_bar.actions import build_topbar_actions
@@ -13,10 +13,12 @@ class MainTopBar(QToolBar):
     
     def __init__(self, parent):
         super().__init__(parent)
-        self.controller = parent
+        self.controller:QMainWindow = parent
+        self.actions:dict = {}
+        self.menu_def:list = build_topbar_actions(self)
+
         self.setMovable(False)
-        self.actions = {}
-        self.menu_def = build_topbar_actions(self)
+
         self._build_toolbar()
 
     def _build_toolbar(self):
