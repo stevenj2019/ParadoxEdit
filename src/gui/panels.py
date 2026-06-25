@@ -4,13 +4,11 @@ from PyQt5.Qt import QMenu
 from PyQt5.QtGui import QCursor
 
 from ParadoxParser import ParadoxScriptParser as PDXScript
-from ParadoxParser.ParadoxNodes import GenericBlock, GenericBool, GenericKeyValue, GenericComment, GenericString, GenericInt, GenericFloat
+from ParadoxParser.ParadoxNodes import GenericBlock, GenericBool, GenericKeyValue, GenericComment, GenericString, GenericInt, GenericFloat, GenericToken
 
 from gui.util import build_category_list, add_menu_heading
-from gui.widgets.cell_editors import text_editor, bool_dropdown, int_editor, float_editor
 from gui.constants import NODE, IS_BLOCK
 
-from editor_session import InlineEditSession
 class ModPanel(QWidget):
     request_load_block = pyqtSignal(object)
     request_context_menu = pyqtSignal(object, object)
@@ -82,6 +80,7 @@ class ModPanel(QWidget):
                 )
                 option.setEnabled(action.enabled)
 
+    #TODO: untangle this mess
     def _connect_events(self):
         tree = self.tree
 
@@ -109,8 +108,7 @@ class ModPanel(QWidget):
         tree.customContextMenuRequested.connect(on_tree_right_click)
     
 class ContentsPanel(QWidget):
-    request_interaction_session_start = pyqtSignal(object, object)
-    request_interaction_session_end = pyqtSignal()
+    edit_open_request = pyqtSignal(object, object, object)
     request_context_menu = pyqtSignal(object)
     def __init__(self):
         super().__init__()
@@ -124,18 +122,7 @@ class ContentsPanel(QWidget):
         self.tree_fully_expanded = False
         layout.addWidget(self.tree)
 
-        self.editor_session = InlineEditSession()
-        QApplication.instance().installEventFilter(self)
         self._connect_events()
-
-
-        self.cell_editors = {
-            GenericComment: text_editor,
-            GenericString:  text_editor,
-            GenericBool:    bool_dropdown,
-            GenericInt:     int_editor,
-            GenericFloat:   float_editor
-        }
 
         self.tree.itemDoubleClicked.connect(self._on_item_double_click)
 
@@ -201,39 +188,8 @@ class ContentsPanel(QWidget):
         if column == 1: #value was clicked.
             if not item.data(0, IS_BLOCK):
                 node = item.data(0, NODE)
-                if not node:
-                    return
-                node_value = node.value if isinstance(node, GenericKeyValue) else node
-                def emit(raw):
-                    self._commit_edit(item, node_value, raw)
-
-                self._close_editor()
-                editor = self._create_editor(node_value, emit)
-                self.editor_session.start(item, editor)
-
-                self.tree.setItemWidget(item, 1, editor)
-                editor.setFocus()
-
-    def _commit_edit(self, item, node, raw):
-        if raw:
-            node.value = raw
-            self.tree.removeItemWidget(item, 1)
-            item.setText(1, str(node._get_value()))
-
-    def _create_editor(self, node, fn):
-        if isinstance(node, GenericKeyValue):
-            node = node.value
-        editor_fn = self.cell_editors.get(type(node))
-        if not editor_fn: 
-            print (f"{node} has no editor, correct?")
-            return None
-        return editor_fn(node, fn)
-
-    def _close_editor(self):
-        if self.editor_session.active():
-            self.tree.removeItemWidget(self.editor_session.source, 1)
-            self.editor_session.editor.deleteLater()
-            self.editor_session.cancel()
+                if node:
+                    self.edit_open_request.emit(self.tree, item, node)
 
     def populate_context_menu(self, panel): #may need to re-add selected later
         selected = self.tree.currentItem()

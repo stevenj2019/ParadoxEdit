@@ -1,5 +1,3 @@
-from editor_session import InlineEditSession
-
 from PyQt5.QtWidgets import QApplication, QMainWindow, QSplitter
 from PyQt5.QtCore import Qt, pyqtSignal, QEvent
 from PyQt5.Qt import QMenu
@@ -7,17 +5,16 @@ from PyQt5.QtGui import QCursor
 
 from gui.menus.top_bar import MainTopBar
 from gui.panels import ModPanel, ContentsPanel
-from gui.dialogues.warning_messages import toggle_safe_mode_warning, bulk_operation_warning
-from gui.util import get_safe_mode_opposed_text, toggle_dark_mode, add_menu_heading
-from gui.constants import NODE, IS_BLOCK
+from gui.InlineEditor import InlineEditManager
+from gui.dialogues.warning_messages import bulk_operation_warning
 
 class MainWindow(QMainWindow):
-    request_global_cancel_edit = pyqtSignal()
+    global_edit_cancel_request = pyqtSignal(str)
     def __init__(self, config):
         super().__init__()
         self.mod = None
         self.config = config
-        self.edit_session = InlineEditSession()
+        self.editor_session = InlineEditManager(self)
         self.safe_mode:bool = config.safe_mode
         self.bulk_warning_shown:bool = False
 
@@ -26,7 +23,6 @@ class MainWindow(QMainWindow):
         #TopBar
         self.topbar = MainTopBar(self)
         self.addToolBar(self.topbar)
-
 
         #Splitter
         self.splitter = QSplitter(Qt.Horizontal)
@@ -44,10 +40,12 @@ class MainWindow(QMainWindow):
         self.splitter.addWidget(self.contents_panel)
 
         #Signal Connections
-        self.request_global_cancel_edit.connect(self.contents_panel._close_editor)
+        self.global_edit_cancel_request.connect(self.editor_session.cancel_request)
+        self.contents_panel.edit_open_request.connect(self.editor_session.open_request)
+        # self.contents_panel.request_editor_session_complete.connect() cant test
+        # self.contents_panel.edit_cancel_request.connect(self.editor_session.cancel_request) not needed
 
         self.topbar.mod_loaded_signal.connect(self._load_mod_to_gui)
-        # self.mod_panel.request_load_block.connect(self.contents_panel._load_block)
         self.mod_panel.request_load_block.connect(self._load_file)
         self.contents_panel.request_context_menu.connect(self.contents_panel.populate_context_menu)
         self.mod_panel.request_bulkable_operation.connect(self._apply_bulkable_operation)
@@ -60,13 +58,30 @@ class MainWindow(QMainWindow):
         QApplication.instance().installEventFilter(self)
 
     def eventFilter(self, obj, event):
+        def _focus_inside_editor():
+            editor = self.editor_session.editor
+            if editor is None:
+                return False
+            widget = QApplication.focusWidget()
+            while widget is not None:
+                if widget is editor:
+                    return True
+                widget = widget.parent()
+
+            return False
+        
         if event.type() in (
             QEvent.MouseButtonPress, 
-            QEvent.MouseButtonDblClick, 
-            QEvent.KeyPress,
+            QEvent.MouseButtonDblClick
         ):
-            self.request_global_cancel_edit.emit()
+            # print(f"OBJ:{obj}, FOCUS:{QApplication.focusWidget()}")
+            if _focus_inside_editor():
+                return super().eventFilter(obj, event)
+            
+            self.global_edit_cancel_request.emit("global click-away")
+        
         return super().eventFilter(obj, event)
+    
     def show_context_menu(self, panel, selected):
         menu = QMenu(self)
         panel.populate_context_menu(menu, self, selected)
@@ -75,8 +90,8 @@ class MainWindow(QMainWindow):
     def _load_mod_to_gui(self, mod):
         self.mod = mod
         self.mod_panel._populate_tree(mod)
-        self.mod_panel.open_file
-        self.contents_panel._load_block(mod.descriptor_object)
+        self._load_file(mod.descriptor_object)
+        # self.contents_panel._load_block(mod.descriptor_object)
         self.topbar._enable_actions()
 
     def _apply_bulkable_operation(self, action, target):
@@ -87,7 +102,8 @@ class MainWindow(QMainWindow):
         self._refresh_contents()
 
     def _load_file(self, file):
-        self.edit_session.cancel(reason="file_switch")
+        # if self.editor_session.active:
+        self.editor_session.cancel_request(reason="file switch")
         self.contents_panel._load_block(file.obj)
 
     def _refresh_contents(self):
@@ -95,16 +111,10 @@ class MainWindow(QMainWindow):
         
         if open_file:
             self._load_file(open_file)
-            # node = self.mod_panel.open_file.data(0, NODE)
-            # self.contents_panel._load_block(node)
 
-    def _on_inline_edit_request(self, node, widget):
-        self.edit_session.start(node, widget)
-
-    def _on_global_interaction(self, reason=None):
-        if not hasattr(self, "edit_session"):
-            return
-        self.edit_session.cancel(reason)
+    def _mutate_node(self, node, value):
+        node.value = value
+        self.mod_panel.open_file.has_been_modified = True
 
     def _save_files(self, modified_only:bool=True):
         for file in self.mod.iter_file():
