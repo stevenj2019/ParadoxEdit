@@ -76,9 +76,9 @@ class StyleManager:
 
     def get_state_colour(self, state):
         if self.config.dark_mode:
-            self.dark_mode_palette.get(state)
+            return self.dark_mode_palette.get(state)
         else:
-            self.light_mode_palette.get(state)
+            return self.light_mode_palette.get(state)
 
 class InlineEditManager:
     def __init__(self, mutate_callback):
