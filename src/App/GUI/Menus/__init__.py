@@ -6,7 +6,7 @@ from ParadoxParser.ParadoxNodes import GenericBlock, GenericKeyValue, GenericNod
 from App.ModClasses.Categories import GenericCategory
 from App.ModClasses.CategoryItems import GenericCategoryItem
 from App.ModClasses.ActionModels import ActionGroup, Action
-from App.SignalContexts import ExpansionMode, RequestExpansionContext
+
 class TopBar(QToolBar):
     request_load_mod = pyqtSignal()
     request_settings_window = pyqtSignal()

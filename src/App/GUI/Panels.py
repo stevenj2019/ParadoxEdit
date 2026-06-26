@@ -10,12 +10,6 @@ from App.Constants import ChangeState, FILE, NODE, IS_BLOCK, STATE
 from App.GUI.Menus import GenericCategoryContextMenu, ParadoxNodesContextMenu
 from App.GUI.StyledDelegate import NodeStateDelegate
 
-from App.SignalContexts import ExpansionMode, RequestExpansionContext
-
-# from gui.change_state import ChangeState
-# from gui.constants import FILE, NODE, IS_BLOCK
-# from gui.menus.context_menu import ContextMenu
-
 class ModPanel(QWidget):
     request_load_block = pyqtSignal(object)
     # request_bulkable_operation = pyqtSignal(object, object)
@@ -134,7 +128,7 @@ class ContentsPanel(QWidget):
         finally:
             self.tree.blockSignals(False)
             self.tree.setUpdatesEnabled(True)
-        self.set_expansion_rule(RequestExpansionContext(ExpansionMode.DEPTH))
+        # self.set_expansion_rule(RequestExpansionContext(ExpansionMode.DEPTH))
         self.tree.resizeColumnToContents(0)
 
     def _add_nodes(self, parent_item, nodes, inherited_state=None):
