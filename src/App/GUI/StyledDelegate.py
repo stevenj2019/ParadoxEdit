@@ -16,12 +16,13 @@ class NodeStateDelegate(QStyledItemDelegate):
         if state in (ChangeState.ADDED, ChangeState.MODIFIED, ChangeState.DELETED):
             colour = self.style_manager.get_state_colour(state)
 
-            print(type(colour))
-
             view = option.widget
             viewport_rect = view.viewport().rect()
+
             rect = option.rect
+            
             stripe_width = 10
+            
             painter.save()
             painter.setPen(Qt.NoPen)
             painter.setBrush(QBrush(colour))

@@ -152,7 +152,6 @@ class ContentsPanel(QWidget):
 
         effective_state = inherited_state or self.parent.app_controller.change_tracker.get_state(node)
         item.setData(0, STATE, effective_state)
-        print(item.data(0, Qt.UserRole + 3))
         self._add_nodes(item, node.children, effective_state)
 
     def _build_row(self, parent_item, node, inherited_state=None, label=""):
