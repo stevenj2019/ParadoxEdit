@@ -17,7 +17,8 @@ class MainWindow(QMainWindow):
 
         #MainWindow
         self.setWindowTitle("ParadoxEdit")
-        
+        self.showMaximized()
+
         #TopBar
         self.topbar = TopBar(self)
         self.addToolBar(self.topbar)
@@ -30,7 +31,7 @@ class MainWindow(QMainWindow):
         #Splitter
         self.splitter = QSplitter(Qt.Horizontal)
         self.setCentralWidget(self.splitter)
-        
+
         #ModPanel(left)
         self.mod_panel = ModPanel(self)
         self.mod_panel.setMinimumWidth(150)
@@ -64,7 +65,7 @@ class MainWindow(QMainWindow):
         self.app_controller.load_mod(path)
 
     def load_mod_to_gui(self, mod):
-        self.mod = mod
+        # self.mod = mod
         self.mod_panel._populate_tree(mod)
         self._load_file(mod.descriptor_object)
         self.topbar._enable_actions()

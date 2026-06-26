@@ -1,9 +1,9 @@
 import json
-import qdarktheme
 from pathlib import Path
 from platformdirs import user_config_dir
 
 from PyQt5.QtWidgets import (QTreeWidget, QTreeWidgetItem, QWidget)
+from PyQt5.QtGui import QColor as QColour
 
 from ParadoxParser.ParadoxNodes import (GenericKeyValue, GenericNode,
                                         GenericComment, GenericString, GenericToken, 
@@ -61,37 +61,25 @@ class ConfigurationManager:
             json.dump(self.to_json(), CONFIG_FILE)
 
 class StyleManager:
-    def _build_stylesheet(self, dark_mode:bool):
-        base = qdarktheme.load_stylesheet("dark" if dark_mode else "light")
-        overlay = self._overlay_qss(dark_mode)
-        return base + overlay
-    
-    def _overlay_qss(self, dark_mode:bool):
-        if dark_mode:
-            return """
-            QTreeWidget::item[state="MODIFIED"] {
-                border: 2px solid #b5b300;
-            }
-            QTreeWidget::item[state="ADDED"] {
-                border: 2px solid #0c7a1f;
-            }
-            QTreeWidget::item[state="DELETED"] {
-                border: 2px solid #7a0c0c;
-            }
-            """
+    def __init__(self, config):
+        self.config = config
+        self.dark_mode_palette = {
+            ChangeState.MODIFIED: QColour("#545703"),
+            ChangeState.ADDED: QColour("#04450c"),
+            ChangeState.DELETED: QColour("#400308"),
+        }
+        self.light_mode_palette = {
+            ChangeState.MODIFIED: QColour("yellow"),
+            ChangeState.ADDED: QColour("green"),
+            ChangeState.DELETED: QColour("red"),
+        }
+
+    def state_colour(self, state):
+        if self.config.dark_mode:
+            self.dark_mode_palette.get(state)
         else:
-            return """
-            QTreeWidget::item[state="MODIFIED"] {
-                border: 2px solid yellow;
-            }
-            QTreeWidget::item[state="ADDED"] {
-                border: 2px solid green;
-            }
-            QTreeWidget::item[state="DELETED"] {
-                border: 2px solid red;
-            }
-            """
-        
+            self.light_mode_palette.get(state)
+
 class InlineEditManager:
     def __init__(self, mutate_callback):
         self.cell_editors = {

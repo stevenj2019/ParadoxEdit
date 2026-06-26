@@ -3,6 +3,7 @@ from PyQt5.QtCore import pyqtSignal
 
 from ParadoxParser.ParadoxNodes import GenericBlock, GenericKeyValue, GenericNode
 
+from App.Enums import ExpansionMode
 from App.ModClasses.Categories import GenericCategory
 from App.ModClasses.CategoryItems import GenericCategoryItem
 from App.ModClasses.ActionModels import ActionGroup, Action
@@ -124,7 +125,3 @@ class ParadoxNodesContextMenu(GenericContextMenu):
                 Action("Expand This", lambda:self.panel.set_expansion_rule(ExpansionMode.FROM_NODE, root_item=self.selected), True),
             ])
         ]
-        RequestExpansionContext(ExpansionMode.ALL)
-        RequestExpansionContext(ExpansionMode.DEPTH, depth_limit=2)
-        RequestExpansionContext(ExpansionMode.FROM_NODE, root_item=self.selected)
-        

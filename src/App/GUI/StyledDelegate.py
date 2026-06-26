@@ -5,33 +5,26 @@ from PyQt5.QtGui import QColor as QColour, QBrush
 from App.Constants import ChangeState, STATE
 
 class NodeStateDelegate(QStyledItemDelegate):
-    def __init__(self, config, parent=None):
+    def __init__(self, style_manager, parent=None):
         super().__init__(parent)
-        self.config = config
+        self.style_manager = style_manager
 
-    def _get_colour(self, dark, light):
-        return QColour(dark if self.config.dark_mode else light)
+    # def _get_colour(self, dark, light):
+    #     return QColour(dark if self.config.dark_mode else light)
     
     def paint(self, painter, option, index):
         view = option.widget
         viewport_rect = view.viewport().rect()
         state = index.model().data(index, STATE)
-        
-        print(f"painting {index.row()}, {index.column()}, {state}")
-        super().paint(painter, option, index)
 
-        # if state is not ChangeState.CLEAN or state is not None:
-        # if state == (ChangeState.CLEAN or None):
-        # if state is not ChangeState.CLEAN or None:
-        match state:
-            case ChangeState.MODIFIED:
-                colour = self._get_colour("#545703", "yellow")
-            case ChangeState.ADDED:
-                colour = self._get_colour("#04450c", "green")
-            case ChangeState.DELETED:
-                colour = self._get_colour("#400308", "red")
-            case ChangeState.CLEAN|None:
-                return 
+        if not state or state == ChangeState.CLEAN:
+            return 
+        colour = self.style_manager.state_colour(state)
+
+        super().paint(painter, option, index)
+        print(option.palette.color(option.palette.Text).name())
+        print(option.palette.color(option.palette.Base).name())
+
         rect = option.rect
         stripe_width = 10
         painter.save()

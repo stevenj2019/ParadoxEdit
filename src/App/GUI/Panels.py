@@ -6,7 +6,8 @@ from PyQt5.QtGui import QColor as QColour
 from ParadoxParser import ParadoxScriptParser as PDXScript
 from ParadoxParser.ParadoxNodes import GenericBlock, GenericKeyValue, GenericComment, GenericString, GenericToken
 
-from App.Constants import ChangeState, FILE, NODE, IS_BLOCK, STATE
+from App.Constants import FILE, NODE, IS_BLOCK, STATE
+from App.Enums import ExpansionMode
 from App.GUI.Menus import GenericCategoryContextMenu, ParadoxNodesContextMenu
 from App.GUI.StyledDelegate import NodeStateDelegate
 
@@ -103,12 +104,12 @@ class ContentsPanel(QWidget):
         self.tree.setColumnCount(2)
         self.tree.setHeaderLabels(["Key", "Value"])
         self.tree_fully_expanded = False
-        self.tree.setItemDelegate(NodeStateDelegate(self.parent.app_controller.config, self.tree))
+        # self.tree.setItemDelegate(NodeStateDelegate(self.parent.app_controller.style_manager, self.tree))
         self.tree.itemDoubleClicked.connect(self._on_item_double_click)
         self.tree.setContextMenuPolicy(Qt.CustomContextMenu)
         self.tree.customContextMenuRequested.connect(self.build_context_menu)
         layout.addWidget(self.tree)
-
+        self.tree.addTopLevelItem(QTreeWidgetItem(["TEST", "TEST"]))
         self.parent.node_changed.connect(self.refresh_node)
 
     def _load_block(self, block):
@@ -128,7 +129,7 @@ class ContentsPanel(QWidget):
         finally:
             self.tree.blockSignals(False)
             self.tree.setUpdatesEnabled(True)
-        # self.set_expansion_rule(RequestExpansionContext(ExpansionMode.DEPTH))
+        self.set_expansion_rule(ExpansionMode.DEPTH)
         self.tree.resizeColumnToContents(0)
 
     def _add_nodes(self, parent_item, nodes, inherited_state=None):
@@ -210,15 +211,6 @@ class ContentsPanel(QWidget):
                         child.setExpanded(True)
                     case ExpansionMode.DEPTH:
                         child.setExpanded(depth < depth_limit)
-
-                # if mode == "all":
-                #     child.setExpanded(True)
-                # elif mode == "none":
-                #     child.setExpanded(False)
-                # elif mode == "depth":
-                #     child.setExpanded(depth < depth_limit)
-                # elif mode == "from_node":
-                #     child.setExpanded(True)
                 recurse(child, depth+1)
         
         root_item.setExpanded(True)

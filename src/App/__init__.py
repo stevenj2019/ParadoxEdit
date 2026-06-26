@@ -1,5 +1,6 @@
 import sys
-import traceback
+
+import qdarktheme
 
 from PyQt5.QtWidgets import QApplication, QDialog
 
@@ -14,7 +15,7 @@ class AppController:
     def __init__(self):
         self.app            = QApplication([])
         self.config         = ConfigurationManager()
-        self.style_manager  = StyleManager()
+        self.style_manager  = StyleManager(self.config)
         self.change_tracker = ChangeTracker()
         self.file_system    = FilesystemMananger()
 
@@ -31,7 +32,7 @@ class AppController:
         self.run()
 
     def apply_stylesheet(self):
-        self.app.setStyleSheet(self.style_manager._build_stylesheet(self.config.dark_mode))
+        self.app.setStyleSheet(qdarktheme.load_stylesheet("dark" if self.config.dark_mode else "light"))
 
     def run(self):
         if not self.config.initalised:
