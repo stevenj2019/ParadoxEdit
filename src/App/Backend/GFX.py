@@ -1,8 +1,7 @@
-# from gui.dialogues.warning_messages import GFX_file_copying_warn, GFX_is_focus_upload, invalid_GFX_file_warning, GFX_load_and_store_are_same
-# from gui.dialogues.file_dialogue import gfx_files_folder_selector, gfx_save_folder_selector
-# from gui.util import get_main_window
+# from App.GUI.Dialogues.PopupModels import GFX_file_copying_warn, GFX_is_focus_upload, invalid_GFX_file_warning, GFX_load_and_store_are_same
+# from App.GUI.Dialogues.FileDialogues import gfx_files_folder_selector, gfx_save_folder_selector
 # from ParadoxParser.ParadoxNodes import GenericBlock, GenericComment
-# from PDXFactory.blocks.sprites import GFX_icon, GFX_shine_icon
+# from PDXFactory.Blocks.Sprites import GFX_icon, GFX_shine_icon
 # import os
 # from pathlib import Path
 # import shutil

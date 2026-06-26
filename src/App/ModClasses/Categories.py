@@ -1,9 +1,12 @@
 import os 
 from pathlib import Path
-from .CategoryItems import GenericCategoryItem, EventCategoryItem, GFXCategoryItem
+
 from ParadoxParser import ParadoxScriptParser as PDXFile
-from gui.menus import ActionGroup, Action
-from Backend import Generic, Events
+
+from App.ModClasses.CategoryItems import GenericCategoryItem, EventCategoryItem, GFXCategoryItem
+from App.ModClasses.ActionModels import ActionGroup, Action
+from App.ModClasses.ActionModels import ActionGroup, Action
+from App.Backend import Generic, Events
 
 class GenericCategory:
     def __init__(self, base:os.PathLike, paths:list[os.PathLike], item_class:GenericCategoryItem, file_type:str=None):

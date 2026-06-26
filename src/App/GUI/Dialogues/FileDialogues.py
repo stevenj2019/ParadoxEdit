@@ -1,7 +1,7 @@
 import os
 from PyQt5.QtWidgets import QFileDialog, QMessageBox
 from pathlib import Path
-from Configuration import ConfigurationFile
+from App.Services import ConfigurationManager
 
 def select_hoi4_install_directory():
     options = QFileDialog.Options()
@@ -23,7 +23,7 @@ def select_mod_directory():
         QFileDialog.ShowDirsOnly
     )
 
-def select_mod_file(config:ConfigurationFile=None):
+def select_mod_file(config:ConfigurationManager=None):
     """
     Opens a file dialog for selecting a .mod file,
     loads it into a ParadoxMod instance, and returns it.

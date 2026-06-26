@@ -1,29 +1,34 @@
 from PyQt5.QtWidgets import (QWidget, QVBoxLayout, QHeaderView, QTreeWidget, QTreeWidgetItem)
 from PyQt5.QtCore import Qt, pyqtSignal
-from PyQt5.Qt import QMenu
-from PyQt5.QtGui import QCursor
+# from PyQt5.QtGui import QCursor, QColor
+from PyQt5.QtGui import QColor as QColour
 
 from ParadoxParser import ParadoxScriptParser as PDXScript
 from ParadoxParser.ParadoxNodes import GenericBlock, GenericKeyValue, GenericComment, GenericString, GenericToken
 
-from gui.constants import FILE, NODE, IS_BLOCK
-from gui.menus.context_menu import ContextMenu
-from gui.menus import Action, ActionGroup
+from App.Constants import ChangeState, FILE, NODE, IS_BLOCK, STATE
+from App.GUI.Menus import GenericCategoryContextMenu, ParadoxNodesContextMenu
+from App.GUI.StyledDelegate import NodeStateDelegate
+
+from App.SignalContexts import ExpansionMode, RequestExpansionContext
+
+# from gui.change_state import ChangeState
+# from gui.constants import FILE, NODE, IS_BLOCK
+# from gui.menus.context_menu import ContextMenu
 
 class ModPanel(QWidget):
     request_load_block = pyqtSignal(object)
-    request_bulkable_operation = pyqtSignal(object, object)
+    # request_bulkable_operation = pyqtSignal(object, object)
     load_file = pyqtSignal()
-    def __init__(self):
+    def __init__(self, parent):
         super().__init__()
-        self.mod = None
-        self.open_file = None
+        self.open_file = None #This should be moved to MainWindow
+        self.parent = parent
 
         layout = QVBoxLayout()
         self.setLayout(layout)
 
         self.tree = QTreeWidget()
-
         self.tree.setColumnCount(1)
 
         header = self.tree.header()
@@ -73,13 +78,13 @@ class ModPanel(QWidget):
                 print(f" - {name}")
 
     def build_context_menu(self, pos):
-        item = self.tree.itemAt(pos)
-        if not item:
-            return
-        selected = item.data(0, FILE)
+        selected = self.tree.itemAt(pos)
         if not selected:
             return
-        menu = ContextMenu(self.tree, selected.context_sections())
+        item = selected.data(0, FILE)
+        if not item:
+            return
+        menu = GenericCategoryContextMenu(self, self.tree, selected, item)
         menu.exec_(self.tree.viewport().mapToGlobal(pos))
 
     def _on_element_click(self, item, column):
@@ -92,8 +97,10 @@ class ModPanel(QWidget):
 
 class ContentsPanel(QWidget):
     edit_open_request = pyqtSignal(object, object, object)
-    def __init__(self):
+    def __init__(self, parent):
         super().__init__()
+        self.parent = parent
+        self.node_to_item:dict = {}
 
         layout = QVBoxLayout()
         self.setLayout(layout)
@@ -102,11 +109,13 @@ class ContentsPanel(QWidget):
         self.tree.setColumnCount(2)
         self.tree.setHeaderLabels(["Key", "Value"])
         self.tree_fully_expanded = False
-        layout.addWidget(self.tree)
-
+        self.tree.setItemDelegate(NodeStateDelegate(self.parent.app_controller.config, self.tree))
         self.tree.itemDoubleClicked.connect(self._on_item_double_click)
         self.tree.setContextMenuPolicy(Qt.CustomContextMenu)
         self.tree.customContextMenuRequested.connect(self.build_context_menu)
+        layout.addWidget(self.tree)
+
+        self.parent.node_changed.connect(self.refresh_node)
 
     def _load_block(self, block):
         """
@@ -125,30 +134,35 @@ class ContentsPanel(QWidget):
         finally:
             self.tree.blockSignals(False)
             self.tree.setUpdatesEnabled(True)
-        self.set_expansion_rule(mode="depth", depth_limit=1)
+        self.set_expansion_rule(RequestExpansionContext(ExpansionMode.DEPTH))
         self.tree.resizeColumnToContents(0)
 
-    def _add_nodes(self, parent_item, nodes):
+    def _add_nodes(self, parent_item, nodes, inherited_state=None):
         for node in nodes:
             match node:
                 case GenericBlock():
-                    self._build_block(parent_item, node)
+                    self._build_block(parent_item, node, inherited_state)
                 case GenericComment():
-                    self._build_row(parent_item, node, "Comment")
+                    self._build_row(parent_item, node, inherited_state, "Comment")
                 case GenericString()|GenericToken():
-                    self._build_row(parent_item, node, "Array Value")
+                    self._build_row(parent_item, node, inherited_state, "Array Value")
                 case GenericKeyValue():
-                    self._build_row(parent_item, node)
+                    self._build_row(parent_item, node, inherited_state)
 
-    def _build_block(self, parent_item, node):
+    def _build_block(self, parent_item, node, inherited_state):
         item = QTreeWidgetItem([str(node.key), ""])
+        self.node_to_item[node] = item
         item.setData(0, NODE, node)
         item.setData(0, IS_BLOCK, True)
+
         parent_item.addChild(item)
 
-        self._add_nodes(item, node.children)
+        effective_state = inherited_state or self.parent.app_controller.change_tracker.get_state(node)
+        item.setData(0, STATE, effective_state)
+        print(item.data(0, Qt.UserRole + 3))
+        self._add_nodes(item, node.children, effective_state)
 
-    def _build_row(self, parent_item, node, label=""):
+    def _build_row(self, parent_item, node, inherited_state=None, label=""):
         if isinstance(node, GenericKeyValue):
             value_label = node.key
             value_node = node.value
@@ -157,8 +171,21 @@ class ContentsPanel(QWidget):
             value_label = label or type(node).__name__
 
         item = QTreeWidgetItem([value_label, str(value_node._get_value())])
+        self.node_to_item[node] = item
+        self.node_to_item[value_node] = item 
+        
         item.setData(0, NODE, node)
         parent_item.addChild(item)
+
+        effective_state = inherited_state or self.parent.app_controller.change_tracker.get_state(node)
+        item.setData(0, STATE, effective_state)
+
+    def refresh_node(self, node):
+        item = self.node_to_item[node]
+        item.setText(1, node._get_value())
+        state_ = self.parent.app_controller.change_tracker.get_state(node)
+        item.setData(0, STATE, state_)
+        self.tree.update()
 
     def _on_item_double_click(self, item, column):
         if column == 1: #value was clicked.
@@ -168,37 +195,36 @@ class ContentsPanel(QWidget):
                     self.edit_open_request.emit(self.tree, item, node)
 
     def build_context_menu(self, pos):
-        item = self.tree.itemAt(pos)
-        if not item:
+        selected = self.tree.itemAt(pos)
+        if not selected:
             return
-        menu = ContextMenu(self.tree, self._get_context_menu_options(item))
+        item = selected.data(0, NODE)
+        menu = ParadoxNodesContextMenu(self, self.tree, selected, item)
         menu.exec_(self.tree.viewport().mapToGlobal(pos))
 
-    def _get_context_menu_options(self, item):
-        return [
-            ActionGroup("Tree Options", [
-                Action("Expand All", lambda:self.set_expansion_rule(mode="all"), True),
-                Action("Collapse All", lambda:self.set_expansion_rule(mode="depth", depth_limit=1), True),
-                Action("Expand This", lambda:self.set_expansion_rule(mode="all", root_item=item), True),
-            ])
-        ]
-
-    def set_expansion_rule(self, mode="depth", depth_limit=1, root_item=None):
+    def set_expansion_rule(self, mode, depth_limit=1, root_item=None):
         self.tree.setUpdatesEnabled(False)
         if root_item is None:
             root_item = self.tree.invisibleRootItem()
+        root_item = root_item if root_item else self.tree.invisibleRootItem()
 
         def recurse(item, depth):
             for i in range(item.childCount()):
                 child = item.child(i)
-                if mode == "all":
-                    child.setExpanded(True)
-                elif mode == "none":
-                    child.setExpanded(False)
-                elif mode == "depth":
-                    child.setExpanded(depth < depth_limit)
-                elif mode == "from_node":
-                    child.setExpanded(True)
+                match mode:
+                    case ExpansionMode.ALL|ExpansionMode.FROM_NODE:
+                        child.setExpanded(True)
+                    case ExpansionMode.DEPTH:
+                        child.setExpanded(depth < depth_limit)
+
+                # if mode == "all":
+                #     child.setExpanded(True)
+                # elif mode == "none":
+                #     child.setExpanded(False)
+                # elif mode == "depth":
+                #     child.setExpanded(depth < depth_limit)
+                # elif mode == "from_node":
+                #     child.setExpanded(True)
                 recurse(child, depth+1)
         
         root_item.setExpanded(True)

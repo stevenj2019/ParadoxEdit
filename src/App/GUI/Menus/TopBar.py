@@ -1,26 +1,34 @@
 from PyQt5.QtWidgets import QMainWindow, QToolBar, QMenu, QAction
 from PyQt5.QtCore import pyqtSignal
 
-from gui.menus.top_bar.actions import build_topbar_actions
-from gui.menus import Action, ActionGroup
+from App.ModClasses.ActionModels import Action, ActionGroup
 
-class MainTopBar(QToolBar):
-    request_edit_session_complete = pyqtSignal()
-    mod_loaded_signal = pyqtSignal(object)
-    save_open_signal = pyqtSignal()
-    save_all_changed_signal = pyqtSignal()
-    save_all_signal = pyqtSignal()
+class TopBar(QToolBar):
+    request_load_mod = pyqtSignal()
+    request_settings_window = pyqtSignal()
+    request_save_open_signal = pyqtSignal()
+    request_save_all_changed_signal = pyqtSignal()
+    request_save_all_signal = pyqtSignal()
     
     def __init__(self, parent):
         super().__init__(parent)
         self.controller:QMainWindow = parent
         self.actions:dict = {}
-        self.menu_def:list = build_topbar_actions(self)
+        self.menu_def:list = self._get_topbar_actions()
 
         self.setMovable(False)
-
         self._build_toolbar()
 
+    def _get_topbar_actions(self):
+        return [
+            ActionGroup("File", [
+                Action("Open Mod", self.request_load_mod.emit, True), 
+                Action("Save Open", self.request_save_open_signal.emit, False),
+                Action("Save All Changed", self.request_save_all_changed_signal.emit, False),
+                Action("Save All", self.request_save_all_signal.emit, False)
+            ]),
+            Action("Settings", self.request_settings_window.emit, True)
+        ]
     def _build_toolbar(self):
         for item in self.menu_def:
             if isinstance(item, ActionGroup):

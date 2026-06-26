@@ -3,10 +3,10 @@ from pathlib import Path
 
 from ParadoxParser import ParadoxScriptParser as PDXFile
 from ParadoxParser.ParadoxNodes import GenericKeyValue
-from .CategoryItems import GenericCategoryItem
-from .Categories import GenericCategory
-from .Categories import EventCategory as Events
-from .Categories import GFXCategory as GFX
+from App.ModClasses.CategoryItems import GenericCategoryItem
+from App.ModClasses.Categories import GenericCategory
+from App.ModClasses.Categories import EventCategory as Events
+from App.ModClasses.Categories import GFXCategory as GFX
 implemented_arr = [Events, GFX]
 #path should point to a descriptor file, 
 

@@ -1,15 +1,25 @@
-from PyQt5.QtWidgets import QMainWindow, QMenu, QLabel, QWidgetAction, QAction
-from PyQt5.QtCore import pyqtSignal #this will be needed, need to figure it out first lol
+from PyQt5.QtWidgets import QMainWindow, QMenu, QLabel, QWidgetAction, QTreeWidgetItem, QAction
+from PyQt5.QtCore import pyqtSignal
 
-from gui.menus import Action, ActionGroup
+from App.GUI.menus import ActionGroup, Action
+
 
 class ContextMenu(QMenu):
-    request_edit_session_complete = pyqtSignal()
-    def __init__(self, parent:QMainWindow, menu_def:list):
+    request_expansion = pyqtSignal(str, int, object)
+    def __init__(self, parent:QMainWindow, item:QTreeWidgetItem):
         super().__init__(parent)
         self.controller = parent
-        self.menu_def:list = menu_def
-        self._build_context_menu()
+        self.menu_def:list = self._get_context_menu_options()
+        self._build_context_menu(item)
+
+    def _get_context_menu_options(self, item):
+        return [
+            ActionGroup("Tree Options", [
+                Action("Expand All", self.request_expansion.emit("all", 1, None), True),
+                Action("Collapse All", self.request_expansion.emit("depth", 1, None), True),
+                Action("Expand This", self.request_expansion.emit("all", 1, item), True),
+            ])
+        ]
 
     def _build_context_menu(self):
         for item in self.menu_def:

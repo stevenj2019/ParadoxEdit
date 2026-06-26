@@ -3,13 +3,12 @@ import qdarktheme
 
 from PyQt5.QtWidgets import QApplication, QDialog, QFormLayout, QHBoxLayout, QLabel, QCheckBox, QLineEdit, QPushButton, QDialogButtonBox
 
-from Configuration import ConfigurationFile
-
-from gui.dialogues.file_dialogue import select_hoi4_install_directory, select_mod_directory
-from gui.dialogues.warning_messages import settings_error_critical
+from App.Services import ConfigurationManager
+from App.GUI.Dialogues.FileDialogues import select_hoi4_install_directory, select_mod_directory
+from App.GUI.Dialogues.PopupModels import settings_error_critical
 
 class SettingsWindow(QDialog):
-    def __init__(self, title:str, config:ConfigurationFile):
+    def __init__(self, title:str, config:ConfigurationManager):
         super().__init__()
         self.config = config
         self.setWindowTitle(title)
