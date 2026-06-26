@@ -9,27 +9,23 @@ class NodeStateDelegate(QStyledItemDelegate):
         super().__init__(parent)
         self.style_manager = style_manager
 
-    # def _get_colour(self, dark, light):
-    #     return QColour(dark if self.config.dark_mode else light)
-    
     def paint(self, painter, option, index):
-        view = option.widget
-        viewport_rect = view.viewport().rect()
+        super().paint(painter, option, index)
         state = index.model().data(index, STATE)
 
         if not state or state == ChangeState.CLEAN:
             return 
-        colour = self.style_manager.state_colour(state)
+        colour = self.style_manager.get_state_colour(state)
 
-        super().paint(painter, option, index)
         print(option.palette.color(option.palette.Text).name())
         print(option.palette.color(option.palette.Base).name())
 
+        view = option.widget
+        viewport_rect = view.viewport().rect()
         rect = option.rect
         stripe_width = 10
         painter.save()
         painter.setPen(Qt.NoPen)
         painter.setBrush(QBrush(colour))
         painter.drawRect(viewport_rect.left(), rect.top(), stripe_width, rect.height())
-        # painter.drawRect(rect.left()-20, rect.top(), stripe_width, rect.height())
         painter.restore()

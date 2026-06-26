@@ -74,7 +74,7 @@ class StyleManager:
             ChangeState.DELETED: QColour("red"),
         }
 
-    def state_colour(self, state):
+    def get_state_colour(self, state):
         if self.config.dark_mode:
             self.dark_mode_palette.get(state)
         else:

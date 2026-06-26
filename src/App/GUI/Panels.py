@@ -55,7 +55,6 @@ class ModPanel(QWidget):
 
         for c_key, c_val in mod.categories.items():
             cat_sub = QTreeWidgetItem([c_key])
-            cat_sub.setData(0, FILE, c_val)
             for file, obj in c_val.files.items():
                 widget = QTreeWidgetItem([file])
                 widget.setText(0, file)
@@ -104,12 +103,11 @@ class ContentsPanel(QWidget):
         self.tree.setColumnCount(2)
         self.tree.setHeaderLabels(["Key", "Value"])
         self.tree_fully_expanded = False
-        # self.tree.setItemDelegate(NodeStateDelegate(self.parent.app_controller.style_manager, self.tree))
+        self.tree.setItemDelegate(NodeStateDelegate(self.parent.app_controller.style_manager, self.tree))
         self.tree.itemDoubleClicked.connect(self._on_item_double_click)
         self.tree.setContextMenuPolicy(Qt.CustomContextMenu)
         self.tree.customContextMenuRequested.connect(self.build_context_menu)
         layout.addWidget(self.tree)
-        self.tree.addTopLevelItem(QTreeWidgetItem(["TEST", "TEST"]))
         self.parent.node_changed.connect(self.refresh_node)
 
     def _load_block(self, block):
