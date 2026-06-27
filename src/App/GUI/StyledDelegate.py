@@ -1,31 +1,43 @@
 from PyQt5.QtWidgets import QStyledItemDelegate
 from PyQt5.QtCore import Qt
-from PyQt5.QtGui import QColor as QColour, QBrush
+from PyQt5.QtGui import QColor as QColour, QBrush, QPen
 
-from App.Constants import ChangeState, STATE
+from App.Constants import ChangeState, STATE, CATEGORY
+from App.ModClasses.Categories import GenericCategory
 
-class GenericCategoryItemDelegate(QStyledItemDelegate):
+class ParadoxFileDelegate(QStyledItemDelegate):
     def __init__(self, style_manager, parent=None):
         super().__init__(parent)
         self.style_manager = style_manager
 
     def paint(self, painter, option, index):
+        print(option, index)
         super().paint(painter, option, index)
+        is_category = index.model().data(index, CATEGORY)
         state = index.model().data(index, STATE)
-        if state in (ChangeState.ADDED, ChangeState.MODIFIED, ChangeState.DELETED):
-            colour = self.style_manager.get_node_state_colour(state)
 
-            radius = 4
-            painter.save()
-            painter.setRenderHint(painter.Antialiasing, True)
-            painter.setPen(Qt.NoPen)
-            painter.setBrush(QColour(colour))
+        radius = 4
+        painter.save()
+        painter.setRenderHint(painter.Antialiasing, True)
+        x = option.rect.right() - radius * 2 - 6
+        y = option.rect.center().y()
 
-            x = option.rect.right() - radius * 2 - 6
-            y = option.rect.center().y()
-
-            painter.drawEllipse(x, y-radius, radius*2, radius*2)
-            painter.restore
+        if is_category:
+            state = index.model().data(index, STATE)
+            if state == ChangeState.MODIFIED:
+                colour = self.style_manager.get_node_state_colour(ChangeState.MODIFIED)
+                painter.setBrush(Qt.NoBrush)
+                painter.setPen(QPen(colour, 2))
+                painter.drawEllipse(x, y - radius, radius * 2, radius * 2)
+                painter.restore()
+        else:
+            state = index.model().data(index, STATE)
+            if state in (ChangeState.ADDED, ChangeState.MODIFIED, ChangeState.DELETED):
+                colour = self.style_manager.get_node_state_colour(state)
+                painter.setPen(Qt.NoPen)
+                painter.setBrush(QColour(colour))
+                painter.drawEllipse(x, y-radius, radius*2, radius*2)
+                painter.restore
 
 class NodeStateDelegate(QStyledItemDelegate):
     def __init__(self, style_manager, parent=None):

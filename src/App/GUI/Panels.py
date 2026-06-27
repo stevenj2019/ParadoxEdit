@@ -6,10 +6,10 @@ from PyQt5.QtGui import QColor as QColour
 from ParadoxParser import ParadoxScriptParser as PDXScript
 from ParadoxParser.ParadoxNodes import GenericBlock, GenericKeyValue, GenericComment, GenericString, GenericToken
 
-from App.Constants import ChangeState, FILE, NODE, IS_BLOCK, STATE
+from App.Constants import ChangeState, FILE, NODE, IS_BLOCK, STATE, CATEGORY
 from App.Enums import ExpansionMode
 from App.GUI.Menus import GenericCategoryContextMenu, ParadoxNodesContextMenu
-from App.GUI.StyledDelegate import GenericCategoryItemDelegate, NodeStateDelegate
+from App.GUI.StyledDelegate import ParadoxFileDelegate, NodeStateDelegate
 
 class ModPanel(QWidget):
     request_load_block = pyqtSignal(object)
@@ -19,6 +19,7 @@ class ModPanel(QWidget):
         super().__init__()
         self.parent = parent
         self.node_to_item:dict = {}
+        self.file_to_category:dict = {}
 
         layout = QVBoxLayout()
         self.setLayout(layout)
@@ -30,7 +31,7 @@ class ModPanel(QWidget):
         header.setSectionResizeMode(0, QHeaderView.Stretch)
         self.tree.setHeaderHidden(True)
         self.tree.setTextElideMode(Qt.ElideRight)
-        self.tree.setItemDelegate(GenericCategoryItemDelegate(self.parent.app_controller.style_manager, self.tree))
+        self.tree.setItemDelegate(ParadoxFileDelegate(self.parent.app_controller.style_manager, self.tree))
         layout.addWidget(self.tree)
 
         self.tree.itemClicked.connect(self._on_element_click)
@@ -42,12 +43,12 @@ class ModPanel(QWidget):
 
 
     def mark_file_dirty(self, file):
-    # def mark_file_dirty(self, category, file):
-        # cat_item = self.node_to_item[category]
         file_item = self.node_to_item[file]
-        # cat_item.setData(0, STATE, ChangeState.MODIFIED)
         state_ = self.parent.app_controller.change_tracker.get_file_state(file) #This returns True
         file_item.setData(0, STATE, state_)
+
+        category = self.file_to_category[file]
+        category.setData(0, STATE, ChangeState.MODIFIED)
         self.tree.update()
 
     def _populate_tree(self, mod):
@@ -68,13 +69,16 @@ class ModPanel(QWidget):
 
         for c_key, c_val in mod.categories.items():
             cat_sub = QTreeWidgetItem([c_key])
+            cat_sub.setData(0, CATEGORY, True)
             self.node_to_item[c_val] = cat_sub
             for file, obj in c_val.files.items():
                 widget = QTreeWidgetItem([file])
                 self.node_to_item[obj] = widget
+                self.file_to_category[obj] = cat_sub
                 widget.setText(0, file)
                 widget.setData(0, FILE, obj)
                 widget.setData(0, STATE, ChangeState.CLEAN)
+                widget.setData(0, CATEGORY, False)
                 cat_sub.addChild(widget)
 
             categories_parent.addChild(cat_sub)

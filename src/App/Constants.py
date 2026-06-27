@@ -11,3 +11,4 @@ FILE = Qt.UserRole
 NODE = Qt.UserRole + 1
 IS_BLOCK = Qt.UserRole + 2
 STATE = Qt.UserRole + 3
+CATEGORY = Qt.UserRole + 4

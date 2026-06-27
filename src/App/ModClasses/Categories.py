@@ -18,7 +18,7 @@ class GenericCategory:
 
     def iter_files(self):
         return self.files.values()
-    
+
     def context_sections(self):
         return [
             ActionGroup("PDX Script Options", [
