@@ -1,4 +1,4 @@
-from PyQt5.QtWidgets import QTreeWidget, QTreeWidgetItem, QWidget, QLineEdit, QComboBox
+from PyQt5.QtWidgets import QApplication, QTreeWidget, QTreeWidgetItem, QWidget, QLineEdit, QComboBox
 from PyQt5.QtGui import QFontMetrics
 from PyQt5.QtCore import QObject, QEvent, Qt
 
@@ -25,15 +25,18 @@ class InLineEditManager(QObject):
         self.editor:QWidget = None
 
     def eventFilter(self, obj, event):
-        if obj is not self.editor:
-            return False
-
-        if event.type() == QEvent.KeyPress:
-            if event.key() == Qt.Key_Escape:
-                self.cancel_request("esc")
-                return True
-
         if event.type() == QEvent.FocusOut:
+            if isinstance(self.editor, QComboBox) and self.editor.view().isVisible():
+                return False
+
+            next_widget = QApplication.focusWidget()
+
+            if next_widget and (
+                next_widget is self.editor
+                or self.editor.isAncestorOf(next_widget)
+            ):
+                return False
+
             self.cancel_request("focus lost")
             return False
 
