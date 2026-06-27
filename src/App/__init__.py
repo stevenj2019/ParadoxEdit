@@ -5,7 +5,6 @@ from PyQt5.QtWidgets import QApplication
 from ParadoxParser.ParadoxNodes import GenericBlock
 
 from App.Services import ConfigurationManager, StyleManager, ChangeTracker, FilesystemMananger
-from App.GlobalEventFilter import GlobalEventFilter
 from App.GUI.Main import MainWindow
 
 from App.Constants import ChangeState
