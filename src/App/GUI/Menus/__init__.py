@@ -12,7 +12,6 @@ class TopBar(QToolBar):
     request_load_mod = pyqtSignal()
     request_settings_window = pyqtSignal()
     request_save_open_signal = pyqtSignal()
-    request_save_all_changed_signal = pyqtSignal()
     request_save_all_signal = pyqtSignal()
     
     def __init__(self, parent):
@@ -29,7 +28,6 @@ class TopBar(QToolBar):
             ActionGroup("File", [
                 Action("Open Mod", self.request_load_mod.emit, True), 
                 Action("Save Open", self.request_save_open_signal.emit, False),
-                Action("Save All Changed", self.request_save_all_changed_signal.emit, False),
                 Action("Save All", self.request_save_all_signal.emit, False)
             ]),
             Action("Settings", self.request_settings_window.emit, True)
@@ -56,7 +54,6 @@ class TopBar(QToolBar):
 
     def _enable_actions(self):
         self.actions["Save Open"].setEnabled(True)
-        self.actions["Save All Changed"].setEnabled(True)
         self.actions["Save All"].setEnabled(True)
 
 class GenericContextMenu(QMenu):

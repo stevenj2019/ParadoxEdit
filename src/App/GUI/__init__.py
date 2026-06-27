@@ -1,15 +1,22 @@
 from PyQt5.QtWidgets import QMainWindow, QSplitter
 from PyQt5.QtCore import Qt, pyqtSignal
 
+from ParadoxParser import ParadoxScriptParser as PDXScript
 from ParadoxParser.ParadoxNodes import GenericNode, GenericKeyValue
+
+from App.Enums import SaveTarget
 from App.ModClasses.Categories import GenericCategory, GenericCategoryItem
-from App.GUI.Menus.TopBar import TopBar
+
+# from App.GUI.Menus.TopBar import 
+from App.GUI.Menus import TopBar
 from App.GUI.Panels import ModPanel, ContentsPanel
 from App.GUI.Dialogues.FileDialogues import select_mod_file
 from App.GUI.Dialogues.PopupModels import could_not_load_mod_critical
 from App.GUI.Windows.Settings import SettingsWindow
 
 class MainWindow(QMainWindow):
+    file_changed = pyqtSignal(object)
+    # file_changed = pyqtSignal(object, object)
     node_changed = pyqtSignal(object)
     def __init__(self, app):
         super().__init__()
@@ -24,9 +31,8 @@ class MainWindow(QMainWindow):
         self.addToolBar(self.topbar)
         self.topbar.request_load_mod.connect(self.load_mod_requested)
         self.topbar.request_settings_window.connect(self.settings_window_requested)
-        self.topbar.request_save_open_signal.connect(lambda:self._save_file(self.mod_panel.open_file))
-        self.topbar.request_save_all_changed_signal.connect(lambda:self._save_files(True))
-        self.topbar.request_save_all_signal.connect(lambda:self._save_files(False))
+        self.topbar.request_save_open_signal.connect(lambda:self.app_controller.save_target(SaveTarget.OPEN))
+        self.topbar.request_save_all_signal.connect(lambda:self.app_controller.save_target(SaveTarget.ALL))
         
         #Splitter
         self.splitter = QSplitter(Qt.Horizontal)
@@ -50,11 +56,12 @@ class MainWindow(QMainWindow):
         if not self.app_controller.config.initialised:
             self.settings_window_requested()
     
-    def propogate_changes(self, 
-                          category:GenericCategory, 
-                          category_item:GenericCategoryItem, 
+    def propogate_changes(self,
+                          category_item:PDXScript, 
                           node:GenericNode|GenericKeyValue #unsure which is it tbh
     ):
+        self.file_changed.emit(category_item)
+        # self.file_changed.emit(category_item.parent, category_item)
         self.node_changed.emit(node)
 
     def settings_window_requested(self):
@@ -84,7 +91,9 @@ class MainWindow(QMainWindow):
 
     def _load_file(self, file):
         self.app_controller.editor_session.cancel_request(reason="file switch")
-        self.contents_panel._load_block(file.obj)
+        self.app_controller.file_system.load_file(file)
+        # self.contents_panel._load_block(file.obj)
+        self.contents_panel._load_block(file)
 
     def _refresh_contents(self):
         open_file = self.mod_panel.open_file
@@ -101,5 +110,7 @@ class MainWindow(QMainWindow):
     
     def _save_file(self, file):
         if self.config.safe_mode:
-            file.obj._backup_file()
-        file.obj._to_pdx_file()
+            file._backup_file()
+            # file.obj._backup_file()
+        file._to_pdx_file()
+        # file.obj._to_pdx_file()

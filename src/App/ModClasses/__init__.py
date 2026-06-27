@@ -14,7 +14,8 @@ class ParadoxMod:
     def __init__(self, path:str|os.PathLike):
         path = Path(path)
         self.descriptor_file = path.name
-        self.descriptor_object = GenericCategoryItem(PDXFile(path))
+        # self.descriptor_object = GenericCategoryItem(PDXFile(path))
+        self.descriptor_object = PDXFile(path)
 
         self.mod_name:str = ""
         self.mod_base_dir:os.PathLike = None
@@ -46,13 +47,21 @@ class ParadoxMod:
 
     def _collect_mod_info(self):
         self.mod_name = next(
-            (node.value.value for node in self.descriptor_object.obj.nodes
+            (node.value.value for node in self.descriptor_object.nodes
             if isinstance(node, GenericKeyValue) and node.key == "name"), None
         )
         self.mod_base_dir = next(
-            (Path(node.value.value.strip('"')) for node in self.descriptor_object.obj.nodes
+            (Path(node.value.value.strip('"')) for node in self.descriptor_object.nodes
             if isinstance(node, GenericKeyValue) and node.key == "path"), None
         )
+        # self.mod_name = next(
+        #     (node.value.value for node in self.descriptor_object.obj.nodes
+        #     if isinstance(node, GenericKeyValue) and node.key == "name"), None
+        # )
+        # self.mod_base_dir = next(
+        #     (Path(node.value.value.strip('"')) for node in self.descriptor_object.obj.nodes
+        #     if isinstance(node, GenericKeyValue) and node.key == "path"), None
+        # )
     # def _collect_categories(self):
     #     def init_category(CategoryClass):
     #         try:

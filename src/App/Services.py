@@ -61,8 +61,8 @@ class ConfigurationManager:
             json.dump(self.to_json(), CONFIG_FILE)
 
 class StyleManager:
-    def __init__(self, config):
-        self.config = config
+    def __init__(self, controller):
+        self.controller = controller
         self.dark_mode_palette = {
             ChangeState.MODIFIED: QColour("#545703"),
             ChangeState.ADDED: QColour("#04450c"),
@@ -74,8 +74,8 @@ class StyleManager:
             ChangeState.DELETED: QColour("red"),
         }
 
-    def get_state_colour(self, state):
-        if self.config.dark_mode:
+    def get_node_state_colour(self, state):
+        if self.controller.config.dark_mode:
             return self.dark_mode_palette.get(state)
         else:
             return self.light_mode_palette.get(state)
@@ -91,7 +91,6 @@ class InlineEditManager:
             GenericBool:    bool_dropdown
         }
         self.mutate_callback = mutate_callback
-        # self.main_controller = main_controller
         self.parent:QTreeWidget = None
         self.source:QTreeWidgetItem = None
         self.node:GenericNode = None
@@ -118,7 +117,6 @@ class InlineEditManager:
         print(f"{self.node}, {self.node.value} to {new_value}")
         if self.node.value != new_value:
             self.mutate_callback(self.node, new_value)
-            # self.main_controller._mutate_node(self.node, new_value)
         self._destroy()
         self._clear()
 
@@ -154,23 +152,46 @@ class InlineEditManager:
 
 class ChangeTracker:
     def __init__(self):
-        self._changes = {}
+        self.node_changes = {}
+        self.file_changes = {}
 
-    def dirty(self, node):
-        return self.get_state(node) is not ChangeState.CLEAN
+    def node_is_dirty(self, node):
+        return self.get_node_state(node) is not ChangeState.CLEAN
 
-    def set_state(self, node, state):
-        self._changes[node] = state
+    def set_node_state(self, node, state):
+        self.node_changes[node] = state
 
-    def get_state(self, node):
-        return self._changes.get(node, ChangeState.CLEAN)
+    def get_node_state(self, node):
+        return self.node_changes.get(node, ChangeState.CLEAN)
 
-    def clear(self, node):
-        self._changes.pop(node, None)
+    def clear_node_state(self, node):
+        self.node_changes.pop(node, None)
+
+    def file_is_dirty(self, file):
+        return self.get_file_state(file) is not ChangeState.CLEAN
+    
+    def set_file_state(self, file, state):
+        self.file_changes[file] = state
+
+    def get_file_state(self, file):
+        return self.file_changes.get(file, ChangeState.CLEAN)
+
+    def clear_file_state(self, file):
+        self.file_changes.pop(file, None)
 
 class FilesystemMananger:
-    def __init__(self):
+    def __init__(self, controller):
+        self.controller = controller
         self.mod = None
+        self.open_file = None
 
     def load_mod(self, path):
         self.mod = ParadoxMod(path)
+
+    def load_file(self, file):
+        self.open_file = file
+
+    def save_file(self, file):
+        if self.controller.config.safe_mode:
+            file.obj._backup_file()
+        file.obj._to_pdx_file()

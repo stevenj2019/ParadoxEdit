@@ -89,4 +89,4 @@ class SettingsWindow(QDialog):
             self.config.write_file()
             self.accept()
         else:
-            settings_error_critical()
+            settings_error_critical(game_dir_error, mod_dir_error)

@@ -6,10 +6,10 @@ from PyQt5.QtGui import QColor as QColour
 from ParadoxParser import ParadoxScriptParser as PDXScript
 from ParadoxParser.ParadoxNodes import GenericBlock, GenericKeyValue, GenericComment, GenericString, GenericToken
 
-from App.Constants import FILE, NODE, IS_BLOCK, STATE
+from App.Constants import ChangeState, FILE, NODE, IS_BLOCK, STATE
 from App.Enums import ExpansionMode
 from App.GUI.Menus import GenericCategoryContextMenu, ParadoxNodesContextMenu
-from App.GUI.StyledDelegate import NodeStateDelegate
+from App.GUI.StyledDelegate import GenericCategoryItemDelegate, NodeStateDelegate
 
 class ModPanel(QWidget):
     request_load_block = pyqtSignal(object)
@@ -17,8 +17,8 @@ class ModPanel(QWidget):
     load_file = pyqtSignal()
     def __init__(self, parent):
         super().__init__()
-        self.open_file = None #This should be moved to MainWindow
         self.parent = parent
+        self.node_to_item:dict = {}
 
         layout = QVBoxLayout()
         self.setLayout(layout)
@@ -28,16 +28,27 @@ class ModPanel(QWidget):
 
         header = self.tree.header()
         header.setSectionResizeMode(0, QHeaderView.Stretch)
-
         self.tree.setHeaderHidden(True)
         self.tree.setTextElideMode(Qt.ElideRight)
-        
+        self.tree.setItemDelegate(GenericCategoryItemDelegate(self.parent.app_controller.style_manager, self.tree))
         layout.addWidget(self.tree)
 
         self.tree.itemClicked.connect(self._on_element_click)
 
         self.tree.setContextMenuPolicy(Qt.CustomContextMenu)
         self.tree.customContextMenuRequested.connect(self.build_context_menu)
+
+        self.parent.file_changed.connect(self.mark_file_dirty)
+
+
+    def mark_file_dirty(self, file):
+    # def mark_file_dirty(self, category, file):
+        # cat_item = self.node_to_item[category]
+        file_item = self.node_to_item[file]
+        # cat_item.setData(0, STATE, ChangeState.MODIFIED)
+        state_ = self.parent.app_controller.change_tracker.get_file_state(file) #This returns True
+        file_item.setData(0, STATE, state_)
+        self.tree.update()
 
     def _populate_tree(self, mod):
         self.tree.clear()
@@ -47,6 +58,8 @@ class ModPanel(QWidget):
 
         descriptor_item = QTreeWidgetItem(["Descriptor"])
         descriptor_item.setData(0, FILE, mod.descriptor_object)
+        descriptor_item.setData(0, STATE, ChangeState.CLEAN)
+        self.node_to_item[mod.descriptor_object] = descriptor_item
         root.addChild(descriptor_item)
         self.open_file = descriptor_item
 
@@ -55,10 +68,13 @@ class ModPanel(QWidget):
 
         for c_key, c_val in mod.categories.items():
             cat_sub = QTreeWidgetItem([c_key])
+            self.node_to_item[c_val] = cat_sub
             for file, obj in c_val.files.items():
                 widget = QTreeWidgetItem([file])
+                self.node_to_item[obj] = widget
                 widget.setText(0, file)
                 widget.setData(0, FILE, obj)
+                widget.setData(0, STATE, ChangeState.CLEAN)
                 cat_sub.addChild(widget)
 
             categories_parent.addChild(cat_sub)
@@ -105,8 +121,10 @@ class ContentsPanel(QWidget):
         self.tree_fully_expanded = False
         self.tree.setItemDelegate(NodeStateDelegate(self.parent.app_controller.style_manager, self.tree))
         self.tree.itemDoubleClicked.connect(self._on_item_double_click)
+        
         self.tree.setContextMenuPolicy(Qt.CustomContextMenu)
         self.tree.customContextMenuRequested.connect(self.build_context_menu)
+        
         layout.addWidget(self.tree)
         self.parent.node_changed.connect(self.refresh_node)
 
@@ -122,7 +140,8 @@ class ContentsPanel(QWidget):
             if isinstance(block, PDXScript):
                 self._add_nodes(self.tree.invisibleRootItem(), block.nodes)
             else:
-                self._add_nodes(self.tree.invisibleRootItem(), block.obj.nodes)
+                self._add_nodes(self.tree.invisibleRootItem(), block.nodes)
+                # self._add_nodes(self.tree.invisibleRootItem(), block.obj.nodes)
 
         finally:
             self.tree.blockSignals(False)
@@ -150,7 +169,7 @@ class ContentsPanel(QWidget):
 
         parent_item.addChild(item)
 
-        effective_state = inherited_state or self.parent.app_controller.change_tracker.get_state(node)
+        effective_state = inherited_state or self.parent.app_controller.change_tracker.get_node_state(node)
         item.setData(0, STATE, effective_state)
         self._add_nodes(item, node.children, effective_state)
 
@@ -169,13 +188,13 @@ class ContentsPanel(QWidget):
         item.setData(0, NODE, node)
         parent_item.addChild(item)
 
-        effective_state = inherited_state or self.parent.app_controller.change_tracker.get_state(node)
+        effective_state = inherited_state or self.parent.app_controller.change_tracker.get_node_state(node)
         item.setData(0, STATE, effective_state)
 
     def refresh_node(self, node):
         item = self.node_to_item[node]
         item.setText(1, node._get_value())
-        state_ = self.parent.app_controller.change_tracker.get_state(node)
+        state_ = self.parent.app_controller.change_tracker.get_node_state(node)
         item.setData(0, STATE, state_)
         self.tree.update()
 
