@@ -53,24 +53,15 @@ class AppController:
 
     def save_target(self, target):
         if target is SaveTarget.ALL:
-            for category in self.mod.categories:
-                for file in category:
-                    if self.change_tracker.get_file_dirty(file):
-                        self.change_tracker.clear_file_dirty(file)
+            for category in self.file_system.mod.categories.values():
+                for file in category.files.values():
+                    if self.change_tracker.file_is_dirty(file):
                         self.save_file(file)
         else:
-            if self.change_tracker.get_file_dirty(file):
+            if self.change_tracker.file_is_dirty(self.file_system.open_file):
                 self.save_file(self.file_system.open_file)
 
     def save_file(self, file):
-        def recurse(node):
-            self.change_tracker.clear_node_state(node)
-            if isinstance(node, GenericBlock):
-                for _node in node.nodes:
-                    recurse(_node)
-
-        # for node in file.obj.nodes:
-        for node in file.nodes:
-            recurse(node)
-
+        self.change_tracker.clear_file_state(file)
         self.file_system.save_file(file)
+        self.main.propogate_save(file)

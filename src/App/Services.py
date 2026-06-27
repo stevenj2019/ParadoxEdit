@@ -2,17 +2,12 @@ import json
 from pathlib import Path
 from platformdirs import user_config_dir
 
-from PyQt5.QtWidgets import (QTreeWidget, QTreeWidgetItem, QWidget)
 from PyQt5.QtGui import QColor as QColour
 
-from ParadoxParser.ParadoxNodes import (GenericKeyValue, GenericNode,
-                                        GenericComment, GenericString, GenericToken, 
-                                        GenericInt, GenericFloat, GenericBool)
+from ParadoxParser.ParadoxNodes import GenericBlock
 
 from App.Constants import ChangeState
 from App.ModClasses import ParadoxMod
-
-from App.GUI.InLineWidgets import text_editor, bool_dropdown, int_editor, float_editor
 
 class ConfigurationManager:
     def __init__(self):
@@ -108,7 +103,16 @@ class ChangeTracker:
         return self.file_changes.get(file, ChangeState.CLEAN)
 
     def clear_file_state(self, file):
+        def recurse(node):
+            self.clear_node_state(node)
+            if isinstance(node, GenericBlock):
+                for _node in node.nodes:
+                    recurse(_node)
         self.file_changes.pop(file, None)
+        if file:
+            for node in file.nodes:
+                recurse(node)
+            
 
 class FilesystemMananger:
     def __init__(self, controller):
@@ -124,5 +128,5 @@ class FilesystemMananger:
 
     def save_file(self, file):
         if self.controller.config.safe_mode:
-            file.obj._backup_file()
-        file.obj._to_pdx_file()
+            file.backup_file()
+        file.to_pdx_file()

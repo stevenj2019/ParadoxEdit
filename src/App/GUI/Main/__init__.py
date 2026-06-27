@@ -59,12 +59,16 @@ class MainWindow(QMainWindow):
             self.settings_window_requested()
     
     def propogate_changes(self,
-                          category_item:PDXScript, 
+                          file:PDXScript, 
                           node:GenericNode|GenericKeyValue #unsure which is it tbh
     ):
-        self.file_changed.emit(category_item)
-        # self.file_changed.emit(category_item.parent, category_item)
-        self.node_changed.emit(node)
+        self.mod_panel.set_file_dirty(file)
+        self.contents_panel.refresh_node(node)
+
+    def propogate_save(self, file):
+        self.mod_panel.set_file_clean(file)
+        if self.app_controller.file_system.open_file == file:
+            self.contents_panel.set_file_clean(file)
 
     def settings_window_requested(self):
         title = "PDXEdit Setup" if self.app_controller.config.initialised else "PDXEdit Settings"

@@ -2,7 +2,7 @@ from PyQt5.QtWidgets import QStyledItemDelegate
 from PyQt5.QtCore import Qt
 from PyQt5.QtGui import QColor as QColour, QBrush, QPen
 
-from App.Constants import ChangeState, STATE, CATEGORY
+from App.Constants import ChangeState, STATE, IS_CATEGORY
 
 class ParadoxFileDelegate(QStyledItemDelegate):
     def __init__(self, style_manager, parent=None):
@@ -11,7 +11,7 @@ class ParadoxFileDelegate(QStyledItemDelegate):
 
     def paint(self, painter, option, index):
         super().paint(painter, option, index)
-        is_category = index.model().data(index, CATEGORY)
+        is_category = index.model().data(index, IS_CATEGORY)
         state = index.model().data(index, STATE)
 
         radius = 4
