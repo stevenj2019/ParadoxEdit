@@ -4,9 +4,9 @@ from PyQt5.QtWidgets import QApplication
 
 from ParadoxParser.ParadoxNodes import GenericBlock
 
-from App.Services import ConfigurationManager, StyleManager, InlineEditManager, ChangeTracker, FilesystemMananger
+from App.Services import ConfigurationManager, StyleManager, ChangeTracker, FilesystemMananger
 from App.GlobalEventFilter import GlobalEventFilter
-from App.GUI import MainWindow
+from App.GUI.Main import MainWindow
 
 from App.Constants import ChangeState
 from App.Enums import SaveTarget
@@ -19,17 +19,12 @@ class AppController:
         self.change_tracker = ChangeTracker()
         self.file_system    = FilesystemMananger(self)
 
-        self.editor_session = InlineEditManager(
-            mutate_callback=self.modify_node
-        )
-        self.inline_filter = GlobalEventFilter(
-            cancel_callback=self.editor_session.cancel_request
-        )
-
-        self.app.installEventFilter(self.inline_filter)
-        self.apply_stylesheet()
         self.main = MainWindow(self)
+        self.apply_stylesheet()
         self.run()
+
+    def cancel_edit(self):
+        self.main.editor_session.cancel_request()
 
     def apply_stylesheet(self):
         self.app.setStyleSheet(qdarktheme.load_stylesheet("dark" if self.config.dark_mode else "light"))
@@ -50,8 +45,7 @@ class AppController:
     def modify_node(self, node, new_value):
         if node.value is not new_value:
             file = self.file_system.open_file
-            self.change_tracker.set_file_state(file, ChangeState.MODIFIED) #This should set 
-            print(self.change_tracker.get_file_state(file))
+            self.change_tracker.set_file_state(file, ChangeState.MODIFIED)
 
             node.value = new_value
             self.change_tracker.set_node_state(node, ChangeState.MODIFIED)

@@ -9,7 +9,8 @@ from App.ModClasses.Categories import GenericCategory, GenericCategoryItem
 
 # from App.GUI.Menus.TopBar import 
 from App.GUI.Menus import TopBar
-from App.GUI.Panels import ModPanel, ContentsPanel
+from App.GUI.Main.InlineEdit import InLineEditManager
+from App.GUI.Main.Panels import ModPanel, ContentsPanel
 from App.GUI.Dialogues.FileDialogues import select_mod_file
 from App.GUI.Dialogues.PopupModels import could_not_load_mod_critical
 from App.GUI.Windows.Settings import SettingsWindow
@@ -21,6 +22,7 @@ class MainWindow(QMainWindow):
     def __init__(self, app):
         super().__init__()
         self.app_controller = app
+        self.editor_session = InLineEditManager(mutate_callback=self.app_controller.modify_node)
 
         #MainWindow
         self.setWindowTitle("ParadoxEdit")
@@ -49,7 +51,7 @@ class MainWindow(QMainWindow):
         self.contents_panel = ContentsPanel(self)
         self.contents_panel.setMinimumWidth(300)
         self.splitter.addWidget(self.contents_panel)
-        self.contents_panel.edit_open_request.connect(self.app_controller.editor_session.open_request)
+        self.contents_panel.edit_open_request.connect(self.editor_session.open_request)
 
         self.splitter.setSizes([200, 600])
         self.showMaximized()
@@ -90,7 +92,7 @@ class MainWindow(QMainWindow):
     #     self._refresh_contents()
 
     def _load_file(self, file):
-        self.app_controller.editor_session.cancel_request(reason="file switch")
+        self.editor_session.cancel_request(reason="file switch")
         self.app_controller.file_system.load_file(file)
         # self.contents_panel._load_block(file.obj)
         self.contents_panel._load_block(file)

@@ -47,8 +47,11 @@ class ModPanel(QWidget):
         state_ = self.parent.app_controller.change_tracker.get_file_state(file) #This returns True
         file_item.setData(0, STATE, state_)
 
-        category = self.file_to_category[file]
-        category.setData(0, STATE, ChangeState.MODIFIED)
+        try:
+            category = self.file_to_category[file]
+            category.setData(0, STATE, ChangeState.MODIFIED)
+        except KeyError:
+            pass
         self.tree.update()
 
     def _populate_tree(self, mod):
