@@ -117,6 +117,7 @@ class ChangeTracker:
 class FilesystemMananger:
     def __init__(self, controller):
         self.controller = controller
+        self.change_tracker = ChangeTracker()
         self.mod = None
         self.open_file = None
 
@@ -126,7 +127,16 @@ class FilesystemMananger:
     def load_file(self, file):
         self.open_file = file
 
-    def save_file(self, file):
-        if self.controller.config.safe_mode:
-            file.backup_file()
-        file.to_pdx_file()
+    def changed_file(self, file, node, status):
+        self.change_tracker.set_file_state(file, status)
+        self.change_tracker.set_node_state(node, status)
+
+    def save_file(self, file=None):
+        if self.change_tracker.file_is_dirty(file):
+            self.change_tracker.clear_file_state(file)
+            if self.controller.config.safe_mode:
+                file.backup_file()
+            file.to_pdx_file()
+            return True
+        else:
+            return False

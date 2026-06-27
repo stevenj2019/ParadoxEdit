@@ -44,7 +44,7 @@ class ModPanel(QWidget):
 
     def set_file_dirty(self, file):
         file_item = self.node_to_item[file]
-        state_ = self.parent.app_controller.change_tracker.get_file_state(file) #This returns True
+        state_ = self.parent.app_controller.file_system.change_tracker.get_file_state(file) #This returns True
         file_item.setData(0, STATE, state_)
 
         try:
@@ -60,7 +60,7 @@ class ModPanel(QWidget):
         try:
             category_item = self.file_to_category[file]
             category = category_item.data(0, CATEGORY)
-            if all(self.parent.app_controller.change_tracker.get_file_state(file) == ChangeState.CLEAN
+            if all(self.parent.app_controller.file_system.change_tracker.get_file_state(file) == ChangeState.CLEAN
                    for file in category.files):
                 category_item.setData(0, STATE, ChangeState.CLEAN)
         except KeyError:
@@ -153,7 +153,7 @@ class ContentsPanel(QWidget):
     def refresh_node(self, node):
         item = self.node_to_item[node]
         item.setText(1, node._get_value())
-        state_ = self.parent.app_controller.change_tracker.get_node_state(node)
+        state_ = self.parent.app_controller.file_system.change_tracker.get_node_state(node)
         item.setData(0, STATE, state_)
         self.tree.update()
 
@@ -210,7 +210,7 @@ class ContentsPanel(QWidget):
 
         parent_item.addChild(item)
 
-        effective_state = inherited_state or self.parent.app_controller.change_tracker.get_node_state(node)
+        effective_state = inherited_state or self.parent.app_controller.file_system.change_tracker.get_node_state(node)
         item.setData(0, STATE, effective_state)
         self._add_nodes(item, node.nodes, effective_state)
 
@@ -229,7 +229,7 @@ class ContentsPanel(QWidget):
         item.setData(0, NODE, node)
         parent_item.addChild(item)
 
-        effective_state = inherited_state or self.parent.app_controller.change_tracker.get_node_state(node)
+        effective_state = inherited_state or self.parent.app_controller.file_system.change_tracker.get_node_state(node)
         item.setData(0, STATE, effective_state)
 
     def _on_item_double_click(self, item, column):

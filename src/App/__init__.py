@@ -2,9 +2,7 @@ import qdarktheme
 
 from PyQt5.QtWidgets import QApplication
 
-from ParadoxParser.ParadoxNodes import GenericBlock
-
-from App.Services import ConfigurationManager, StyleManager, ChangeTracker, FilesystemMananger
+from App.Services import ConfigurationManager, StyleManager, FilesystemMananger
 from App.GUI.Main import MainWindow
 
 from App.Constants import ChangeState
@@ -15,7 +13,7 @@ class AppController:
         self.app            = QApplication([])
         self.config         = ConfigurationManager()
         self.style_manager  = StyleManager(self)
-        self.change_tracker = ChangeTracker()
+        # self.file_system.change_tracker = ChangeTracker()
         self.file_system    = FilesystemMananger(self)
 
         self.main = MainWindow(self)
@@ -44,24 +42,24 @@ class AppController:
     def modify_node(self, node, new_value):
         if node.value is not new_value:
             file = self.file_system.open_file
-            self.change_tracker.set_file_state(file, ChangeState.MODIFIED)
-
             node.value = new_value
-            self.change_tracker.set_node_state(node, ChangeState.MODIFIED)
-            
+            self.file_system.changed_file(file, node, ChangeState.MODIFIED)
             self.main.propogate_changes(file, node)
 
     def save_target(self, target):
+        def save_routine(file):
+            saved = self.file_system.save_file(file)
+            if saved:
+                self.main.propogate_save(file)
+
         if target is SaveTarget.ALL:
             for category in self.file_system.mod.categories.values():
                 for file in category.files.values():
-                    if self.change_tracker.file_is_dirty(file):
-                        self.save_file(file)
+                    save_routine(file)
         else:
-            if self.change_tracker.file_is_dirty(self.file_system.open_file):
-                self.save_file(self.file_system.open_file)
+            save_routine(self.file_system.open_file)
 
-    def save_file(self, file):
-        self.change_tracker.clear_file_state(file)
-        self.file_system.save_file(file)
-        self.main.propogate_save(file)
+    # def save_file(self, file):
+    #     self.file_system.change_tracker.clear_file_state(file)
+    #     self.file_system.save_file(file)
+    #     self.main.propogate_save(file)
