@@ -26,12 +26,12 @@ jobs:
       - name: Install Python Dependencies
         run: |
            python -m pip install --upgrade pip
-           pip install -r src/requirements.txt
+           pip install -r requirements.txt
            pip install pyinstaller
 
       - name: Python Build
         run: |
-          pyinstaller src/PDXEdit.spec
+          pyinstaller PDXEdit.spec
 
       - name: Build DMG
         if: matrix.os == 'macos-latest'
