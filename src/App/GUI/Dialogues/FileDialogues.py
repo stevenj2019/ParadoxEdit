@@ -32,7 +32,7 @@ def select_mod_file(parent):
     filepath, _ = QFileDialog.getOpenFileName(
         parent,
         "Select Paradox descriptor.mod file",
-        "" if not parent.app_controller.config.mod_file_path else str(parent.app_controller.config.mod_file_path),
+        "" if not parent.app_controller.configuration.mod_file_path else str(parent.app_controller.configuration.mod_file_path),
         "Paradox Mod Files (*.mod);;All Files (*)",
         options=options
     )

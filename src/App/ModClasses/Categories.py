@@ -16,9 +16,6 @@ class GenericCategory:
         for path in paths:
             self._read_directory(os.path.join(base, path))
 
-    def iter_files(self):
-        return self.files.values()
-
     def context_sections(self):
         return [
             ActionGroup("PDX Script Options", [

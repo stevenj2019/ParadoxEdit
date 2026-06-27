@@ -6,12 +6,18 @@ from PyQt5.QtGui import QColor as QColour
 
 from ParadoxParser.ParadoxNodes import GenericBlock
 
-from App.Constants import ChangeState
+from App.Enums import ChangeState
 from App.ModClasses import ParadoxMod
+
+class Services:
+    def __init__(self, app):
+        self.configuration = app.configuration
+        self.file_system =   app.file_system
+        self.style_manager = app.style_manager
 
 class ConfigurationManager:
     def __init__(self):
-        self.file_path:Path = Path(user_config_dir("PDXEdit"), "config.json")
+        self.file_path:Path = Path(user_config_dir("PDXEdit"), "configuration.json")
         self.game_install_path:Path = ""
         self.mod_file_path:Path = ""
         self.safe_mode:bool = True
@@ -57,8 +63,8 @@ class ConfigurationManager:
             json.dump(self.to_json(), CONFIG_FILE)
 
 class StyleManager:
-    def __init__(self, controller):
-        self.controller = controller
+    def __init__(self, configuration):
+        self.configuration = configuration
         self.dark_mode_palette = {
             ChangeState.MODIFIED: QColour("#545703"),
             ChangeState.ADDED: QColour("#04450c"),
@@ -71,7 +77,7 @@ class StyleManager:
         }
 
     def get_node_state_colour(self, state):
-        if self.controller.config.dark_mode:
+        if self.configuration.dark_mode:
             return self.dark_mode_palette.get(state)
         else:
             return self.light_mode_palette.get(state)
@@ -113,10 +119,9 @@ class ChangeTracker:
             for node in file.nodes:
                 recurse(node)
             
-
 class FilesystemMananger:
-    def __init__(self, controller):
-        self.controller = controller
+    def __init__(self, configuration):
+        self.configuration = configuration
         self.change_tracker = ChangeTracker()
         self.mod = None
         self.open_file = None
@@ -134,7 +139,7 @@ class FilesystemMananger:
     def save_file(self, file=None):
         if self.change_tracker.file_is_dirty(file):
             self.change_tracker.clear_file_state(file)
-            if self.controller.config.safe_mode:
+            if self.configuration.safe_mode:
                 file.backup_file()
             file.to_pdx_file()
             return True

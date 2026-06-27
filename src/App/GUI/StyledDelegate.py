@@ -2,7 +2,8 @@ from PyQt5.QtWidgets import QStyledItemDelegate
 from PyQt5.QtCore import Qt
 from PyQt5.QtGui import QColor as QColour, QBrush, QPen
 
-from App.Constants import ChangeState, STATE, IS_CATEGORY
+from App.Constants import STATE, IS_CATEGORY
+from App.Enums import ChangeState
 
 class ParadoxFileDelegate(QStyledItemDelegate):
     def __init__(self, style_manager, parent=None):
@@ -27,7 +28,6 @@ class ParadoxFileDelegate(QStyledItemDelegate):
                 painter.setBrush(Qt.NoBrush)
                 painter.setPen(QPen(colour, 2))
                 painter.drawEllipse(x, y - radius, radius * 2, radius * 2)
-                # painter.restore()
         else:
             state = index.model().data(index, STATE)
             if state in (ChangeState.ADDED, ChangeState.MODIFIED, ChangeState.DELETED):
@@ -35,7 +35,6 @@ class ParadoxFileDelegate(QStyledItemDelegate):
                 painter.setPen(Qt.NoPen)
                 painter.setBrush(QColour(colour))
                 painter.drawEllipse(x, y-radius, radius*2, radius*2)
-                # painter.restore()
         painter.restore()
 
 class NodeStateDelegate(QStyledItemDelegate):

@@ -5,6 +5,8 @@ from PyQt5.QtCore import QObject, QEvent, Qt
 from ParadoxParser.ParadoxNodes import (GenericNode, GenericKeyValue, GenericNode, 
                                         GenericComment, GenericString, GenericToken, 
                                         GenericInt, GenericFloat, GenericBool)
+from App.Contracts import ModifyNodeRequest
+
 from App.GUI.Dialogues.PopupModels import change_rejected_warning
 
 class InLineEditManager(QObject):
@@ -62,14 +64,15 @@ class InLineEditManager(QObject):
     def complete_request(self, new_value):
         print(f"{self.node}, {self.node.value} to {new_value}")
         if self.node.value != new_value:
-            self.mutate_callback(self.node, new_value)
-        self._destroy()
+            self.mutate_callback.emit(ModifyNodeRequest(file=None, node = self.node, value = new_value))
+            # self.mutate_callback(self.node, new_value)
+        self._destroy(new_value)
         self._clear()
 
     def cancel_request(self, reason):
         if self.active:
             print(f"{self.editor} cancelled due to {reason}, value: {self.node.value}")
-            self._destroy()
+            self._destroy(self.node.value)
         self._clear()
 
     def _get_widget(self):
@@ -88,8 +91,9 @@ class InLineEditManager(QObject):
 
         self.editor.installEventFilter(self)
 
-    def _destroy(self):
+    def _destroy(self, value):
         self.parent.removeItemWidget(self.source, 1)
+        self.source.setText(1, value)
         self.editor.deleteLater()
 
     def _clear(self):

@@ -6,9 +6,6 @@ class GenericCategoryItem:
     def __init__(self, pdx_obj:PDXFile):
         self.obj = pdx_obj
         self.has_been_modified:bool = False
-
-    def iter_files(self):
-        yield self
         
     def context_sections(self):
         return [

@@ -2,12 +2,13 @@ from PyQt5.QtWidgets import QMainWindow, QSplitter
 from PyQt5.QtCore import Qt, pyqtSignal
 
 from ParadoxParser import ParadoxScriptParser as PDXScript
-from ParadoxParser.ParadoxNodes import GenericNode, GenericKeyValue
+from ParadoxParser.ParadoxNodes import GenericBlock
 
 from App.Enums import SaveTarget
-from App.ModClasses.Categories import GenericCategory, GenericCategoryItem
 
 # from App.GUI.Menus.TopBar import 
+from App.Contracts import PropagationRequest
+from App.Enums import PropagationType, ChangeState
 from App.GUI.Menus import TopBar
 from App.GUI.Main.InlineEdit import InLineEditManager
 from App.GUI.Main.Panels import ModPanel, ContentsPanel
@@ -16,13 +17,15 @@ from App.GUI.Dialogues.PopupModels import could_not_load_mod_critical
 from App.GUI.Windows.Settings import SettingsWindow
 
 class MainWindow(QMainWindow):
-    file_changed = pyqtSignal(object)
+    propagation_request = pyqtSignal(object)
+    # file_changed = pyqtSignal(object)
     # file_changed = pyqtSignal(object, object)
     node_changed = pyqtSignal(object)
-    def __init__(self, app):
+    def __init__(self, app, services):
         super().__init__()
         self.app_controller = app
-        self.editor_session = InLineEditManager(mutate_callback=self.app_controller.modify_node)
+        self.app_services = services
+        self.editor_session = InLineEditManager(mutate_callback=self.app_controller.request_node_mutation)
 
         #MainWindow
         self.setWindowTitle("ParadoxEdit")
@@ -41,37 +44,47 @@ class MainWindow(QMainWindow):
         self.setCentralWidget(self.splitter)
 
         #ModPanel(left)
-        self.mod_panel = ModPanel(self)
+        self.mod_panel = ModPanel(self, services)
         self.mod_panel.setMinimumWidth(150)
         self.splitter.addWidget(self.mod_panel)
         self.mod_panel.request_load_block.connect(self._load_file)
-        # self.mod_panel.request_bulkable_operation.connect(self._apply_bulkable_operation)
-        
+
         #ContentsPanel
-        self.contents_panel = ContentsPanel(self)
+        self.contents_panel = ContentsPanel(self, services)
         self.contents_panel.setMinimumWidth(300)
         self.splitter.addWidget(self.contents_panel)
         self.contents_panel.edit_open_request.connect(self.editor_session.open_request)
 
         self.splitter.setSizes([200, 600])
         self.showMaximized()
-        if not self.app_controller.config.initialised:
+        if not self.app_services.configuration.initialised:
             self.settings_window_requested()
-    
-    def propogate_changes(self,
-                          file:PDXScript, 
-                          node:GenericNode|GenericKeyValue #unsure which is it tbh
-    ):
-        self.mod_panel.set_file_dirty(file)
-        self.contents_panel.refresh_node(node)
 
-    def propogate_save(self, file):
-        self.mod_panel.set_file_clean(file)
-        if self.app_controller.file_system.open_file == file:
-            self.contents_panel.set_file_clean(file)
+        self.propagation_request.connect(self._propogate_mutations)
+    
+    def _propogate_mutations(self, request:PropagationRequest):
+        type = request.type
+        file = request.file
+        node = request.node #this may be None
+        state = request.state
+        match type:
+            case PropagationType.NODE:
+                self.mod_panel.set_file_state(file, state)
+                self.contents_panel.set_node_state(node, ChangeState.MODIFIED)
+            case PropagationType.FILE:
+                self.mod_panel.set_file_state(file, state)
+                def recurse(node):
+                    self.contents_panel.set_node_state(node, state)
+                    if isinstance(node, GenericBlock):
+                        for child in node.nodes:
+                            recurse(child)
+                for node in file.nodes:
+                    recurse(node)
+            case _:
+                print("ERROR")
 
     def settings_window_requested(self):
-        title = "PDXEdit Setup" if self.app_controller.config.initialised else "PDXEdit Settings"
+        title = "PDXEdit Setup" if self.app_services.configuration.initialised else "PDXEdit Settings"
         settings = SettingsWindow(title, self)
         settings.exec_()
 
@@ -97,9 +110,8 @@ class MainWindow(QMainWindow):
 
     def _load_file(self, file):
         self.editor_session.cancel_request(reason="file switch")
-        self.app_controller.file_system.load_file(file)
-        # self.contents_panel._load_block(file.obj)
-        self.contents_panel._load_block(file)
+        self.app_services.file_system.load_file(file)
+        self.contents_panel.load_block(file)
 
     def _refresh_contents(self):
         open_file = self.mod_panel.open_file
@@ -107,16 +119,4 @@ class MainWindow(QMainWindow):
         if open_file:
             self._load_file(open_file)
 
-    #TODO delegate these to FileSystemManager in AppController, at some point
-    def _save_files(self, modified_only:bool=True):
-        for file in self.mod.iter_file():
-            if modified_only and not file.has_been_modified:
-                continue
-            self._save_file(file)
-    
-    def _save_file(self, file):
-        if self.config.safe_mode:
-            file._backup_file()
-            # file.obj._backup_file()
-        file._to_pdx_file()
-        # file.obj._to_pdx_file()
+

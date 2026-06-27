@@ -8,13 +8,11 @@ from App.ModClasses.Categories import GenericCategory
 from App.ModClasses.Categories import EventCategory as Events
 from App.ModClasses.Categories import GFXCategory as GFX
 implemented_arr = [Events, GFX]
-#path should point to a descriptor file, 
 
 class ParadoxMod:
     def __init__(self, path:str|os.PathLike):
         path = Path(path)
         self.descriptor_file = path.name
-        # self.descriptor_object = GenericCategoryItem(PDXFile(path))
         self.descriptor_object = PDXFile(path)
 
         self.mod_name:str = ""
@@ -28,22 +26,7 @@ class ParadoxMod:
 
         for category in implemented_arr:
             obj = category(self.mod_base_dir)
-            # obj._organise()
             self.categories[type(obj).__name__] = obj
-
-    def iter_file(self):
-        files = []
-        for category in self.categories:
-            for file in category.iter_files():
-                files.expand(file)
-        return files
-    
-    def _get_saving_targets(self, modified_only:bool = True):
-        save_targets = []
-        for category in self.categories:
-            for file in category.iter_files():
-                if file.has_been_modified:
-                    save_targets.append(file)
 
     def _collect_mod_info(self):
         self.mod_name = next(

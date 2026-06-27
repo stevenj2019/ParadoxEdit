@@ -9,19 +9,19 @@ from App.GUI.Dialogues.PopupModels import settings_error_critical
 class SettingsWindow(QDialog):
     def __init__(self, title:str, parent):
         super().__init__()
-        self.config = parent.app_controller.config
+        self.configuration = parent.app_controller.configuration
         self.setWindowTitle(title)
         self.resize(550,150)
         self.setLayout(QFormLayout())
         self.form = self.layout()
 
-        self.config_file_label = QLabel(f"Configuration will be stored at: {self.config.file_path.absolute()}")
+        self.config_file_label = QLabel(f"Configuration will be stored at: {self.configuration.file_path.absolute()}")
         self.form.addRow(self.config_file_label)
 
         self.game_install_path_label = QLabel("Paradox Game Path:")
         self.game_install_path_element = QHBoxLayout()
         self.game_install_path_element_text = QLineEdit()
-        self.game_install_path_element_text.setText(str(self.config.game_install_path))
+        self.game_install_path_element_text.setText(str(self.configuration.game_install_path))
         self.game_install_path_element_button = QPushButton("...")
         self.game_install_path_element.addWidget(self.game_install_path_element_text)
         self.game_install_path_element.addWidget(self.game_install_path_element_button)
@@ -31,7 +31,7 @@ class SettingsWindow(QDialog):
         self.mod_install_path_label = QLabel("Paradox Mods Path:")
         self.mod_install_path_element = QHBoxLayout()
         self.mod_install_path_element_text = QLineEdit()
-        self.mod_install_path_element_text.setText(str(self.config.mod_file_path))
+        self.mod_install_path_element_text.setText(str(self.configuration.mod_file_path))
         self.mod_install_path_element_button = QPushButton("...")
         self.mod_install_path_element.addWidget(self.mod_install_path_element_text)
         self.mod_install_path_element.addWidget(self.mod_install_path_element_button)
@@ -40,13 +40,13 @@ class SettingsWindow(QDialog):
 
         self.safe_mode_label = QLabel("Safe Mode:")
         self.safe_mode_check = QCheckBox()
-        self.safe_mode_check.setChecked(self.config.safe_mode)
+        self.safe_mode_check.setChecked(self.configuration.safe_mode)
         self.safe_mode_label.setBuddy(self.safe_mode_check)
         self.form.addRow(self.safe_mode_label, self.safe_mode_check)
 
         self.dark_mode_label = QLabel("Use Dark Mode?:")
         self.dark_mode_check = QCheckBox()
-        self.dark_mode_check.setChecked(self.config.dark_mode)
+        self.dark_mode_check.setChecked(self.configuration.dark_mode)
         self.dark_mode_label.setBuddy(self.dark_mode_check)
         self.form.addRow(self.dark_mode_label, self.dark_mode_check)
         self.dark_mode_check.toggled.connect(self.toggle_dark_mode)
@@ -66,9 +66,9 @@ class SettingsWindow(QDialog):
             self.mod_install_path_element_text.setText(path)
     
     def toggle_dark_mode(self):
-        self.config.change_setting(dark_mode = not(self.config.dark_mode))
+        self.configuration.change_setting(dark_mode = not(self.configuration.dark_mode))
         app = QApplication.instance()
-        app.setStyleSheet(qdarktheme.load_stylesheet("dark" if self.config.dark_mode else "light"))
+        app.setStyleSheet(qdarktheme.load_stylesheet("dark" if self.configuration.dark_mode else "light"))
 
     def submit_form(self):
         game_dir_error = False
@@ -82,11 +82,11 @@ class SettingsWindow(QDialog):
             mod_dir_error = True
         
         if not (game_dir_error or mod_dir_error):
-            self.config.change_setting(safe_mode = self.safe_mode_check.isChecked() )
-            self.config.change_setting(dark_mode = self.dark_mode_check.isChecked() )
-            self.config.change_setting(game_install_path = game_folder)
-            self.config.change_setting(mod_file_path = mod_folder)
-            self.config.write_file()
+            self.configuration.change_setting(safe_mode = self.safe_mode_check.isChecked() )
+            self.configuration.change_setting(dark_mode = self.dark_mode_check.isChecked() )
+            self.configuration.change_setting(game_install_path = game_folder)
+            self.configuration.change_setting(mod_file_path = mod_folder)
+            self.configuration.write_file()
             self.accept()
         else:
             settings_error_critical(game_dir_error, mod_dir_error)

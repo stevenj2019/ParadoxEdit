@@ -6,18 +6,18 @@ from PyQt5.QtGui import QColor as QColour
 from ParadoxParser import ParadoxScriptParser as PDXScript
 from ParadoxParser.ParadoxNodes import GenericBlock, GenericKeyValue, GenericComment, GenericString, GenericToken
 
-from App.Constants import ChangeState, FILE, NODE, IS_BLOCK, STATE, CATEGORY, IS_CATEGORY
-from App.Enums import ExpansionMode
+from App.Constants import FILE, NODE, IS_BLOCK, STATE, CATEGORY, IS_CATEGORY
+from App.Enums import ChangeState, ExpansionMode
 from App.GUI.Menus import GenericCategoryContextMenu, ParadoxNodesContextMenu
 from App.GUI.StyledDelegate import ParadoxFileDelegate, NodeStateDelegate
 
 class ModPanel(QWidget):
     request_load_block = pyqtSignal(object)
-    # request_bulkable_operation = pyqtSignal(object, object)
     load_file = pyqtSignal()
-    def __init__(self, parent):
+    def __init__(self, parent, app_services):
         super().__init__()
         self.parent = parent
+        self.parent.app_controller = app_services
         self.node_to_item:dict = {}
         self.file_to_category:dict = {}
 
@@ -39,33 +39,24 @@ class ModPanel(QWidget):
         self.tree.setContextMenuPolicy(Qt.CustomContextMenu)
         self.tree.customContextMenuRequested.connect(self.build_context_menu)
 
-        # self.parent.file_changed.connect(self.set_file_dirty)
 
-
-    def set_file_dirty(self, file):
+    def set_file_state(self, file, status):
         file_item = self.node_to_item[file]
-        state_ = self.parent.app_controller.file_system.change_tracker.get_file_state(file) #This returns True
-        file_item.setData(0, STATE, state_)
-
+        file_item.setData(0, STATE, status)
         try:
-            category_item = self.file_to_category[file]
-            category_item.setData(0, STATE, ChangeState.MODIFIED)
+            self._set_category_state(file)
         except KeyError:
             pass
         self.tree.update()
 
-    def set_file_clean(self, file):
-        file_item = self.node_to_item[file]
-        file_item.setData(0, STATE, ChangeState.CLEAN)
-        try:
-            category_item = self.file_to_category[file]
-            category = category_item.data(0, CATEGORY)
-            if all(self.parent.app_controller.file_system.change_tracker.get_file_state(file) == ChangeState.CLEAN
-                   for file in category.files):
-                category_item.setData(0, STATE, ChangeState.CLEAN)
-        except KeyError:
-            pass
-
+    def _set_category_state(self, file):
+        category_item = self.file_to_category[file]
+        category = category_item.data(0, CATEGORY)
+        if all(self.parent.app_controller.file_system.change_tracker.get_file_state(file) == ChangeState.CLEAN
+                for file in category.files.values()):
+            category_item.setData(0, STATE, ChangeState.CLEAN)
+        else:
+            category_item.setData(0, STATE, ChangeState.MODIFIED)
 
     def _populate_tree(self, mod):
         self.tree.clear()
@@ -147,42 +138,30 @@ class ContentsPanel(QWidget):
         self.tree.customContextMenuRequested.connect(self.build_context_menu)
         
         layout.addWidget(self.tree)
-        self.parent.node_changed.connect(self.refresh_node)
+        self.parent.node_changed.connect(self.set_node_state)
 
-
-    def refresh_node(self, node):
+    def set_node_state(self, node, state):
         item = self.node_to_item[node]
-        item.setText(1, node._get_value())
-        state_ = self.parent.app_controller.file_system.change_tracker.get_node_state(node)
-        item.setData(0, STATE, state_)
+        # item.setText(1, node._get_value())
+        item.setData(0, STATE, state)
         self.tree.update()
 
-    def set_file_clean(self, file):
-        def _set_subtree_state(item):
-            item.setData(0, STATE, ChangeState)
+    def set_node_value(self, node, value):
+        item = self.node_to_item[node]
+        item.setText(1, node._get_value())
 
-            for i in range(item.childCount()):
-                child = item.child(i)
-                _set_subtree_state(child)
-
-        for node in file.nodes:
-            item = self.node_to_item[node]
-            _set_subtree_state(item)
-
-    def _load_block(self, block):
+    def load_block(self, block):
         """
         Load a GenericBlock into the tree for display.
         """
         self.tree.clear()
-        self.tree.setUpdatesEnabled(False)
         self.tree.blockSignals(True)
-
+        self.tree.setUpdatesEnabled(False)
         try:
             if isinstance(block, PDXScript):
                 self._add_nodes(self.tree.invisibleRootItem(), block.nodes)
             else:
                 self._add_nodes(self.tree.invisibleRootItem(), block.nodes)
-                # self._add_nodes(self.tree.invisibleRootItem(), block.obj.nodes)
 
         finally:
             self.tree.blockSignals(False)
@@ -244,7 +223,7 @@ class ContentsPanel(QWidget):
         if not selected:
             return
         item = selected.data(0, NODE)
-        menu = ParadoxNodesContextMenu(self, self.tree, selected, item)
+        menu = ParadoxNodesContextMenu(self, self.parent.app_controller, self.tree, selected, item)
         menu.exec_(self.tree.viewport().mapToGlobal(pos))
 
     def set_expansion_rule(self, mode, depth_limit=1, root_item=None):
@@ -267,3 +246,4 @@ class ContentsPanel(QWidget):
         recurse(root_item, 0)
         self.tree.setUpdatesEnabled(True)
         self.tree.resizeColumnToContents(0)
+

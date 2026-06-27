@@ -57,8 +57,9 @@ class TopBar(QToolBar):
         self.actions["Save All"].setEnabled(True)
 
 class GenericContextMenu(QMenu):
-    def __init__(self, panel, parent, selected, node):
+    def __init__(self, app_controller, panel, parent, selected, node):
         super().__init__()
+        self.app_controller = app_controller
         self.panel = panel
         self.parent:QTreeWidget = parent
         self.selected:QTreeWidgetItem = selected
@@ -92,25 +93,23 @@ class GenericContextMenu(QMenu):
 
 class GenericCategoryContextMenu(GenericContextMenu):
     def __init__(self, 
+                 app_controller,
                  panel:QWidget,
                  parent:QTreeWidget, 
                  selected:QTreeWidgetItem, 
                  node:GenericCategory|GenericCategoryItem):
-        super().__init__(panel, parent, selected, node)
+        super().__init__(app_controller, panel, parent, selected, node)
         self.menu_def = self.selected_node.context_sections()
         self._build_menu()
 
 class ParadoxNodesContextMenu(GenericContextMenu):
-    request_expansion_all = pyqtSignal(str, int, object)
-    request_expansion_this = pyqtSignal()
-    request_collapse_all = pyqtSignal()
-    
-    def __init__(self, 
+    def __init__(self,
+                 app_controller,
                  panel:QWidget,
                  parent:QTreeWidget, 
                  selected:QTreeWidgetItem, 
                  node:GenericBlock|GenericKeyValue|GenericNode):
-        super().__init__(panel, parent, selected, node)
+        super().__init__(app_controller, panel, parent, selected, node)
         self.menu_def = self._get_context_menu_options()
         self._build_menu()
 
@@ -120,5 +119,9 @@ class ParadoxNodesContextMenu(GenericContextMenu):
                 Action("Expand All", lambda:self.panel.set_expansion_rule(ExpansionMode.ALL), True),
                 Action("Collapse All", lambda:self.panel.set_expansion_rule(ExpansionMode.DEPTH, depth_limit=2), True),
                 Action("Expand This", lambda:self.panel.set_expansion_rule(ExpansionMode.FROM_NODE, root_item=self.selected), True),
+            ]), 
+            ActionGroup("File Options", [
+                # ActionGroup("Add+")
+                Action("Delete", lambda:self.app_controller.request_deletion(self.selected))
             ])
         ]
