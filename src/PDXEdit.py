@@ -1,5 +1,6 @@
-from pathlib import Path
-import sys
-sys.path.insert(0, str(Path(__file__).resolve().parent.parent.parent / "ParadoxParser"))
+#for Debugging ParadoxParser issues
+# from pathlib import Path
+# import sys
+# sys.path.insert(0, str(Path(__file__).resolve().parent.parent.parent / "ParadoxParser"))
 from App import AppController
 AppController()
