@@ -47,6 +47,8 @@ class MainWindow(QMainWindow):
 
         self.splitter.setSizes([200, 600])
         self.showMaximized()
+        if not self.app_controller.config.initialised:
+            self.settings_window_requested()
     
     def propogate_changes(self, 
                           category:GenericCategory, 
@@ -56,12 +58,12 @@ class MainWindow(QMainWindow):
         self.node_changed.emit(node)
 
     def settings_window_requested(self):
-        title = "PDXEdit Setup" if self.app_controller.config.initalised else "PDXEdit Settings"
-        settings = SettingsWindow(title, self.app_controller.config)
+        title = "PDXEdit Setup" if self.app_controller.config.initialised else "PDXEdit Settings"
+        settings = SettingsWindow(title, self)
         settings.exec_()
 
     def load_mod_requested(self):
-        path = select_mod_file(config=self.app_controller.config)
+        path = select_mod_file(self)
         self.app_controller.load_mod(path)
 
     def load_mod_to_gui(self, mod):

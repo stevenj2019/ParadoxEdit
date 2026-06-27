@@ -6,7 +6,7 @@ from PyQt5.QtWidgets import QApplication, QDialog
 
 from App.Services import ConfigurationManager, StyleManager, InlineEditManager, ChangeTracker, FilesystemMananger
 from App.GlobalEventFilter import GlobalEventFilter
-from App.GUI.Windows import MainWindow
+from App.GUI import MainWindow
 from App.GUI.Windows.Settings import SettingsWindow
 
 from App.Constants import ChangeState
@@ -35,11 +35,12 @@ class AppController:
         self.app.setStyleSheet(qdarktheme.load_stylesheet("dark" if self.config.dark_mode else "light"))
 
     def run(self):
-        if not self.config.initalised:
+        if not self.config.initialised:
             settings = SettingsWindow("PDXEdit Setup", self.config)
             if not settings.exec_() == QDialog.Accepted:
                 sys.exit()
-        
+
+        self.main = MainWindow(self)
         self.main.show()
         self.app.exec_()
 

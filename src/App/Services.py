@@ -22,10 +22,10 @@ class ConfigurationManager:
         self.dark_mode:bool = False
 
         if self.file_path.exists():
-            self.initalised = True
+            self.initialised = True
             self.read_file()
         else:
-            self.initalised = False
+            self.initialised = False
     
     def change_setting(self, **kwargs):
         for k, v in kwargs.items():
@@ -54,7 +54,7 @@ class ConfigurationManager:
         self.file_path.parent.mkdir(exist_ok=True, parents=True)
         self.file_path.touch()
 
-        self.initalised = True
+        self.initialised = True
 
     def write_file(self):
         with open(self.file_path, "w") as CONFIG_FILE:

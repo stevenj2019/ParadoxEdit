@@ -3,18 +3,20 @@ import qdarktheme
 
 from PyQt5.QtWidgets import QApplication, QDialog, QFormLayout, QHBoxLayout, QLabel, QCheckBox, QLineEdit, QPushButton, QDialogButtonBox
 
-from App.Services import ConfigurationManager
 from App.GUI.Dialogues.FileDialogues import select_hoi4_install_directory, select_mod_directory
 from App.GUI.Dialogues.PopupModels import settings_error_critical
 
 class SettingsWindow(QDialog):
-    def __init__(self, title:str, config:ConfigurationManager):
+    def __init__(self, title:str, parent):
         super().__init__()
-        self.config = config
+        self.config = parent.app_controller.config
         self.setWindowTitle(title)
         self.resize(550,150)
         self.setLayout(QFormLayout())
         self.form = self.layout()
+
+        self.config_file_label = QLabel(f"Configuration will be stored at: {self.config.file_path.absolute()}")
+        self.form.addRow(self.config_file_label)
 
         self.game_install_path_label = QLabel("Paradox Game Path:")
         self.game_install_path_element = QHBoxLayout()
