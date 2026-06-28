@@ -14,10 +14,10 @@ from App.GUI.StyledDelegate import ParadoxFileDelegate, NodeStateDelegate
 class ModPanel(QWidget):
     request_load_block = pyqtSignal(object)
     load_file = pyqtSignal()
-    def __init__(self, parent, app_services):
+    def __init__(self, parent, app_controller):
         super().__init__()
         self.parent = parent
-        self.parent.app_controller = app_services
+        self.app_controller = app_controller
         self.node_to_item:dict = {}
         self.file_to_category:dict = {}
 
@@ -31,14 +31,13 @@ class ModPanel(QWidget):
         header.setSectionResizeMode(0, QHeaderView.Stretch)
         self.tree.setHeaderHidden(True)
         self.tree.setTextElideMode(Qt.ElideRight)
-        self.tree.setItemDelegate(ParadoxFileDelegate(self.parent.app_controller.style_manager, self.tree))
+        self.tree.setItemDelegate(ParadoxFileDelegate(self.app_controller.style_manager, self.tree))
         layout.addWidget(self.tree)
 
         self.tree.itemClicked.connect(self._on_element_click)
 
         self.tree.setContextMenuPolicy(Qt.CustomContextMenu)
-        self.tree.customContextMenuRequested.connect(self.build_context_menu)
-
+        # self.tree.customContextMenuRequested.connect(self.build_context_menu)
 
     def set_file_state(self, file, status):
         file_item = self.node_to_item[file]
@@ -52,7 +51,7 @@ class ModPanel(QWidget):
     def _set_category_state(self, file):
         category_item = self.file_to_category[file]
         category = category_item.data(0, CATEGORY)
-        if all(self.parent.app_controller.file_system.change_tracker.get_file_state(file) == ChangeState.CLEAN
+        if all(self.app_controller.file_system.change_tracker.get_file_state(file) == ChangeState.CLEAN
                 for file in category.files.values()):
             category_item.setData(0, STATE, ChangeState.CLEAN)
         else:
@@ -99,15 +98,15 @@ class ModPanel(QWidget):
             for name in mod.error_categories:
                 print(f" - {name}")
 
-    def build_context_menu(self, pos):
-        selected = self.tree.itemAt(pos)
-        if not selected:
-            return
-        item = selected.data(0, FILE)
-        if not item:
-            return
-        menu = GenericCategoryContextMenu(self, self.tree, selected, item)
-        menu.exec_(self.tree.viewport().mapToGlobal(pos))
+    # def build_context_menu(self, pos):
+    #     selected = self.tree.itemAt(pos)
+    #     if not selected:
+    #         return
+    #     item = selected.data(0, FILE)
+    #     if not item:
+    #         return
+    #     menu = GenericCategoryContextMenu(self, self.tree, selected, item)
+    #     menu.exec_(self.tree.viewport().mapToGlobal(pos))
 
     def _on_element_click(self, item, column):
         if item.data(0, IS_BLOCK):
@@ -118,10 +117,12 @@ class ModPanel(QWidget):
             self.request_load_block.emit(file)
 
 class ContentsPanel(QWidget):
+    # request_expansion = pyqtSignal(object)
     edit_open_request = pyqtSignal(object, object, object)
-    def __init__(self, parent):
+    def __init__(self, parent, app_controller):
         super().__init__()
         self.parent = parent
+        self.app_controller = app_controller
         self.node_to_item:dict = {}
 
         layout = QVBoxLayout()
@@ -131,29 +132,29 @@ class ContentsPanel(QWidget):
         self.tree.setColumnCount(2)
         self.tree.setHeaderLabels(["Key", "Value"])
         self.tree_fully_expanded = False
-        self.tree.setItemDelegate(NodeStateDelegate(self.parent.app_controller.style_manager, self.tree))
+        self.tree.setItemDelegate(NodeStateDelegate(self.app_controller.style_manager, self.tree))
         self.tree.itemDoubleClicked.connect(self._on_item_double_click)
         
+        self.context_menu = ParadoxNodesContextMenu(self, app_controller)
+        self.context_menu.request_expansion.connect(self.set_expansion_rule)
         self.tree.setContextMenuPolicy(Qt.CustomContextMenu)
-        self.tree.customContextMenuRequested.connect(self.build_context_menu)
+        self.tree.customContextMenuRequested.connect(self.request_context_menu)
         
         layout.addWidget(self.tree)
-        self.parent.node_changed.connect(self.set_node_state)
 
     def set_node_state(self, node, state):
         item = self.node_to_item[node]
+        if item is None:
+            return
         # item.setText(1, node._get_value())
         item.setData(0, STATE, state)
         self.tree.update()
-
-    def set_node_value(self, node, value):
-        item = self.node_to_item[node]
-        item.setText(1, node._get_value())
 
     def load_block(self, block):
         """
         Load a GenericBlock into the tree for display.
         """
+        self.node_to_item.clear()
         self.tree.clear()
         self.tree.blockSignals(True)
         self.tree.setUpdatesEnabled(False)
@@ -189,7 +190,7 @@ class ContentsPanel(QWidget):
 
         parent_item.addChild(item)
 
-        effective_state = inherited_state or self.parent.app_controller.file_system.change_tracker.get_node_state(node)
+        effective_state = inherited_state or self.app_controller.file_system.change_tracker.get_node_state(node)
         item.setData(0, STATE, effective_state)
         self._add_nodes(item, node.nodes, effective_state)
 
@@ -208,7 +209,7 @@ class ContentsPanel(QWidget):
         item.setData(0, NODE, node)
         parent_item.addChild(item)
 
-        effective_state = inherited_state or self.parent.app_controller.file_system.change_tracker.get_node_state(node)
+        effective_state = self.app_controller.file_system.change_tracker.get_node_state(node)
         item.setData(0, STATE, effective_state)
 
     def _on_item_double_click(self, item, column):
@@ -218,13 +219,18 @@ class ContentsPanel(QWidget):
                 if node:
                     self.edit_open_request.emit(self.tree, item, node)
 
-    def build_context_menu(self, pos):
+    def request_context_menu(self, pos):
         selected = self.tree.itemAt(pos)
         if not selected:
             return
         item = selected.data(0, NODE)
-        menu = ParadoxNodesContextMenu(self, self.parent.app_controller, self.tree, selected, item)
-        menu.exec_(self.tree.viewport().mapToGlobal(pos))
+        self.context_menu.call(item)
+        self.context_menu.exec_(self.tree.viewport().mapToGlobal(pos))
+        # menu = ParadoxNodesContextMenu(self, self.app_controller, self.tree, selected, item)
+        # menu.exec_(self.tree.viewport().mapToGlobal(pos))
+
+    def request_node_mutation(self, request):
+        self.app_controller.request_block_mutation.emit(request)
 
     def set_expansion_rule(self, mode, depth_limit=1, root_item=None):
         self.tree.setUpdatesEnabled(False)

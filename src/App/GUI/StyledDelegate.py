@@ -54,7 +54,7 @@ class NodeStateDelegate(QStyledItemDelegate):
 
             rect = option.rect
             
-            stripe_width = 10
+            stripe_width = 5
             
             painter.save()
             painter.setPen(Qt.NoPen)

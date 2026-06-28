@@ -1,22 +1,17 @@
 from PyQt5.QtWidgets import QMainWindow, QWidget, QTreeWidget, QTreeWidgetItem, QToolBar, QMenu, QLabel, QWidgetAction, QAction
 from PyQt5.QtCore import pyqtSignal
 
-from ParadoxParser.ParadoxNodes import GenericBlock, GenericKeyValue, GenericNode
-
-from App.Enums import ExpansionMode
-from App.ModClasses.Categories import GenericCategory
-from App.ModClasses.CategoryItems import GenericCategoryItem
+from App.Enums import ExpansionMode, SaveTarget, ChangeState
+from App.Contracts import BlockMutationRequest
 from App.ModClasses.ActionModels import ActionGroup, Action
 
 class TopBar(QToolBar):
     request_load_mod = pyqtSignal()
     request_settings_window = pyqtSignal()
-    request_save_open_signal = pyqtSignal()
-    request_save_all_signal = pyqtSignal()
-    
-    def __init__(self, parent):
+    def __init__(self, parent, app_controller):
         super().__init__(parent)
-        self.controller:QMainWindow = parent
+        self.parent:QMainWindow = parent
+        self.app_controller = app_controller
         self.actions:dict = {}
         self.menu_def:list = self._get_topbar_actions()
 
@@ -27,8 +22,8 @@ class TopBar(QToolBar):
         return [
             ActionGroup("File", [
                 Action("Open Mod", self.request_load_mod.emit, True), 
-                Action("Save Open", self.request_save_open_signal.emit, False),
-                Action("Save All", self.request_save_all_signal.emit, False)
+                Action("Save Open", lambda:self.app_controller.request_save.emit(SaveTarget.OPEN), False),
+                Action("Save All", lambda:self.app_controller.request_save.emit(SaveTarget.ALL), False)
             ]),
             Action("Settings", self.request_settings_window.emit, True)
         ]
@@ -57,15 +52,22 @@ class TopBar(QToolBar):
         self.actions["Save All"].setEnabled(True)
 
 class GenericContextMenu(QMenu):
-    def __init__(self, app_controller, panel, parent, selected, node):
+    def __init__(self, parent, app_controller):
         super().__init__()
-        self.app_controller = app_controller
-        self.panel = panel
         self.parent:QTreeWidget = parent
-        self.selected:QTreeWidgetItem = selected
-        self.selected_node = node
+        self.app_controller = app_controller
         self.menu_def:list = []
+        self.selected:QTreeWidgetItem = None
 
+    def call(self, selected):
+        self.clear()
+        self.selected = selected
+        self.menu_def = self._get_context_menu_options(self.selected)
+        self._build_menu()
+
+    def _get_context_menu_options():
+        return 
+    
     def _build_menu(self):
         for item in self.menu_def:
             if isinstance(item, ActionGroup):
@@ -92,36 +94,32 @@ class GenericContextMenu(QMenu):
         self.addAction(action)
 
 class GenericCategoryContextMenu(GenericContextMenu):
-    def __init__(self, 
-                 app_controller,
-                 panel:QWidget,
-                 parent:QTreeWidget, 
-                 selected:QTreeWidgetItem, 
-                 node:GenericCategory|GenericCategoryItem):
-        super().__init__(app_controller, panel, parent, selected, node)
-        self.menu_def = self.selected_node.context_sections()
-        self._build_menu()
-
-class ParadoxNodesContextMenu(GenericContextMenu):
-    def __init__(self,
-                 app_controller,
-                 panel:QWidget,
-                 parent:QTreeWidget, 
-                 selected:QTreeWidgetItem, 
-                 node:GenericBlock|GenericKeyValue|GenericNode):
-        super().__init__(app_controller, panel, parent, selected, node)
-        self.menu_def = self._get_context_menu_options()
-        self._build_menu()
+    def __init__(self, parent:QTreeWidget, app_controller):
+        super().__init__(parent, app_controller)
+        self.menu_def:list = []
 
     def _get_context_menu_options(self):
+        #TODO
+        return
+    
+class ParadoxNodesContextMenu(GenericContextMenu):
+    request_expansion = pyqtSignal(object)
+    def __init__(self, parent:QTreeWidget, app_controller):
+        super().__init__(parent, app_controller)
+        self.menu_def:list = []
+
+    def _get_context_menu_options(self, selected):
         return [
             ActionGroup("Tree Options", [
-                Action("Expand All", lambda:self.panel.set_expansion_rule(ExpansionMode.ALL), True),
-                Action("Collapse All", lambda:self.panel.set_expansion_rule(ExpansionMode.DEPTH, depth_limit=2), True),
-                Action("Expand This", lambda:self.panel.set_expansion_rule(ExpansionMode.FROM_NODE, root_item=self.selected), True),
+                Action("Expand All", lambda:self.parent.set_expansion_rule(ExpansionMode.ALL), True),
+                Action("Collapse All", lambda:self.parent.set_expansion_rule(ExpansionMode.DEPTH, depth_limit=2), True),
+                Action("Expand This", lambda:self.parent.set_expansion_rule(ExpansionMode.FROM_NODE, root_item=selected), True),
             ]), 
             ActionGroup("File Options", [
                 # ActionGroup("Add+")
-                Action("Delete", lambda:self.app_controller.request_deletion(self.selected))
+                Action("Delete", lambda:self.app_controller.request_block_mutation.emit(BlockMutationRequest(file=None,
+                                                                                                        target=selected, 
+                                                                                                        value=None,
+                                                                                                        state=ChangeState.DELETED)), True)
             ])
         ]

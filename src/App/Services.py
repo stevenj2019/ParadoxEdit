@@ -133,10 +133,32 @@ class FilesystemMananger:
         self.open_file = file
 
     def changed_file(self, file, node, status):
-        self.change_tracker.set_file_state(file, status)
+        self.change_tracker.set_file_state(file, status) #marks file
         self.change_tracker.set_node_state(node, status)
+        
+    def collect_deletion_nodes(self, file):
+        deletions = []
+        def recurse(parent, node):
+            if self.change_tracker.get_node_state(node) == ChangeState.DELETED:
+                index = parent.nodes.index(node)
+                deletions.append((parent, index, node))
+                return 
+            if isinstance(node, GenericBlock):
+                for child in node.nodes:
+                    recurse(node, child)
+        for node in file.nodes:
+            recurse(file, node)
+        return deletions
+    
+    def cleanup_deletion_nodes(self, file):
+        deletions = self.collect_deletion_nodes(file)
+
+        for parent, index, node in sorted(deletions, key=lambda x: x[1], reverse=True):
+            self.change_tracker.clear_node_state(node)
+            parent.nodes.pop(index)
 
     def save_file(self, file=None):
+        self.cleanup_deletion_nodes(file)
         if self.change_tracker.file_is_dirty(file):
             self.change_tracker.clear_file_state(file)
             if self.configuration.safe_mode:

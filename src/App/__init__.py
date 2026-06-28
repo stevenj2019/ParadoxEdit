@@ -3,31 +3,32 @@ import qdarktheme
 from PyQt5.QtCore import QObject, pyqtSignal
 from PyQt5.QtWidgets import QApplication
 
-from App.Services import Services, ConfigurationManager, StyleManager, FilesystemMananger
+from App.Services import ConfigurationManager, StyleManager, FilesystemMananger
 from App.GUI.Main import MainWindow
 
 from App.Enums import SaveTarget, PropagationType, ChangeState
-from App.Contracts import PropagationRequest, ModifyNodeRequest, RemoveNodeRequest
+from App.Contracts import PropagationRequest, NodeMutationRequest, BlockMutationRequest
 
 class AppController(QObject):
     request_node_mutation = pyqtSignal(object)
-    # request_save = pyqtSignal()
+    request_block_mutation = pyqtSignal(object)
+    request_save = pyqtSignal(object)
     def __init__(self):
         super().__init__()
         self.app           = QApplication([])
+
         self.configuration = ConfigurationManager()
         self.file_system   = FilesystemMananger(self.configuration)
         self.style_manager = StyleManager(self.configuration)
 
-        self.main = MainWindow(self, Services(self))
-        self.apply_stylesheet()
+        self.main = MainWindow(self)
         self.run()
 
-    def apply_stylesheet(self):
-        self.app.setStyleSheet(qdarktheme.load_stylesheet("dark" if self.configuration.dark_mode else "light"))
-
     def run(self):
+        self.app.setStyleSheet(qdarktheme.load_stylesheet("dark" if self.configuration.dark_mode else "light"))
         self.request_node_mutation.connect(self._request_node_mutation)
+        self.request_block_mutation.connect(self._request_block_mutation)
+        self.request_save.connect(self._save_target)
         self.main.show()
         self.app.exec_()
 
@@ -40,33 +41,33 @@ class AppController(QObject):
         
         self.main.load_mod_to_gui(self.file_system.mod)
 
-    # def return_mutation_request():
-    def _request_node_mutation(self, request:ModifyNodeRequest):
+    def _request_node_mutation(self, request:NodeMutationRequest):
         file = request.file if request.file else self.file_system.open_file
         node = request.node
+        node_value = request.node_value
         value = request.value
-        if node.value != value:
+        if node_value.value != value:
+            node_value.value = value
             self.file_system.changed_file(file, node, ChangeState.MODIFIED)
             self.main.propagation_request.emit(PropagationRequest(type=PropagationType.NODE,
                                                                   file=file,
                                                                   node=node,
                                                                   state=ChangeState.MODIFIED))
 
-    #important note, no way to modify QTreeWidget yet
-    #this should work with blocks, keyvalues, calue is the structure, 
-    # def append_node_to_block(self, file, node, index, value):
-    #     node.nodes.insert(index) = value
-    #     self.file_system.changed_file(file, node, ChangeState.ADDED)
-    #     self.main.propogate_changes(PropagationType.NODE, node, ChangeState.ADDED)
-
-    def remove_node(self, request:RemoveNodeRequest):
+    def _request_block_mutation(self, request:BlockMutationRequest):
         file = request.file if request.file else self.file_system.open_file
-        node = request.node
-        
-        self.file_system.changed_file(file, node, ChangeState.DELETED)
-        self.main.propogate_changes(PropagationType.NODE, node, ChangeState.DELETED)
+        node = request.target
+        value = request.value
+        state = request.state
+        # if state == ChangeState.ADDED:
+        #     node.insert(index, value)
+        self.file_system.changed_file(file, node, state)
+        self.main.propagation_request.emit(PropagationRequest(type=PropagationType.NODE, 
+                                                       file=file,
+                                                       node=node,
+                                                       state=state))
 
-    def save_target(self, target):
+    def _save_target(self, target):
         def save_routine(file):
             saved = self.file_system.save_file(file)
             if saved:
@@ -76,8 +77,10 @@ class AppController(QObject):
                                                                       state=ChangeState.CLEAN))
 
         if target is SaveTarget.ALL:
+            save_routine(self.file_system.mod.descriptor_object)
             for category in self.file_system.mod.categories.values():
                 for file in category.files.values():
                     save_routine(file)
         else:
             save_routine(self.file_system.open_file)
+        self.main.load_file(self.file_system.open_file)

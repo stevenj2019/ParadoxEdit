@@ -5,7 +5,7 @@ from PyQt5.QtCore import QObject, QEvent, Qt
 from ParadoxParser.ParadoxNodes import (GenericNode, GenericKeyValue, GenericNode, 
                                         GenericComment, GenericString, GenericToken, 
                                         GenericInt, GenericFloat, GenericBool)
-from App.Contracts import ModifyNodeRequest
+from App.Contracts import NodeMutationRequest
 
 from App.GUI.Dialogues.PopupModels import change_rejected_warning
 
@@ -50,21 +50,22 @@ class InLineEditManager(QObject):
     def open_request(self,
                 parent:QTreeWidget, 
                 source:QTreeWidgetItem, 
-                node:GenericNode|GenericKeyValue):
+                node:GenericNode):
         if self.active:
             print("open_request when already open")
 
         self.parent = parent
         self.source = source
-        self.node = node.value if isinstance(node, GenericKeyValue) else node
+        self.node = node
+        self.node_value = node.value if isinstance(node, GenericKeyValue) else node
         self.editor = self._get_widget()
         print(f"{self.editor} created")
         self._create()
 
     def complete_request(self, new_value):
-        print(f"{self.node}, {self.node.value} to {new_value}")
-        if self.node.value != new_value:
-            self.mutate_callback.emit(ModifyNodeRequest(file=None, node = self.node, value = new_value))
+        print(f"{self.node_value}, {self.node_value.value} to {new_value}")
+        if self.node_value.value != new_value:
+            self.mutate_callback.emit(NodeMutationRequest(file=None, node = self.node, node_value = self.node_value, value = new_value))
             # self.mutate_callback(self.node, new_value)
         self._destroy(new_value)
         self._clear()
@@ -79,11 +80,11 @@ class InLineEditManager(QObject):
         def emit(value):
             self.complete_request(value)
         try:
-            editor_fn = self.cell_editors.get(type(self.node))
+            editor_fn = self.cell_editors.get(type(self.node_value))
         except Exception as e:
             print(e)
             return None
-        return editor_fn(self.node, emit)
+        return editor_fn(self.node_value, emit)
 
     def _create(self):
         self.parent.setItemWidget(self.source, 1, self.editor)

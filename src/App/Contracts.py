@@ -2,8 +2,7 @@ from dataclasses import dataclass
 from typing import Optional
 from ParadoxParser import ParadoxScriptParser as PDXScriptFile
 from ParadoxParser import GenericBlock, GenericKeyValue, GenericNode
-from App.Enums import PropagationType, ChangeState, SaveTarget, ExpansionMode
-
+from App.Enums import PropagationType, ChangeState
 @dataclass
 class PropagationRequest:
     type  :PropagationType
@@ -12,11 +11,19 @@ class PropagationRequest:
     state :ChangeState
 
 @dataclass
-class ModifyNodeRequest:
+class NodeMutationRequest:
     file:Optional[PDXScriptFile]
-    node:GenericBlock|GenericKeyValue|GenericNode
+    node:GenericBlock|GenericKeyValue
+    node_value:GenericNode
     value:str|int|float
 
+@dataclass
+class BlockMutationRequest:
+    file:Optional[PDXScriptFile]
+    target:GenericBlock
+    value:Optional[GenericBlock|GenericKeyValue|GenericNode]
+    state:ChangeState
+    
 @dataclass
 class AppendNodeRequest:
     file:Optional[PDXScriptFile]
@@ -24,19 +31,3 @@ class AppendNodeRequest:
     index:int
     value:GenericBlock|GenericKeyValue|GenericNode
 
-@dataclass
-class RemoveNodeRequest:
-    file:Optional[PDXScriptFile]
-    node:GenericBlock|GenericKeyValue|GenericNode
-
-# class ModifyStructureRequest:TODO
-
-@dataclass
-class SaveRequest:
-    type:SaveTarget #This is an Enum .ALL, .OPEN
-
-@dataclass
-class ExpansionRequest:
-    mode:ExpansionMode #TThis is an Enum .ALL, .DEPTH, .FROM_NODE
-    depth:int
-    from_node: #unsure of type, i am almost certain QTreeWidgetItem
