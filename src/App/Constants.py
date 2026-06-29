@@ -7,3 +7,4 @@ IS_BLOCK = Qt.UserRole + 2
 STATE = Qt.UserRole + 3
 CATEGORY = Qt.UserRole + 4
 IS_CATEGORY = Qt.UserRole + 5
+CONTEXT = Qt.UserRole + 6

@@ -6,8 +6,9 @@ from PyQt5.QtGui import QColor as QColour
 from ParadoxParser import ParadoxScriptParser as PDXScript
 from ParadoxParser.ParadoxNodes import GenericBlock, GenericKeyValue, GenericComment, GenericString, GenericToken
 
-from App.Constants import FILE, NODE, IS_BLOCK, STATE, CATEGORY, IS_CATEGORY
+from App.Constants import FILE, NODE, IS_BLOCK, STATE, CATEGORY, IS_CATEGORY, CONTEXT
 from App.Enums import ChangeState, ExpansionMode
+from App.ModClasses.FileContexts import ParadoxFileContext
 from App.GUI.Menus import GenericCategoryContextMenu, ParadoxNodesContextMenu
 from App.GUI.StyledDelegate import ParadoxFileDelegate, NodeStateDelegate
 
@@ -64,8 +65,11 @@ class ModPanel(QWidget):
         self.tree.addTopLevelItem(root)
 
         descriptor_item = QTreeWidgetItem(["Descriptor"])
+
         descriptor_item.setData(0, FILE, mod.descriptor_object)
         descriptor_item.setData(0, STATE, ChangeState.CLEAN)
+        descriptor_item.setData(0, CONTEXT, ParadoxFileContext)
+        
         self.node_to_item[mod.descriptor_object] = descriptor_item
         root.addChild(descriptor_item)
         self.open_file = descriptor_item
@@ -73,19 +77,30 @@ class ModPanel(QWidget):
         categories_parent = QTreeWidgetItem(["Categories"])
         root.addChild(categories_parent)
 
+        def set_category_data(category_item, category_class, category_context):
+            category_item.setData(0, IS_CATEGORY, True)
+            category_item.setData(0, CATEGORY, category_class)
+            category_item.setData(0, CONTEXT, category_context)
+
+        def set_file_data(file_item, file, category_class):
+            file_item.setData(0, FILE, file)
+            file_item.setData(0, STATE, ChangeState.CLEAN)
+            file_item.setData(0, IS_CATEGORY, False)
+            file_item.setData(0, CATEGORY, category_class)
+
         for c_key, c_val in mod.categories.items():
             cat_sub = QTreeWidgetItem([c_key])
-            cat_sub.setData(0, IS_CATEGORY, True)
-            cat_sub.setData(0, CATEGORY, c_val)
+            category_context = c_val.context
+            set_category_data(cat_sub, c_val, category_context)
+
             self.node_to_item[c_val] = cat_sub
             for file, obj in c_val.files.items():
                 widget = QTreeWidgetItem([file])
                 self.node_to_item[obj] = widget
                 self.file_to_category[obj] = cat_sub
+
                 widget.setText(0, file)
-                widget.setData(0, FILE, obj)
-                widget.setData(0, STATE, ChangeState.CLEAN)
-                widget.setData(0, IS_CATEGORY, False)
+                set_file_data(widget, obj, category_context)
                 cat_sub.addChild(widget)
 
             categories_parent.addChild(cat_sub)

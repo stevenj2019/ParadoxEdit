@@ -3,15 +3,14 @@ from pathlib import Path
 
 from ParadoxParser import ParadoxScriptParser as PDXFile
 
-from App.ModClasses.CategoryItems import GenericCategoryItem, EventCategoryItem, GFXCategoryItem
-from App.ModClasses.ActionModels import ActionGroup, Action
+from App.ModClasses.FileContexts import ParadoxFileContext, EventFileContext, GFXFileContext
 from App.ModClasses.ActionModels import ActionGroup, Action
 from App.Backend import Generic, Events
 
 class GenericCategory:
-    def __init__(self, base:os.PathLike, paths:list[os.PathLike], item_class:GenericCategoryItem, file_type:str=None):
+    def __init__(self, base:os.PathLike, paths:list[os.PathLike], context:ParadoxFileContext, file_type:str=None):
         self.file_type = file_type
-        # self.item_class:GenericCategoryItem = item_class
+        self.context:ParadoxFileContext = context
         self.files:dict[str, PDXFile] = {}
         for path in paths:
             self._read_directory(os.path.join(base, path))
@@ -36,16 +35,13 @@ class GenericCategory:
                      and not name.endswith(".bak")):
                     self._parse_files(Path(os.path.join(root, name)))
 
-    # def _parse_files(self, path:os.PathLike)->GenericCategoryItem:
-    #     self.files[path.name] = self.item_class(PDXFile(path))
-
     def _parse_files(self, path:os.PathLike):
         self.files[path.name] = PDXFile(path)
 
 # EVENT_ERROR_KEYS = ("missing_data", "missing_id", "missing_namespace") might do, might not
 class EventCategory(GenericCategory):
     def __init__(self, mod_path:os.PathLike):
-        super().__init__(mod_path, ["events/"], EventCategoryItem)
+        super().__init__(mod_path, ["events/"], EventFileContext)
 
     def context_sections(self):
         return [
@@ -57,7 +53,7 @@ class EventCategory(GenericCategory):
     
 class GFXCategory(GenericCategory):
     def __init__(self, mod_path:os.PathLike):
-        super().__init__(mod_path, ["interface/"], GFXCategoryItem, ".gfx")
+        super().__init__(mod_path, ["interface/"], GFXFileContext, ".gfx")
 
     def context_sections(self):
         return [

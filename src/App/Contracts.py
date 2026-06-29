@@ -3,6 +3,7 @@ from typing import Optional
 from ParadoxParser import ParadoxScriptParser as PDXScriptFile
 from ParadoxParser import GenericBlock, GenericKeyValue, GenericNode
 from App.Enums import PropagationType, ChangeState
+from App.ModClasses.FileContexts import ParadoxFileContext
 @dataclass
 class PropagationRequest:
     type  :PropagationType
@@ -31,3 +32,8 @@ class AppendNodeRequest:
     index:int
     value:GenericBlock|GenericKeyValue|GenericNode
 
+@dataclass
+class CurrentContext:
+    file:PDXScriptFile
+    node:Optional[GenericBlock|GenericKeyValue|GenericNode]
+    category:ParadoxFileContext
