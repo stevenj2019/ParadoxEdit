@@ -1,27 +1,25 @@
 import os 
 from pathlib import Path
 
-from ParadoxParser import ParadoxScriptParser as PDXFile
+from ParadoxParser import ParadoxScriptParser as PDXScriptFile
 
-from App.ModClasses.FileContexts import ParadoxFileContext, EventFileContext, GFXFileContext
-from App.ModClasses.ActionModels import ActionGroup, Action
-from App.Backend import Generic, Events
+from App.Contexts.FileContexts import ParadoxFileContext, EventFileContext, GFXFileContext
 
 class GenericCategory:
     def __init__(self, base:os.PathLike, paths:list[os.PathLike], context:ParadoxFileContext, file_type:str=None):
         self.file_type = file_type
         self.context:ParadoxFileContext = context
-        self.files:dict[str, PDXFile] = {}
+        self.files:dict[str, PDXScriptFile] = {}
         for path in paths:
             self._read_directory(os.path.join(base, path))
 
-    def context_sections(self):
-        return [
-            ActionGroup("PDX Script Options", [
-                Action("Clear Comments", Generic.clear_comments, True),
-                Action("Clear Whitespace", Generic.clear_whitespace, True)
-            ])
-        ]
+    # def context_sections(self):
+    #     return [
+    #         ActionGroup("PDX Script Options", [
+    #             Action("Clear Comments", Generic.clear_comments, True),
+    #             Action("Clear Whitespace", Generic.clear_whitespace, True)
+    #         ])
+    #     ]
     
     def _read_file(self, file):
         self._parse_file(file)
@@ -36,7 +34,7 @@ class GenericCategory:
                     self._parse_files(Path(os.path.join(root, name)))
 
     def _parse_files(self, path:os.PathLike):
-        self.files[path.name] = PDXFile(path)
+        self.files[path.name] = PDXScriptFile(path)
 
 # EVENT_ERROR_KEYS = ("missing_data", "missing_id", "missing_namespace") might do, might not
 class EventCategory(GenericCategory):

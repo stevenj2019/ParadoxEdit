@@ -4,10 +4,12 @@ from platformdirs import user_config_dir
 
 from PyQt5.QtGui import QColor as QColour
 
+from ParadoxParser import ParadoxScriptParser as PDXScriptFile
 from ParadoxParser.ParadoxNodes import GenericBlock
 
 from App.Enums import ChangeState
 from App.ModClasses import ParadoxMod
+from App.Contexts.FileContexts import ParadoxFileContext
 
 class Services:
     def __init__(self, app):
@@ -118,18 +120,22 @@ class ChangeTracker:
         if file:
             for node in file.nodes:
                 recurse(node)
-            
+
 class FilesystemMananger:
     def __init__(self, configuration):
         self.configuration = configuration
         self.change_tracker = ChangeTracker()
         self.mod = None
-        self.open_file = None
+
+        self.open_file:PDXScriptFile = None
+        self.open_file_context:ParadoxFileContext = None
 
     def load_mod(self, path):
         self.mod = ParadoxMod(path)
 
-    def load_file(self, file):
+    def load_file(self, file, context=None):
+        if context:
+            self.open_file_context = context
         self.open_file = file
 
     def changed_file(self, file, node, status):

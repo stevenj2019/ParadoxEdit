@@ -1,7 +1,7 @@
 import os
 from pathlib import Path
 
-from ParadoxParser import ParadoxScriptParser as PDXFile
+from ParadoxParser import ParadoxScriptParser as PDXScriptFile
 from ParadoxParser.ParadoxNodes import GenericKeyValue
 from App.ModClasses.CategoryItems import GenericCategoryItem
 from App.ModClasses.Categories import GenericCategory
@@ -13,7 +13,7 @@ class ParadoxMod:
     def __init__(self, path:str|os.PathLike):
         path = Path(path)
         self.descriptor_file = path.name
-        self.descriptor_object = PDXFile(path)
+        self.descriptor_object = PDXScriptFile(path)
 
         self.mod_name:str = ""
         self.mod_base_dir:os.PathLike = None

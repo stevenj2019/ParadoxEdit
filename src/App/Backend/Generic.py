@@ -1,4 +1,4 @@
-from ParadoxParser import ParadoxScriptParser as PDXFile
+from ParadoxParser import ParadoxScriptParser as PDXScriptFile
 from ParadoxParser.ParadoxNodes import GenericBlock, GenericComment
 
 def clear_comments(file):
@@ -11,6 +11,6 @@ def clear_comments(file):
         if isinstance(root, GenericBlock):
             root.traverse(remove_comments)
             
-def clear_whitespace(file:PDXFile):
+def clear_whitespace(file:PDXScriptFile):
     pass
 
