@@ -6,8 +6,7 @@ from PyQt5.QtGui import QColor as QColour
 from ParadoxParser import ParadoxScriptParser as PDXScript
 from ParadoxParser.ParadoxNodes import GenericBlock, GenericKeyValue, GenericComment, GenericString, GenericToken
 
-from App.Constants import FILE, NODE, IS_BLOCK, STATE, CATEGORY, IS_CATEGORY, CONTEXT
-from App.Enums import ChangeState, ExpansionMode
+from App.Enums import QtStorage, ChangeState, ExpansionMode
 from App.ModClasses.FileContexts import ParadoxFileContext
 from App.GUI.Menus import GenericCategoryContextMenu, ParadoxNodesContextMenu
 from App.GUI.StyledDelegate import ParadoxFileDelegate, NodeStateDelegate
@@ -42,7 +41,7 @@ class ModPanel(QWidget):
 
     def set_file_state(self, file, status):
         file_item = self.node_to_item[file]
-        file_item.setData(0, STATE, status)
+        file_item.setData(0, QtStorage.STATE, status)
         try:
             self._set_category_state(file)
         except KeyError:
@@ -51,12 +50,12 @@ class ModPanel(QWidget):
 
     def _set_category_state(self, file):
         category_item = self.file_to_category[file]
-        category = category_item.data(0, CATEGORY)
+        category = category_item.data(0, QtStorage.CATEGORY)
         if all(self.app_controller.file_system.change_tracker.get_file_state(file) == ChangeState.CLEAN
                 for file in category.files.values()):
-            category_item.setData(0, STATE, ChangeState.CLEAN)
+            category_item.setData(0, QtStorage.STATE, ChangeState.CLEAN)
         else:
-            category_item.setData(0, STATE, ChangeState.MODIFIED)
+            category_item.setData(0, QtStorage.STATE, ChangeState.MODIFIED)
 
     def _populate_tree(self, mod):
         self.tree.clear()
@@ -66,9 +65,9 @@ class ModPanel(QWidget):
 
         descriptor_item = QTreeWidgetItem(["Descriptor"])
 
-        descriptor_item.setData(0, FILE, mod.descriptor_object)
-        descriptor_item.setData(0, STATE, ChangeState.CLEAN)
-        descriptor_item.setData(0, CONTEXT, ParadoxFileContext)
+        descriptor_item.setData(0, QtStorage.FILE, mod.descriptor_object)
+        descriptor_item.setData(0, QtStorage.STATE, ChangeState.CLEAN)
+        descriptor_item.setData(0, QtStorage.CONTEXT, ParadoxFileContext)
         
         self.node_to_item[mod.descriptor_object] = descriptor_item
         root.addChild(descriptor_item)
@@ -78,15 +77,15 @@ class ModPanel(QWidget):
         root.addChild(categories_parent)
 
         def set_category_data(category_item, category_class, category_context):
-            category_item.setData(0, IS_CATEGORY, True)
-            category_item.setData(0, CATEGORY, category_class)
-            category_item.setData(0, CONTEXT, category_context)
+            category_item.setData(0, QtStorage.IS_CATEGORY, True)
+            category_item.setData(0, QtStorage.CATEGORY, category_class)
+            category_item.setData(0, QtStorage.CONTEXT, category_context)
 
         def set_file_data(file_item, file, category_class):
-            file_item.setData(0, FILE, file)
-            file_item.setData(0, STATE, ChangeState.CLEAN)
-            file_item.setData(0, IS_CATEGORY, False)
-            file_item.setData(0, CATEGORY, category_class)
+            file_item.setData(0, QtStorage.FILE, file)
+            file_item.setData(0, QtStorage.STATE, ChangeState.CLEAN)
+            file_item.setData(0, QtStorage.IS_CATEGORY, False)
+            file_item.setData(0, QtStorage.CATEGORY, category_class)
 
         for c_key, c_val in mod.categories.items():
             cat_sub = QTreeWidgetItem([c_key])
@@ -117,16 +116,16 @@ class ModPanel(QWidget):
     #     selected = self.tree.itemAt(pos)
     #     if not selected:
     #         return
-    #     item = selected.data(0, FILE)
+    #     item = selected.data(0, QtStorage.FILE)
     #     if not item:
     #         return
     #     menu = GenericCategoryContextMenu(self, self.tree, selected, item)
     #     menu.exec_(self.tree.viewport().mapToGlobal(pos))
 
     def _on_element_click(self, item, column):
-        if item.data(0, IS_BLOCK):
+        if item.data(0, QtStorage.IS_BLOCK):
             return
-        file = item.data(0, FILE)
+        file = item.data(0, QtStorage.FILE)
         if file:
             self.open_file = file
             self.request_load_block.emit(file)
@@ -162,7 +161,7 @@ class ContentsPanel(QWidget):
         if item is None:
             return
         # item.setText(1, node._get_value())
-        item.setData(0, STATE, state)
+        item.setData(0, QtStorage.STATE, state)
         self.tree.update()
 
     def load_block(self, block):
@@ -200,13 +199,13 @@ class ContentsPanel(QWidget):
     def _build_block(self, parent_item, node, inherited_state):
         item = QTreeWidgetItem([str(node.key), ""])
         self.node_to_item[node] = item
-        item.setData(0, NODE, node)
-        item.setData(0, IS_BLOCK, True)
+        item.setData(0, QtStorage.NODE, node)
+        item.setData(0, QtStorage.IS_BLOCK, True)
 
         parent_item.addChild(item)
 
         effective_state = inherited_state or self.app_controller.file_system.change_tracker.get_node_state(node)
-        item.setData(0, STATE, effective_state)
+        item.setData(0, QtStorage.STATE, effective_state)
         self._add_nodes(item, node.nodes, effective_state)
 
     def _build_row(self, parent_item, node, inherited_state=None, label=""):
@@ -221,16 +220,16 @@ class ContentsPanel(QWidget):
         self.node_to_item[node] = item
         self.node_to_item[value_node] = item 
         
-        item.setData(0, NODE, node)
+        item.setData(0, QtStorage.NODE, node)
         parent_item.addChild(item)
 
         effective_state = self.app_controller.file_system.change_tracker.get_node_state(node)
-        item.setData(0, STATE, effective_state)
+        item.setData(0, QtStorage.STATE, effective_state)
 
     def _on_item_double_click(self, item, column):
         if column == 1: #value was clicked.
-            if not item.data(0, IS_BLOCK):
-                node = item.data(0, NODE)
+            if not item.data(0, QtStorage.IS_BLOCK):
+                node = item.data(0, QtStorage.NODE)
                 if node:
                     self.edit_open_request.emit(self.tree, item, node)
 
@@ -238,7 +237,7 @@ class ContentsPanel(QWidget):
         selected = self.tree.itemAt(pos)
         if not selected:
             return
-        item = selected.data(0, NODE)
+        item = selected.data(0, QtStorage.NODE)
         self.context_menu.call(item)
         self.context_menu.exec_(self.tree.viewport().mapToGlobal(pos))
         # menu = ParadoxNodesContextMenu(self, self.app_controller, self.tree, selected, item)

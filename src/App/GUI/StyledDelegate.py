@@ -2,7 +2,7 @@ from PyQt5.QtWidgets import QStyledItemDelegate
 from PyQt5.QtCore import Qt
 from PyQt5.QtGui import QColor as QColour, QBrush, QPen
 
-from App.Constants import STATE, IS_CATEGORY
+from App.Enums import QtStorage
 from App.Enums import ChangeState
 
 class ParadoxFileDelegate(QStyledItemDelegate):
@@ -12,8 +12,8 @@ class ParadoxFileDelegate(QStyledItemDelegate):
 
     def paint(self, painter, option, index):
         super().paint(painter, option, index)
-        is_category = index.model().data(index, IS_CATEGORY)
-        state = index.model().data(index, STATE)
+        is_category = index.model().data(index, QtStorage.IS_CATEGORY)
+        state = index.model().data(index, QtStorage.STATE)
 
         radius = 4
         painter.save()
@@ -22,14 +22,14 @@ class ParadoxFileDelegate(QStyledItemDelegate):
         y = option.rect.center().y()
 
         if is_category:
-            state = index.model().data(index, STATE)
+            state = index.model().data(index, QtStorage.STATE)
             if state == ChangeState.MODIFIED:
                 colour = self.style_manager.get_node_state_colour(ChangeState.MODIFIED)
                 painter.setBrush(Qt.NoBrush)
                 painter.setPen(QPen(colour, 2))
                 painter.drawEllipse(x, y - radius, radius * 2, radius * 2)
         else:
-            state = index.model().data(index, STATE)
+            state = index.model().data(index, QtStorage.STATE)
             if state in (ChangeState.ADDED, ChangeState.MODIFIED, ChangeState.DELETED):
                 colour = self.style_manager.get_node_state_colour(state)
                 painter.setPen(Qt.NoPen)
@@ -44,7 +44,7 @@ class NodeStateDelegate(QStyledItemDelegate):
 
     def paint(self, painter, option, index):
         super().paint(painter, option, index)
-        state = index.model().data(index, STATE)
+        state = index.model().data(index, QtStorage.STATE)
 
         if state in (ChangeState.ADDED, ChangeState.MODIFIED, ChangeState.DELETED):
             colour = self.style_manager.get_node_state_colour(state)
