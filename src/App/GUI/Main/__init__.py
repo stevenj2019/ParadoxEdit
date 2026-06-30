@@ -7,7 +7,7 @@ from ParadoxParser.ParadoxNodes import GenericBlock
 from App.Enums import SaveTarget
 
 # from App.GUI.Menus.TopBar import 
-from App.Contracts import PropagationRequest
+from App.Contracts import PropagationRequest, OpenFile
 from App.Enums import PropagationType, ChangeState
 from App.Contexts.FileContexts import ParadoxFileContext
 from App.GUI.Menus.Topbar import Topbar
@@ -92,13 +92,13 @@ class MainWindow(QMainWindow):
     def load_mod_to_gui(self, mod):
         # self.mod = mod
         self.mod_panel._populate_tree(mod)
-        self.load_file(mod.descriptor_object, ParadoxFileContext)
+        self.load_file(OpenFile(mod.descriptor_object, ParadoxFileContext))
         self.topbar._enable_actions()
 
     def load_mod_failed(self, exc):
         could_not_load_mod_critical(exc)
 
-    def load_file(self, file, file_context):
+    def load_file(self, file):
         self.editor_session.cancel_request(reason="file switch")
-        self.app_controller.file_system.load_file(file, file_context)
+        self.app_controller.file_system.load_file(file)
         self.contents_panel.load_block(file)

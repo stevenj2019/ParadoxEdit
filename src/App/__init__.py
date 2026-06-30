@@ -3,6 +3,8 @@ import qdarktheme
 from PyQt5.QtCore import QObject, pyqtSignal
 from PyQt5.QtWidgets import QApplication
 
+from ParadoxParser.ParadoxNodes import GenericBlock
+
 from App.Services import ConfigurationManager, StyleManager, FilesystemMananger
 from App.GUI.Main import MainWindow
 
@@ -42,7 +44,7 @@ class AppController(QObject):
         self.main.load_mod_to_gui(self.file_system.mod)
 
     def _request_node_mutation(self, request:NodeMutationRequest):
-        file = request.file if request.file else self.file_system.open_file
+        file = request.file if request.file else self.file_system.open_file.file
         node = request.node
         node_value = request.node_value
         value = request.value
@@ -55,12 +57,32 @@ class AppController(QObject):
                                                                   state=ChangeState.MODIFIED))
 
     def _request_block_mutation(self, request:BlockMutationRequest):
-        file = request.file if request.file else self.file_system.open_file
+        file = request.file if request.file else self.file_system.open_file.file
         node = request.target
         value = request.value
         state = request.state
-        # if state == ChangeState.ADDED:
-        #     node.insert(index, value)
+        def _find_parent_index(file, target):
+            def visit(parent, children):
+                for child in children:
+                    if child is target:
+                        return parent, parent.nodes.index(child)+1
+                    if isinstance(child, GenericBlock):
+                        result = visit(child, child.node)
+                    if result:
+                        return result
+                return 
+            return visit(file, file.nodes)
+        
+        if state == ChangeState.ADDED:
+            if isinstance(node, GenericBlock):
+                parent = node
+                index = 0
+            else:
+                parent, index = _find_parent_index(file, node)
+            node = value()
+            parent.nodes.insert(index, node)
+            if file is self.file_system.open_file.file:
+                self.main.load_file(self.file_system.open_file)
         self.file_system.changed_file(file, node, state)
         self.main.propagation_request.emit(PropagationRequest(type=PropagationType.NODE, 
                                                        file=file,
@@ -82,5 +104,5 @@ class AppController(QObject):
                 for file in category.files.values():
                     save_routine(file)
         else:
-            save_routine(self.file_system.open_file)
+            save_routine(self.file_system.open_file.file)
         self.main.load_file(self.file_system.open_file)

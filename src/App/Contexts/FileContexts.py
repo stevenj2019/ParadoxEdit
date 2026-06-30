@@ -6,7 +6,7 @@ if TYPE_CHECKING:
 
 from App.GUI.Menus import Action
 from ParadoxParser.ParadoxNodes import GenericBlock
-from App.Contexts.NodeActions import GenericNodeActions, EventBlockContext, EventOptionContext
+from App.Contexts.NodeActions import GenericNodeActions, EventBlockActions, EventOptionContext
 from App.Contexts.FileActions import ParadoxFileActions, EventFileActions, GFXFileActions
 #fill-in till i code ability lol
 class CurrentContext:
@@ -15,7 +15,7 @@ class CurrentContext:
 
 class ParadoxFileContext:
     @staticmethod
-    def get_file_context(cts:CurrentContext, node):
+    def get_file_context(ctx:CurrentContext, node):
         return ParadoxFileActions
     
     @staticmethod
@@ -31,7 +31,7 @@ class EventFileContext(ParadoxFileContext):
     def derive_node_context(ctx:CurrentContext, node):
         if isinstance(node, GenericBlock):
             if node.key in ["news_event", "country_event"]:
-                return EventBlockContext
+                return EventBlockActions
             elif node.key in ["option", "immediate"]:
                 return EventOptionContext
         return GenericNodeActions

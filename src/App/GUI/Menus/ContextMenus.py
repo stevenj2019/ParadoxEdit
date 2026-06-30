@@ -17,6 +17,7 @@ class GenericContextMenu(QMenu):
     def call(self, selected, context):
         self.clear()
         self.selected = selected
+        print(f"{context} in ContextMenu")
         self.menu_def = self._get_context_menu_options(self.selected, context)
         self._build_menu()
 
@@ -84,12 +85,12 @@ class ParadoxNodesContextMenu(GenericContextMenu):
             ]), 
             ActionGroup("File Options", [
                 ActionSubMenu("Add", [
-                    Action("Dummy", dummy, True)
-                    # *context.node_actions(None),
+                    # Action("Dummy", dummy, True)
+                    *context.node_actions(self.app_controller, selected),
                 ]),
                 Action("Delete", lambda:self.app_controller.request_block_mutation.emit(BlockMutationRequest(file=None,
-                                                                                                        target=selected, 
-                                                                                                        value=None,
-                                                                                                        state=ChangeState.DELETED)), True)
+                                                                                                             target=selected, 
+                                                                                                             value=None,
+                                                                                                             state=ChangeState.DELETED)), True)
             ])
         ]

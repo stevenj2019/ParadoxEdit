@@ -1,9 +1,19 @@
+from __future__ import annotations
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from App.Contexts.FileContexts import ParadoxFileContext
+
 from dataclasses import dataclass
-from typing import Optional
+from typing import Optional, Callable
 from ParadoxParser import ParadoxScriptParser as PDXScriptFile
 from ParadoxParser import GenericBlock, GenericKeyValue, GenericNode
 from App.Enums import PropagationType, ChangeState
-# from App.Contexts.FileContexts import ParadoxFileContext
+
+@dataclass
+class OpenFile:
+    file:PDXScriptFile
+    context:ParadoxFileContext
 
 @dataclass
 class PropagationRequest:
@@ -23,7 +33,7 @@ class NodeMutationRequest:
 class BlockMutationRequest:
     file:Optional[PDXScriptFile]
     target:GenericBlock
-    value:Optional[GenericBlock|GenericKeyValue|GenericNode]
+    value:Callable
     state:ChangeState
     
 @dataclass

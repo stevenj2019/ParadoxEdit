@@ -6,13 +6,14 @@ from PyQt5.QtGui import QColor as QColour
 from ParadoxParser import ParadoxScriptParser as PDXScript
 from ParadoxParser.ParadoxNodes import GenericBlock, GenericKeyValue, GenericComment, GenericString, GenericToken
 
+from App.Contracts import OpenFile
 from App.Enums import QtStorage, ChangeState, ExpansionMode
 from App.Contexts.FileContexts import ParadoxFileContext
 from App.GUI.Menus.ContextMenus import GenericCategoryContextMenu, ParadoxNodesContextMenu
 from App.GUI.StyledDelegate import ParadoxFileDelegate, NodeStateDelegate
 
 class ModPanel(QWidget):
-    request_load_block = pyqtSignal(object, object)
+    request_load_block = pyqtSignal(object)
     load_file = pyqtSignal()
     def __init__(self, parent, app_controller):
         super().__init__()
@@ -120,7 +121,7 @@ class ModPanel(QWidget):
         context = item.data(0, QtStorage.CONTEXT) #but fucking None Here.
         print(file, context)
         if file:
-            self.request_load_block.emit(file, context)
+            self.request_load_block.emit(OpenFile(file, context))
 
     # def build_context_menu(self, pos):
     #     selected = self.tree.itemAt(pos)
@@ -166,16 +167,17 @@ class ContentsPanel(QWidget):
         item.setData(0, QtStorage.STATE, state)
         self.tree.update()
 
-    def load_block(self, block):
+    def load_block(self, file):
         """
         Load a GenericBlock into the tree for display.
         """
+        block = file.file
         self.node_to_item.clear()
         self.tree.clear()
         self.tree.blockSignals(True)
         self.tree.setUpdatesEnabled(False)
         try:
-            file_context = self.app_controller.file_system.open_file_context #here is where we treieve currently open context
+            file_context = self.app_controller.file_system.open_file.context #here is where we treieve currently open context
             if isinstance(block, PDXScript):
                 self._add_nodes(self.tree.invisibleRootItem(), block.nodes, file_context)
             else:
@@ -250,6 +252,7 @@ class ContentsPanel(QWidget):
             return
         item = selected.data(0, QtStorage.NODE)
         context = selected.data(0, QtStorage.CONTEXT)
+        # action_context = context.
         self.context_menu.call(item, context)
         self.context_menu.exec_(self.tree.viewport().mapToGlobal(pos))
 
