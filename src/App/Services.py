@@ -129,8 +129,6 @@ class FilesystemMananger:
         self.mod = None
 
         self.open_file:OpenFile = None
-        # self.open_file:PDXScriptFile = None
-        # self.open_file_context:ParadoxFileContext = None
 
     def load_mod(self, path):
         self.mod = ParadoxMod(path)
@@ -139,7 +137,7 @@ class FilesystemMananger:
         self.open_file = file
 
     def changed_file(self, file, node, status):
-        self.change_tracker.set_file_state(file, status) #marks file
+        self.change_tracker.set_file_state(file, status)
         self.change_tracker.set_node_state(node, status)
         
     def collect_deletion_nodes(self, file):

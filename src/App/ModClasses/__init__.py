@@ -37,29 +37,3 @@ class ParadoxMod:
             (Path(node.value.value.strip('"')) for node in self.descriptor_object.nodes
             if isinstance(node, GenericKeyValue) and node.key == "path"), None
         )
-        # self.mod_name = next(
-        #     (node.value.value for node in self.descriptor_object.obj.nodes
-        #     if isinstance(node, GenericKeyValue) and node.key == "name"), None
-        # )
-        # self.mod_base_dir = next(
-        #     (Path(node.value.value.strip('"')) for node in self.descriptor_object.obj.nodes
-        #     if isinstance(node, GenericKeyValue) and node.key == "path"), None
-        # )
-    # def _collect_categories(self):
-    #     def init_category(CategoryClass):
-    #         try:
-    #             return CategoryClass()  # instantiate category
-    #         except Exception as e:
-    #             print(f"Failed to load {CategoryClass.__name__}: {e}")
-    #             return None
-
-    #     with concurrent.futures.ThreadPoolExecutor() as executor:
-    #         # map the Category classes to the executor
-    #         results = executor.map(init_category, implemented_arr)
-
-    #     # append only successful objects
-    #     for obj, cls in zip(results, implemented_arr):
-    #         if obj is not None:
-    #             self.categories.append(obj)
-    #         else:
-    #             self.error_categories.append(cls.__name__)

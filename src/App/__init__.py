@@ -5,15 +5,17 @@ from PyQt5.QtWidgets import QApplication
 
 from ParadoxParser.ParadoxNodes import GenericBlock
 
+from App.ModClasses.Categories import GenericCategory
 from App.Services import ConfigurationManager, StyleManager, FilesystemMananger
 from App.GUI.Main import MainWindow
 
 from App.Enums import SaveTarget, PropagationType, ChangeState
-from App.Contracts import PropagationRequest, NodeMutationRequest, BlockMutationRequest
+from App.Contracts import PropagationRequest, NodeMutationRequest, BlockMutationRequest, BulkMutationRequest
 
 class AppController(QObject):
     request_node_mutation = pyqtSignal(object)
     request_block_mutation = pyqtSignal(object)
+    request_bulk_mutation = pyqtSignal(object)
     request_save = pyqtSignal(object)
     def __init__(self):
         super().__init__()
@@ -30,6 +32,7 @@ class AppController(QObject):
         self.app.setStyleSheet(qdarktheme.load_stylesheet("dark" if self.configuration.dark_mode else "light"))
         self.request_node_mutation.connect(self._request_node_mutation)
         self.request_block_mutation.connect(self._request_block_mutation)
+        self.request_bulk_mutation.connect(self._request_bulk_mutation)
         self.request_save.connect(self._save_target)
         self.main.show()
         self.app.exec_()
@@ -88,6 +91,23 @@ class AppController(QObject):
                                                        file=file,
                                                        node=node,
                                                        state=state))
+        
+    def _request_bulk_mutation(self, request:BulkMutationRequest):
+        target = request.target
+        action = request.action
+        if isinstance(target, GenericCategory):
+            file_list = [f for f in target.files.values()]
+        else:
+            file_list = [target]
+
+        for file in file_list:
+            action(file, self)
+            self.main.propagation_request.emit(PropagationRequest(type=PropagationType.FILE,
+                                                                  file=file,
+                                                                  node=None,
+                                                                  state=ChangeState.MODIFIED))
+        if self.file_system.open_file.file in file_list:
+            self.main.load_file(self.file_system.open_file)
 
     def _save_target(self, target):
         def save_routine(file):

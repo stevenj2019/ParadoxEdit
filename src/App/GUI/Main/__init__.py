@@ -1,18 +1,15 @@
 from PyQt5.QtWidgets import QMainWindow, QSplitter
 from PyQt5.QtCore import Qt, pyqtSignal
 
-from ParadoxParser import ParadoxScriptParser as PDXScript
 from ParadoxParser.ParadoxNodes import GenericBlock
 
-from App.Enums import SaveTarget
-
-# from App.GUI.Menus.TopBar import 
 from App.Contracts import PropagationRequest, OpenFile
 from App.Enums import PropagationType, ChangeState
 from App.Contexts.FileContexts import ParadoxFileContext
 from App.GUI.Menus.Topbar import Topbar
 from App.GUI.Main.InlineEdit import InLineEditManager
-from App.GUI.Main.Panels import ModPanel, ContentsPanel
+from App.GUI.Main.ModPanel import ModPanel
+from App.GUI.Main.ContentsPanel import ContentsPanel
 from App.GUI.Dialogues.FileDialogues import select_mod_file
 from App.GUI.Dialogues.PopupModels import could_not_load_mod_critical
 from App.GUI.Windows.Settings import SettingsWindow

@@ -3,11 +3,14 @@ from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
     from App.Contexts.FileContexts import ParadoxFileContext
+    from App.ModClasses.Categories import GenericCategory
 
 from dataclasses import dataclass
 from typing import Optional, Callable
+
 from ParadoxParser import ParadoxScriptParser as PDXScriptFile
 from ParadoxParser import GenericBlock, GenericKeyValue, GenericNode
+
 from App.Enums import PropagationType, ChangeState
 
 @dataclass
@@ -44,16 +47,8 @@ class BlockMutationRequest:
             value=factory, 
             state=ChangeState.ADDED
         )
-    
-@dataclass
-class AppendNodeRequest:
-    file:Optional[PDXScriptFile]
-    node:GenericBlock|GenericKeyValue|GenericNode
-    index:int
-    value:GenericBlock|GenericKeyValue|GenericNode
 
-# @dataclass
-# class CurrentContext:
-#     file:PDXScriptFile
-#     category:ParadoxFileContext
-#     node:Optional[GenericBlock|GenericKeyValue|GenericNode]
+@dataclass
+class BulkMutationRequest:
+    target:GenericCategory|PDXScriptFile
+    action:Callable

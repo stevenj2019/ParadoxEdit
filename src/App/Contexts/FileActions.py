@@ -1,23 +1,34 @@
 from App.Enums import ChangeState
-from App.Contracts import BlockMutationRequest
+from App.Contracts import BlockMutationRequest, BulkMutationRequest
 from App.GUI.Menus import Action
-from App.PDXFactory.Blocks import Generic, Sprites, Events
-#dumb temporary bullshit
 
-def dummy():
-    return 
+from App.PDXFactory.Blocks.Generic import comment_node
+from App.PDXFactory.Blocks.Events import add_namespace_keyval, country_event_block, news_event_block
+from App.PDXFactory.Blocks.Sprites import GFX_icon, GFX_shine_icon
+from App.Scripts.Generic import clear_comments, clear_whitespace
 class ParadoxFileActions:
     @staticmethod
     def file_actions(app_controller, selected):
         return [
-            Action("Remove Comments", dummy(), False)
+            Action("Remove Comments", 
+                   lambda:app_controller.request_bulk_mutation.emit(
+                       BulkMutationRequest(target=selected, action=clear_comments)
+                   ),
+                   True
+            ),
+            Action("Remove Whitespace", 
+                   lambda:app_controller.request_bulk_mutation.emit(
+                       BulkMutationRequest(target=selected, action=clear_whitespace)
+                   ),
+                   True
+            )
         ]
     @staticmethod
     def node_actions(app_controller, selected):
         return [
             Action("Add Comment", 
                    lambda:app_controller.request_block_mutation.emit(
-                       BlockMutationRequest.add(selected, Generic.comment_node)
+                       BlockMutationRequest.add(selected, comment_node)
                    ), 
                    True
             )
@@ -27,7 +38,7 @@ class EventFileActions(ParadoxFileActions):
     @staticmethod
     def file_actions(app_controller, selected):
         return [
-            *ParadoxFileActions.node_actions(app_controller, selected),
+            *ParadoxFileActions.file_actions(app_controller, selected),
             # Action("Inject Event Logs", dummy(), False)
         ]
     @staticmethod
@@ -36,19 +47,19 @@ class EventFileActions(ParadoxFileActions):
             *ParadoxFileActions.node_actions(app_controller, selected),
             Action("Add Namespace", 
                    lambda:app_controller.request_block_mutation.emit(
-                       BlockMutationRequest.add(selected, Events.add_namespace_keyval)
+                       BlockMutationRequest.add(selected, add_namespace_keyval)
                    ), 
                    True
             ),
             Action("Add Country Event",
                    lambda:app_controller.request_block_mutation.emit(
-                       BlockMutationRequest.add(selected, Events.country_event_block)
+                       BlockMutationRequest.add(selected, country_event_block)
                    ),
                    True
             ),
             Action("Add News Event",
                    lambda:app_controller.request_block_mutation.emit(
-                       BlockMutationRequest.add(selected, Events.news_event_block)
+                       BlockMutationRequest.add(selected, news_event_block)
                    ),
                    True
             )
@@ -58,7 +69,7 @@ class GFXFileActions(ParadoxFileActions):
     @staticmethod
     def file_actions(app_controller, selected):
         return [
-            *ParadoxFileActions.node_actions(app_controller, selected),
+            *ParadoxFileActions.file_actions(app_controller, selected),
             #Action()
         ]
     @staticmethod
@@ -67,12 +78,12 @@ class GFXFileActions(ParadoxFileActions):
             *ParadoxFileActions.node_actions(app_controller, selected),
             Action("Add Static Sprite",
                    lambda:app_controller.request_block_mutation.emit(
-                       BlockMutationRequest.add(selected, Sprites.GFX_icon)
+                       BlockMutationRequest.add(selected, GFX_icon)
                    ), True
             ),
             Action("Add Focus _shine Sprite",
                    lambda:app_controller.request_block_mutation.emit(
-                       BlockMutationRequest.add(selected, Sprites.GFX_shine_icon)
+                       BlockMutationRequest.add(selected, GFX_shine_icon)
                    ), True
             )
        ]

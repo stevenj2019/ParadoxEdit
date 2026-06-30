@@ -4,14 +4,9 @@ from typing import TYPE_CHECKING
 if TYPE_CHECKING:
     from App.Contracts import CurrentContext
 
-from App.GUI.Menus import Action
 from ParadoxParser.ParadoxNodes import GenericBlock
 from App.Contexts.NodeActions import GenericNodeActions, EventBlockActions, EventOptionContext
 from App.Contexts.FileActions import ParadoxFileActions, EventFileActions, GFXFileActions
-#fill-in till i code ability lol
-class CurrentContext:
-    def __init__():
-        pass
 
 class ParadoxFileContext:
     @staticmethod

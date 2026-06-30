@@ -64,9 +64,9 @@ class GenericCategoryContextMenu(GenericContextMenu):
         super().__init__(parent, app_controller)
         self.menu_def:list = []
 
-    def _get_context_menu_options(self):
-        #TODO
-        return
+    def _get_context_menu_options(self, selected, context):
+        context_actions = context.get_file_context()
+        return context_actions.file_actions(self.app_controller, selected)
     
 class ParadoxNodesContextMenu(GenericContextMenu):
     request_expansion = pyqtSignal(object)
@@ -75,7 +75,6 @@ class ParadoxNodesContextMenu(GenericContextMenu):
         self.menu_def:list = []
 
     def _get_context_menu_options(self, selected, context):
-        print(f"getting menu with {context}")
         return [
             ActionGroup("Tree Options", [
                 Action("Expand All", lambda:self.parent.set_expansion_rule(ExpansionMode.ALL), True),
@@ -84,12 +83,14 @@ class ParadoxNodesContextMenu(GenericContextMenu):
             ]), 
             ActionGroup("File Options", [
                 ActionSubMenu("Add", [
-                    # Action("Dummy", dummy, True)
                     *context.node_actions(self.app_controller, selected),
                 ]),
-                Action("Delete", lambda:self.app_controller.request_block_mutation.emit(BlockMutationRequest(file=None,
-                                                                                                             target=selected, 
-                                                                                                             value=None,
-                                                                                                             state=ChangeState.DELETED)), True)
+                Action("Delete", 
+                       lambda:self.app_controller.request_block_mutation.emit(
+                           BlockMutationRequest(file=None,
+                                                target=selected, 
+                                                value=None,
+                                                state=ChangeState.DELETED)), 
+                       True)
             ])
         ]

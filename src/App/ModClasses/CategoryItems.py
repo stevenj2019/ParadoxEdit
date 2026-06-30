@@ -1,6 +1,6 @@
 from ParadoxParser import ParadoxScriptParser as PDXScriptFile
 # from App.ModClasses.ActionModels import ActionGroup, Action
-from App.Backend import Generic, Events, GFX
+# from App.Backend import Generic, Events, GFX
 
 class GenericCategoryItem:
     def __init__(self, pdx_obj:PDXScriptFile):
