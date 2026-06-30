@@ -1,6 +1,8 @@
 from ParadoxParser.ParadoxNodes import (GenericBlock, GenericKeyValue, GenericString,
                                         GenericInt, GenericFloat, GenericBool)
-def GFX_icon(name, path):
+def GFX_icon(name=None, path=None):
+    name = name if name else "GFX_icon_here"
+    path = path if path else "/path/to/file.dds"
     return GenericBlock(
         "SpriteType",
         [
@@ -9,7 +11,9 @@ def GFX_icon(name, path):
         ]
     )
 
-def GFX_shine_icon(name, path):
+def GFX_shine_icon(name=None, path=None):
+    name = name if name else "GFX_icon_here"
+    path = path if path else "/path/to/file.dds"
     def _animation_block(path, rotation):
         return GenericBlock(
             "animation",

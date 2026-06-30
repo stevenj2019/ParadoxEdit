@@ -35,6 +35,15 @@ class BlockMutationRequest:
     target:GenericBlock
     value:Callable
     state:ChangeState
+
+    @classmethod
+    def add(cls, target, factory, file=None):
+        return cls(
+            file=file, 
+            target=target, 
+            value=factory, 
+            state=ChangeState.ADDED
+        )
     
 @dataclass
 class AppendNodeRequest:

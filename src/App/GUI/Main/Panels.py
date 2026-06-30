@@ -206,7 +206,7 @@ class ContentsPanel(QWidget):
         self.node_to_item[node] = item
 
         effective_state = inherited_state or self.app_controller.file_system.change_tracker.get_node_state(node)
-        context = open_file_context.derive_node_context(None, node)
+        context = open_file_context.derive_node_context(node)
         print(f"{open_file_context} {node.key} block with {context}") #and by here, it is already wrong.
 
         item.setData(0, QtStorage.NODE, node)
@@ -231,7 +231,7 @@ class ContentsPanel(QWidget):
         self.node_to_item[value_node] = item 
 
         effective_state = self.app_controller.file_system.change_tracker.get_node_state(node)
-        context = open_file_context.derive_node_context(None, node)
+        context = open_file_context.derive_node_context(node)
         
         item.setData(0, QtStorage.NODE, node)
         item.setData(0, QtStorage.STATE, effective_state)

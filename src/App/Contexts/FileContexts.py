@@ -15,32 +15,35 @@ class CurrentContext:
 
 class ParadoxFileContext:
     @staticmethod
-    def get_file_context(ctx:CurrentContext, node):
+    def get_file_context():
         return ParadoxFileActions
     
     @staticmethod
-    def derive_node_context(ctx:CurrentContext, node):
+    def derive_node_context(node):
         return GenericNodeActions
 
 class EventFileContext(ParadoxFileContext):
     @staticmethod
-    def get_file_context(cts:CurrentContext, node):
+    def get_file_context():
         return EventFileActions
     
     @staticmethod
-    def derive_node_context(ctx:CurrentContext, node):
+    def derive_node_context(node):
         if isinstance(node, GenericBlock):
             if node.key in ["news_event", "country_event"]:
                 return EventBlockActions
             elif node.key in ["option", "immediate"]:
                 return EventOptionContext
-        return GenericNodeActions
-    
+        return EventFileActions
+
 class GFXFileContext(ParadoxFileContext):
     @staticmethod
-    def get_file_context(cts:CurrentContext, node):
+    def get_file_context():
         return GFXFileActions
     
     @staticmethod
-    def derive_node_context(ctx:CurrentContext, node):
+    def derive_node_context(node):
+        if isinstance(node, GenericBlock):
+            if node.key.lower() == "spritetypes":
+                return GFXFileActions
         return GenericNodeActions

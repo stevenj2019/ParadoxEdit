@@ -17,7 +17,6 @@ class GenericContextMenu(QMenu):
     def call(self, selected, context):
         self.clear()
         self.selected = selected
-        print(f"{context} in ContextMenu")
         self.menu_def = self._get_context_menu_options(self.selected, context)
         self._build_menu()
 

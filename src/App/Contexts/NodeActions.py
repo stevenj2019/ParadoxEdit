@@ -3,6 +3,7 @@ from App.Contracts import BlockMutationRequest
 from App.GUI.Menus import Action
 from App.Contexts.FileActions import ParadoxFileActions
 from App.PDXFactory.Blocks.Generic import comment_node
+from App.PDXFactory.Blocks import Generic, Events
 #dumb temporary bullshit
 class CurrentContext:
     def __init__():
@@ -17,13 +18,14 @@ class GenericNodeActions:
     @staticmethod
     def node_actions(app_controller, selected):
         return [
-            Action("Add Comment", 
-                   lambda:app_controller.request_block_mutation.emit(BlockMutationRequest(  file=None,
-                                                                                            target=selected,
-                                                                                            value=comment_node,
-                                                                                            state=ChangeState.ADDED)),
-                    False
-            )
+            *ParadoxFileActions.node_actions(app_controller, selected),
+            # Action("Add Comment", 
+            #        lambda:app_controller.request_block_mutation.emit(BlockMutationRequest(  file=None,
+            #                                                                                 target=selected,
+            #                                                                                 value=Generic.comment_node,
+            #                                                                                 state=ChangeState.ADDED)),
+            #         False
+            # )
         ]
     
 ###          ###
@@ -31,15 +33,17 @@ class GenericNodeActions:
 ###          ###
 class EffectsContext:
     @staticmethod
-    def node_actions(ctx:CurrentContext):
+    def node_actions(app_controller, selected):
         return [
+            *ParadoxFileActions.node_actions(app_controller, selected),
            Action("EffectsContext", dummy(), False)
         ]
     
 class TriggersContext:
     @staticmethod
-    def node_actions(ctx:CurrentContext):
+    def node_actions(app_controller, selected):
         return [
+            *ParadoxFileActions.node_actions(app_controller, selected),
             Action("TriggersContext", dummy(), False)
         ]
     
@@ -48,19 +52,17 @@ class TriggersContext:
 ###      ###
 class EventBlockActions:
     @staticmethod
-    def node_actions(ctx:CurrentContext):
+    def node_actions(app_controller, selected):
         return [
-            # *ParadoxFileActions.node_actions(ctx), 
-            Action("EventBlockActions", dummy, False)
-            # Action("Add Immediate Block", dummy(), False),
-            # Action("Add Option Block", dummy(), False)
+            *ParadoxFileActions.node_actions(app_controller, selected),
+            Action("Add Immediate Block", dummy, False)
         ]
     
 class EventOptionContext:
     @staticmethod
-    def node_actions(ctx:CurrentContext):
+    def node_actions(app_controller, selected):
         return [
-            *ParadoxFileActions.node_actions(ctx),
-            *TriggersContext.node_actions(ctx), 
-            *EffectsContext.node_actions(ctx),
+            *ParadoxFileActions.node_actions(app_controller, selected),
+            # *TriggersContext.node_actions(ctx), 
+            # *EffectsContext.node_actions(ctx),
         ]
