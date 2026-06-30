@@ -68,8 +68,8 @@ class AppController(QObject):
                         return parent, parent.nodes.index(child)+1
                     if isinstance(child, GenericBlock):
                         result = visit(child, child.node)
-                    if result:
-                        return result
+                        if result:
+                            return result
                 return 
             return visit(file, file.nodes)
         
