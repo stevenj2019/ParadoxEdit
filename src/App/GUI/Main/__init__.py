@@ -10,13 +10,12 @@ from App.GUI.Menus.Topbar import Topbar
 from App.GUI.Main.InlineEdit import InLineEditManager
 from App.GUI.Main.ModPanel import ModPanel
 from App.GUI.Main.ContentsPanel import ContentsPanel
-from App.GUI.Dialogues.FileDialogues import select_mod_file
-from App.GUI.Dialogues.PopupModels import could_not_load_mod_critical
-from App.GUI.Windows.Settings import SettingsWindow
+from App.GUI.Widgets.FileDialogues import select_mod_file
+from App.GUI.Widgets.PopupModels import could_not_load_mod_critical
+from App.GUI.Forms.Settings import SettingsForm
 
 class MainWindow(QMainWindow):
     propagation_request = pyqtSignal(object)
-    # node_changed = pyqtSignal(object)
     def __init__(self, app):
         super().__init__()
         self.app_controller = app
@@ -58,7 +57,7 @@ class MainWindow(QMainWindow):
     def _propogate_mutations(self, request:PropagationRequest):
         type = request.type
         file = request.file
-        node = request.node #this may be None
+        node = request.node
         state = request.state
         def recurse(node):
             self.contents_panel.set_node_state(node, state)
@@ -79,17 +78,15 @@ class MainWindow(QMainWindow):
 
     def settings_window_requested(self):
         title = "PDXEdit Setup" if self.app_controller.configuration.initialised else "PDXEdit Settings"
-        settings = SettingsWindow(title, self)
+        settings = SettingsForm(title, self.app_controller)
         settings.exec_()
 
     def load_mod_requested(self):
         path = select_mod_file(self)
         self.app_controller.load_mod(path)
 
-    def load_mod_to_gui(self, mod):
-        # self.mod = mod
+    def load_mod(self, mod):
         self.mod_panel._populate_tree(mod)
-        self.load_file(OpenFile(mod.descriptor_object, ParadoxFileContext))
         self.topbar._enable_actions()
 
     def load_mod_failed(self, exc):
@@ -97,5 +94,4 @@ class MainWindow(QMainWindow):
 
     def load_file(self, file):
         self.editor_session.cancel_request(reason="file switch")
-        self.app_controller.file_system.load_file(file)
         self.contents_panel.load_block(file)

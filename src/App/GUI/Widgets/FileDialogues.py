@@ -1,5 +1,4 @@
-import os
-from PyQt5.QtWidgets import QFileDialog, QMessageBox
+from PyQt5.QtWidgets import QFileDialog
 from pathlib import Path
 
 def select_hoi4_install_directory():

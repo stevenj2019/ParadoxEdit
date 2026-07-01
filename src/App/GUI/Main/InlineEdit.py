@@ -7,7 +7,7 @@ from ParadoxParser.ParadoxNodes import (GenericNode, GenericKeyValue, GenericNod
                                         GenericInt, GenericFloat, GenericBool)
 from App.Contracts import NodeMutationRequest
 
-from App.GUI.Dialogues.PopupModels import change_rejected_warning
+from App.GUI.Widgets.PopupModels import change_rejected_warning
 
 class InLineEditManager(QObject):
     def __init__(self, mutate_callback):

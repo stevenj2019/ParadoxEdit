@@ -10,7 +10,8 @@ from App.Services import ConfigurationManager, StyleManager, FilesystemMananger
 from App.GUI.Main import MainWindow
 
 from App.Enums import SaveTarget, PropagationType, ChangeState
-from App.Contracts import PropagationRequest, NodeMutationRequest, BlockMutationRequest, BulkMutationRequest
+from App.Contracts import OpenFile, PropagationRequest, NodeMutationRequest, BlockMutationRequest, BulkMutationRequest
+from App.Contexts.FileContexts import ParadoxFileContext
 
 class AppController(QObject):
     request_node_mutation = pyqtSignal(object)
@@ -43,8 +44,9 @@ class AppController(QObject):
         except Exception as e:
             self.main.load_mod_failed(e)
             return 
-        
-        self.main.load_mod_to_gui(self.file_system.mod)
+        self.file_system.load_file(OpenFile(self.file_system.mod.descriptor_object, ParadoxFileContext))
+        self.main.load_mod(self.file_system.mod)
+        self.main.load_file(self.file_system.open_file)
 
     def _request_node_mutation(self, request:NodeMutationRequest):
         file = request.file if request.file else self.file_system.open_file.file

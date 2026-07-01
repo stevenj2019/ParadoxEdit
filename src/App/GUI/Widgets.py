@@ -1,6 +1,6 @@
 from PyQt5.QtWidgets import QLineEdit, QComboBox
 from PyQt5.QtGui import QFontMetrics
-from App.GUI.Dialogues.PopupModels import change_rejected_warning
+from App.GUI.Widgets.PopupModels import change_rejected_warning
 
 def text_editor(node, emit):
     widget = QLineEdit(str(node.value))
