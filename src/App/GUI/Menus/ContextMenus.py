@@ -1,6 +1,8 @@
 from PyQt5.QtWidgets import QTreeWidget, QTreeWidgetItem, QMenu, QLabel, QWidgetAction, QAction
 from PyQt5.QtCore import pyqtSignal
 
+from ParadoxParser import ParadoxScriptParser as PDXScriptFile
+
 from App.Enums import ExpansionMode, ChangeState
 from App.Contracts import BlockMutationRequest
 from App.GUI.Menus import ActionGroup, ActionSubMenu, Action
@@ -12,12 +14,12 @@ class GenericContextMenu(QMenu):
         self.parent:QTreeWidget = parent
         self.app_controller = app_controller
         self.menu_def:list = []
-        self.selected:QTreeWidgetItem = None
+        self.parent_node = None
+        self.parent_index = None
 
-    def call(self, selected, context):
+    def call(self, parent, parent_idx, context):
         self.clear()
-        self.selected = selected
-        self.menu_def = self._get_context_menu_options(self.selected, context)
+        self.menu_def = self._get_context_menu_options(node=parent, node_index=parent_idx, context=context)
         self._build_menu()
 
     def _get_context_menu_options():
@@ -57,6 +59,7 @@ class GenericContextMenu(QMenu):
     def _build_button(self, menu, item):
         action = QAction(item.text, menu)
         action.triggered.connect(item.callback)
+        action.setEnabled(item.enabled)
         menu.addAction(action)
 
 class GenericCategoryContextMenu(GenericContextMenu):
@@ -64,9 +67,9 @@ class GenericCategoryContextMenu(GenericContextMenu):
         super().__init__(parent, app_controller)
         self.menu_def:list = []
 
-    def _get_context_menu_options(self, selected, context):
-        context_actions = context.get_file_context()
-        return context_actions.file_actions(self.app_controller, selected)
+    # def _get_context_menu_options(self, context):
+    #     context_actions = context.get_file_context()
+    #     return context_actions.file_actions(self.app_controller, node, node_index)
     
 class ParadoxNodesContextMenu(GenericContextMenu):
     request_expansion = pyqtSignal(object)
@@ -74,23 +77,26 @@ class ParadoxNodesContextMenu(GenericContextMenu):
         super().__init__(parent, app_controller)
         self.menu_def:list = []
 
-    def _get_context_menu_options(self, selected, context):
+    #TODO need to disable delete if the PDXScriptFile is selected
+    def _get_context_menu_options(self, node, node_index, context):
         return [
-            ActionGroup("Tree Options", [
-                Action("Expand All", lambda:self.parent.set_expansion_rule(ExpansionMode.ALL), True),
-                Action("Collapse All", lambda:self.parent.set_expansion_rule(ExpansionMode.DEPTH, depth_limit=2), True),
-                Action("Expand This", lambda:self.parent.set_expansion_rule(ExpansionMode.FROM_NODE, root_item=selected), True),
-            ]), 
+            # ActionGroup("Tree Options", [
+            #     Action("Expand All", lambda:self.parent.set_expansion_rule(ExpansionMode.ALL), True),
+            #     Action("Collapse All", lambda:self.parent.set_expansion_rule(ExpansionMode.DEPTH, depth_limit=2), True),
+            #     Action("Expand This", lambda:self.parent.set_expansion_rule(ExpansionMode.FROM_NODE, root_item=selected), True),
+            # ]), 
             ActionGroup("File Options", [
                 ActionSubMenu("Add", [
-                    *context.node_actions(self.app_controller, selected),
+                    *context.node_actions(self.app_controller, node, node_index),
                 ]),
                 Action("Delete", 
                        lambda:self.app_controller.request_block_mutation.emit(
                            BlockMutationRequest(file=None,
-                                                target=selected, 
+                                                parent=node,
+                                                index=node_index, 
                                                 value=None,
                                                 state=ChangeState.DELETED)), 
-                       True)
+                    (not isinstance(node, PDXScriptFile))
+                )
             ])
         ]

@@ -88,7 +88,6 @@ class ModPanel(QWidget):
         for c_key, c_val in mod.categories.items():
             cat_sub = QTreeWidgetItem([c_key])
             category_context = c_val.context
-            print(f"{c_val} with {category_context}") #it is correct here
             set_category_data(cat_sub, c_val, category_context)
 
             self.node_to_item[c_val] = cat_sub
@@ -98,7 +97,6 @@ class ModPanel(QWidget):
                 self.file_to_category[obj] = cat_sub
 
                 widget.setText(0, file)
-                print(f"{file} {category_context}") #and here
                 set_file_data(widget, obj, category_context)
                 cat_sub.addChild(widget)
 
@@ -117,7 +115,6 @@ class ModPanel(QWidget):
             return
         file = item.data(0, QtStorage.FILE)
         context = item.data(0, QtStorage.CONTEXT)
-        print(file, context)
         if file:
             self.request_load_block.emit(OpenFile(file, context))
 

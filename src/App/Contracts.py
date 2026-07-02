@@ -35,15 +35,17 @@ class NodeMutationRequest:
 @dataclass
 class BlockMutationRequest:
     file:Optional[PDXScriptFile]
-    target:GenericBlock
+    parent:PDXScriptFile|GenericBlock
+    index:int
     value:Callable
     state:ChangeState
 
     @classmethod
-    def add(cls, target, factory, file=None):
+    def add(cls, parent, index, factory, file=None):
         return cls(
             file=file, 
-            target=target, 
+            parent=parent,
+            index=index,
             value=factory, 
             state=ChangeState.ADDED
         )

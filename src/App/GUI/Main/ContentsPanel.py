@@ -2,9 +2,10 @@ from PyQt5.QtWidgets import QWidget, QVBoxLayout, QTreeWidget, QTreeWidgetItem
 from PyQt5.QtCore import Qt, pyqtSignal
 
 from ParadoxParser import ParadoxScriptParser as PDXScript
-from ParadoxParser.ParadoxNodes import GenericBlock, GenericKeyValue, GenericComment, GenericString, GenericToken
+from ParadoxParser.ParadoxNodes import GenericBlock, GenericKeyValue, GenericNode, GenericComment, GenericString, GenericToken
 
 from App.Enums import QtStorage, ExpansionMode, ChangeState
+from App.Contexts.FileContexts import ParadoxFileContext
 from App.GUI.Menus.ContextMenus import ParadoxNodesContextMenu
 from App.GUI.StyledDelegate import NodeStateDelegate
 
@@ -29,16 +30,16 @@ class ContentsPanel(QWidget):
         self.context_menu = ParadoxNodesContextMenu(self, app_controller)
         self.context_menu.request_expansion.connect(self.set_expansion_rule)
         
-        self.tree.setContextMenuPolicy(Qt.CustomContextMenu)
-        self.tree.customContextMenuRequested.connect(self._request_context_menu)
-        
+        # self.tree.setContextMenuPolicy(Qt.CustomContextMenu)
+        # self.tree.customContextMenuRequested.connect(self._request_context_menu)
+        self.setContextMenuPolicy(Qt.CustomContextMenu)
+        self.customContextMenuRequested.connect(self._request_context_menu)
         layout.addWidget(self.tree)
 
     def set_node_state(self, node, state):
         item = self.node_to_item[node]
         if item is None:
             return
-        # item.setText(1, node._get_value())
         item.setData(0, QtStorage.STATE, state)
         self.tree.update()
 
@@ -53,11 +54,11 @@ class ContentsPanel(QWidget):
         self.tree.setUpdatesEnabled(False)
 
         try:
-            file_context = self.app_controller.file_system.open_file.context #here is where we treieve currently open context
-            if isinstance(block, PDXScript):
-                self._add_nodes(self.tree.invisibleRootItem(), block.nodes, file_context)
-            else:
-                self._add_nodes(self.tree.invisibleRootItem(), block.nodes, file_context)
+            file_context = self.app_controller.file_system.open_file.context
+            self._add_nodes(parent_item=self.tree.invisibleRootItem(),
+                            parent_node=block,
+                            nodes=block.nodes, 
+                            open_file_context=file_context)
 
         finally:
             self.tree.blockSignals(False)
@@ -65,47 +66,76 @@ class ContentsPanel(QWidget):
         self.set_expansion_rule(ExpansionMode.DEPTH)
         self.tree.resizeColumnToContents(0)
 
-    def _add_nodes(self, parent_item, nodes, open_file_context, inherited_state=None):
-        for node in nodes:
+    def _add_nodes(self, 
+                   parent_item:QTreeWidgetItem, 
+                   parent_node:PDXScript|GenericBlock,
+                   nodes:list, 
+                   open_file_context:ParadoxFileContext, 
+                   inherited_state:ChangeState=None):
+        for index, node in enumerate(nodes):
             effective_state = (
                 inherited_state 
                 or self.app_controller.file_system.change_tracker.get_node_state(node)
             )
-            match node:
-                case GenericBlock():
-                    self._build_block(parent_item, node, open_file_context, effective_state)
-                case GenericComment():
-                    self._build_row(parent_item, node, open_file_context, effective_state, "Comment")
-                case GenericString()|GenericToken():
-                    self._build_row(parent_item, node, open_file_context, effective_state, "Array Value")
-                case GenericKeyValue():
-                    self._build_row(parent_item, node, open_file_context, effective_state)
+            if isinstance(node, GenericBlock):
+                self._build_block(parent_item=parent_item,
+                                  parent_node=parent_node,
+                                  parent_index=index,
+                                  node=node,
+                                  open_file_context=open_file_context,
+                                  inherited_state=effective_state)
+            else:
+                self._build_row(parent_item=parent_item,
+                                parent_node=parent_node,
+                                parent_index=index,
+                                node=node,
+                                open_file_context=open_file_context,
+                                inherited_state=effective_state)
 
-    def _build_block(self, parent_item, node, open_file_context, inherited_state):
+    def _build_block(self, 
+                     parent_item:QTreeWidgetItem,
+                     parent_node:PDXScript|GenericBlock,
+                     parent_index:int,
+                     node:GenericKeyValue|GenericNode, 
+                     open_file_context:ParadoxFileContext, 
+                     inherited_state:ChangeState
+    ):
         item = QTreeWidgetItem([str(node.key), ""])
         self.node_to_item[node] = item
-
         effective_state = inherited_state or self.app_controller.file_system.change_tracker.get_node_state(node)
         context = open_file_context.derive_node_context(node)
-        print(f"{open_file_context} {node.key} block with {context}") #and by here, it is already wrong.
 
         item.setData(0, QtStorage.NODE, node)
         item.setData(0, QtStorage.IS_BLOCK, True)
         item.setData(0, QtStorage.STATE, effective_state)
         item.setData(0, QtStorage.CONTEXT, context)
+        item.setData(0, QtStorage.PARENT, parent_node)
+        item.setData(0, QtStorage.INDEX, parent_index)
 
         parent_item.addChild(item)
 
-        self._add_nodes(item, node.nodes, open_file_context, effective_state)
+        self._add_nodes(parent_item=item, 
+                        parent_node=node,
+                        nodes=node.nodes, 
+                        open_file_context=open_file_context, 
+                        inherited_state=effective_state)
 
-    def _build_row(self, parent_item, node, open_file_context, inherited_state=None, label=""):
+    def _build_row(self, 
+                   parent_item:QTreeWidgetItem,
+                   parent_node:PDXScript|GenericKeyValue,
+                   parent_index:int,
+                   node:GenericKeyValue|GenericNode, 
+                   open_file_context:ParadoxFileContext, 
+                   inherited_state:ChangeState=None
+    ):
         if isinstance(node, GenericKeyValue):
             value_label = node.key
             value_node = node.value
         else:
+            value_label = ""
             value_node = node
-            value_label = label or type(node).__name__
 
+        # item = QTreeWidgetItem([value_label, str(str(value_node._get_value())+parent_node.__class__.__name__+str(parent_index))])
         item = QTreeWidgetItem([value_label, str(value_node._get_value())])
         self.node_to_item[node] = item
         self.node_to_item[value_node] = item 
@@ -114,11 +144,12 @@ class ContentsPanel(QWidget):
             effective_state = inherited_state
         else:
             effective_state = self.app_controller.file_system.change_tracker.get_node_state(node)
-        context = open_file_context.derive_node_context(node)
-        
+        node_context = open_file_context.derive_node_context(parent_node)
         item.setData(0, QtStorage.NODE, node)
         item.setData(0, QtStorage.STATE, effective_state)
-        item.setData(0, QtStorage.CONTEXT, context)
+        item.setData(0, QtStorage.CONTEXT, node_context)
+        item.setData(0, QtStorage.PARENT, parent_node)
+        item.setData(0, QtStorage.INDEX, parent_index)
         
         parent_item.addChild(item)
 
@@ -130,13 +161,27 @@ class ContentsPanel(QWidget):
                     self.edit_open_request.emit(self.tree, item, node)
 
     def _request_context_menu(self, pos):
+        pos = self.tree.viewport().mapFrom(self, pos)
         selected = self.tree.itemAt(pos)
-        if not selected:
-            return
-        item = selected.data(0, QtStorage.NODE)
-        context = selected.data(0, QtStorage.CONTEXT)
-        # action_context = context.
-        self.context_menu.call(item, context)
+        if selected:
+            node = selected.data(0, QtStorage.NODE)
+            context = selected.data(0, QtStorage.CONTEXT)
+            if isinstance(node, GenericBlock):
+                parent = node
+                index = 0
+                context = selected.data(0, QtStorage.CONTEXT)
+            else:
+                parent = selected.data(0, QtStorage.PARENT)
+                index = selected.data(0, QtStorage.INDEX)+1
+        else:
+            open_file = self.app_controller.file_system.open_file
+            file_context = open_file.context
+
+            parent = open_file.file
+            index = len(open_file.file.nodes)+1
+            context = file_context.derive_node_context(None)
+
+        self.context_menu.call(parent, index, context)
         self.context_menu.exec_(self.tree.viewport().mapToGlobal(pos))
 
     def request_node_mutation(self, request):

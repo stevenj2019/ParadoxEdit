@@ -62,32 +62,20 @@ class AppController(QObject):
                                                                   state=ChangeState.MODIFIED))
 
     def _request_block_mutation(self, request:BlockMutationRequest):
-        file = request.file if request.file else self.file_system.open_file.file
-        node = request.target
-        value = request.value
-        state = request.state
-        def _find_parent_index(file, target):
-            def visit(parent, children):
-                for child in children:
-                    if child is target:
-                        return parent, parent.nodes.index(child)+1
-                    if isinstance(child, GenericBlock):
-                        result = visit(child, child.node)
-                        if result:
-                            return result
-                return 
-            return visit(file, file.nodes)
-        
+        file   = request.file if request.file else self.file_system.open_file.file
+        parent = request.parent
+        index  = request.index
+        value  = request.value
+        state  = request.state
+
+        #ADDED - mutate (DELETE just marks item for deletion)
         if state == ChangeState.ADDED:
-            if isinstance(node, GenericBlock):
-                parent = node
-                index = 0
-            else:
-                parent, index = _find_parent_index(file, node)
             node = value()
             parent.nodes.insert(index, node)
             if file is self.file_system.open_file.file:
                 self.main.load_file(self.file_system.open_file)
+        else:
+            node = parent.nodes[index]
         self.file_system.changed_file(file, node, state)
         self.main.propagation_request.emit(PropagationRequest(type=PropagationType.NODE, 
                                                        file=file,

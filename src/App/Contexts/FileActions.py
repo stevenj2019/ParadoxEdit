@@ -6,29 +6,30 @@ from App.PDXFactory.Blocks.Generic import comment_node
 from App.PDXFactory.Blocks.Events import add_namespace_keyval, country_event_block, news_event_block
 from App.PDXFactory.Blocks.Sprites import GFX_icon, GFX_shine_icon
 from App.Scripts.Generic import clear_comments, clear_whitespace
+
 class ParadoxFileActions:
     @staticmethod
-    def file_actions(app_controller, selected):
+    def file_actions(app_controller, node, node_index):
         return [
-            Action("Remove Comments", 
-                   lambda:app_controller.request_bulk_mutation.emit(
-                       BulkMutationRequest(target=selected, action=clear_comments)
-                   ),
-                   True
-            ),
-            Action("Remove Whitespace", 
-                   lambda:app_controller.request_bulk_mutation.emit(
-                       BulkMutationRequest(target=selected, action=clear_whitespace)
-                   ),
-                   True
-            )
+            # Action("Remove Comments", 
+            #        lambda:app_controller.request_bulk_mutation.emit(
+            #            BulkMutationRequest(target=selected, action=clear_comments)
+            #        ),
+            #        True
+            # ),
+            # Action("Remove Whitespace", 
+            #        lambda:app_controller.request_bulk_mutation.emit(
+            #            BulkMutationRequest(target=selected, action=clear_whitespace)
+            #        ),
+            #        True
+            # )
         ]
     @staticmethod
-    def node_actions(app_controller, selected):
+    def node_actions(app_controller, node, node_index):
         return [
             Action("Add Comment", 
                    lambda:app_controller.request_block_mutation.emit(
-                       BlockMutationRequest.add(selected, comment_node)
+                       BlockMutationRequest.add(node, node_index, comment_node)
                    ), 
                    True
             )
@@ -36,30 +37,30 @@ class ParadoxFileActions:
 
 class EventFileActions(ParadoxFileActions):
     @staticmethod
-    def file_actions(app_controller, selected):
+    def file_actions(app_controller, node, node_index):
         return [
-            *ParadoxFileActions.file_actions(app_controller, selected),
+            *ParadoxFileActions.file_actions(app_controller, node, node_index),
             # Action("Inject Event Logs", dummy(), False)
         ]
     @staticmethod
-    def node_actions(app_controller, selected):
+    def node_actions(app_controller, node, node_index):
         return [
-            *ParadoxFileActions.node_actions(app_controller, selected),
+            *ParadoxFileActions.node_actions(app_controller, node, node_index),
             Action("Add Namespace", 
                    lambda:app_controller.request_block_mutation.emit(
-                       BlockMutationRequest.add(selected, add_namespace_keyval)
+                       BlockMutationRequest.add(node, node_index, add_namespace_keyval)
                    ), 
                    True
             ),
             Action("Add Country Event",
                    lambda:app_controller.request_block_mutation.emit(
-                       BlockMutationRequest.add(selected, country_event_block)
+                       BlockMutationRequest.add(node, node_index, country_event_block)
                    ),
                    True
             ),
             Action("Add News Event",
                    lambda:app_controller.request_block_mutation.emit(
-                       BlockMutationRequest.add(selected, news_event_block)
+                       BlockMutationRequest.add(node, node_index, news_event_block)
                    ),
                    True
             )
@@ -67,15 +68,15 @@ class EventFileActions(ParadoxFileActions):
     
 class GFXFileActions(ParadoxFileActions):
     @staticmethod
-    def file_actions(app_controller, selected):
+    def file_actions(app_controller, node, node_index):
         return [
-            *ParadoxFileActions.file_actions(app_controller, selected),
+            *ParadoxFileActions.file_actions(app_controller, node, node_index),
             #Action()
         ]
     @staticmethod
-    def node_actions(app_controller, selected):
+    def node_actions(app_controller, node, node_index):
         return [
-            *ParadoxFileActions.node_actions(app_controller, selected),
+            *ParadoxFileActions.node_actions(app_controller, node, node_index),
             Action("Add Static Sprite",
                    lambda:app_controller.request_block_mutation.emit(
                        BlockMutationRequest.add(selected, GFX_icon)

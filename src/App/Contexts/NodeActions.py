@@ -1,3 +1,4 @@
+
 from App.Enums import ChangeState
 from App.Contracts import BlockMutationRequest
 from App.GUI.Menus import Action
@@ -13,9 +14,9 @@ def dummy():
 ###       ###
 class GenericNodeActions:
     @staticmethod
-    def node_actions(app_controller, selected):
+    def node_actions(app_controller, node, node_index):
         return [
-            *ParadoxFileActions.node_actions(app_controller, selected),
+            *ParadoxFileActions.node_actions(app_controller, node, node_index),
         ]
     
 ###          ###
@@ -23,17 +24,17 @@ class GenericNodeActions:
 ###          ###
 class EffectsContext:
     @staticmethod
-    def node_actions(app_controller, selected):
+    def node_actions(app_controller, node, node_index):
         return [
-            *ParadoxFileActions.node_actions(app_controller, selected),
+            *ParadoxFileActions.node_actions(app_controller, node, node_index),
            Action("EffectsContext", dummy(), False)
         ]
-    
+
 class TriggersContext:
     @staticmethod
-    def node_actions(app_controller, selected):
+    def node_actions(app_controller, node, node_index):
         return [
-            *ParadoxFileActions.node_actions(app_controller, selected),
+            *ParadoxFileActions.node_actions(app_controller, node, node_index),
             Action("TriggersContext", dummy(), False)
         ]
     
@@ -42,17 +43,17 @@ class TriggersContext:
 ###      ###
 class EventBlockActions:
     @staticmethod
-    def node_actions(app_controller, selected):
+    def node_actions(app_controller, node, node_index):
         return [
-            *ParadoxFileActions.node_actions(app_controller, selected),
+            *ParadoxFileActions.node_actions(app_controller, node, node_index),
             Action("Add Immediate Block", dummy, False)
         ]
     
 class EventOptionContext:
     @staticmethod
-    def node_actions(app_controller, selected):
+    def node_actions(app_controller, node, node_index):
         return [
-            *ParadoxFileActions.node_actions(app_controller, selected),
+            *ParadoxFileActions.node_actions(app_controller, node, node_index),
             # *TriggersContext.node_actions(ctx), 
             # *EffectsContext.node_actions(ctx),
         ]

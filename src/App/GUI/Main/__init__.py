@@ -73,8 +73,6 @@ class MainWindow(QMainWindow):
                 if file is self.app_controller.file_system.open_file:
                     for node in file.nodes:
                         recurse(node)
-            case _:
-                print("ERROR")
 
     def settings_window_requested(self):
         title = "PDXEdit Setup" if self.app_controller.configuration.initialised else "PDXEdit Settings"
@@ -94,4 +92,5 @@ class MainWindow(QMainWindow):
 
     def load_file(self, file):
         self.editor_session.cancel_request(reason="file switch")
+        self.app_controller.file_system.load_file(file)
         self.contents_panel.load_block(file)
