@@ -28,6 +28,7 @@
 #             shutil.copyfile(img, new_img)
 #             image_paths.append(new_img)
 #         except shutil.SameFileError:
+#              TODO this needs to be moved to submission
 #             GFX_load_and_store_are_same()
 #             return
 #     return image_paths

@@ -6,7 +6,7 @@ if TYPE_CHECKING:
     from App.ModClasses.Categories import GenericCategory
 
 from dataclasses import dataclass
-from typing import Optional, Callable
+from typing import Optional, Callable, List
 
 from ParadoxParser import ParadoxScriptParser as PDXScriptFile
 from ParadoxParser import GenericBlock, GenericKeyValue, GenericNode
@@ -37,16 +37,16 @@ class BlockMutationRequest:
     file:Optional[PDXScriptFile]
     parent:PDXScriptFile|GenericBlock
     index:int
-    value:Callable
+    payload:Callable|GenericBlock|GenericKeyValue|GenericNode
     state:ChangeState
 
     @classmethod
-    def add(cls, parent, index, factory, file=None):
+    def add(cls, parent, index, payload, file=None):
         return cls(
             file=file, 
             parent=parent,
             index=index,
-            value=factory, 
+            payload=payload, 
             state=ChangeState.ADDED
         )
 

@@ -13,6 +13,7 @@ def dummy():
 ###       ###
 #  GENERIC  #
 ###       ###
+
 class GenericNodeActions:
     @staticmethod
     def node_actions(app_controller, node, node_index):
@@ -23,6 +24,7 @@ class GenericNodeActions:
 ###          ###
 #  PRE-BUILTS  #
 ###          ###
+
 class EffectBlockActions:
     @staticmethod
     def node_actions(app_controller, node, node_index):
@@ -42,6 +44,7 @@ class TriggerBlockActions:
 ###      ###
 #  EVENTS  #
 ###      ###
+
 class EventBlockActions:
     @staticmethod
     def node_actions(app_controller, node, node_index):

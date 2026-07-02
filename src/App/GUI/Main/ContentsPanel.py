@@ -37,8 +37,9 @@ class ContentsPanel(QWidget):
         layout.addWidget(self.tree)
 
     def set_node_state(self, node, state):
-        item = self.node_to_item[node]
-        if item is None:
+        try:
+            item = self.node_to_item[node]
+        except KeyError:
             return
         item.setData(0, QtStorage.STATE, state)
         self.tree.update()
@@ -135,7 +136,6 @@ class ContentsPanel(QWidget):
             value_label = ""
             value_node = node
 
-        # item = QTreeWidgetItem([value_label, str(str(value_node._get_value())+parent_node.__class__.__name__+str(parent_index))])
         item = QTreeWidgetItem([value_label, str(value_node._get_value())])
         self.node_to_item[node] = item
         self.node_to_item[value_node] = item 

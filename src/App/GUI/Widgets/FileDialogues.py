@@ -48,13 +48,24 @@ def gfx_files_folder_selector(parent):
     )
     return filepath, Path(filepath).exists()
 
-def gfx_save_folder_selector(parent):
+def gfx_files_file_selector(parent):
+    options = QFileDialog.Options()
+    options |= QFileDialog.ReadOnly
+    filepath, _ = QFileDialog.getOpenFileName(
+        parent, 
+        "Select import image",
+        str(Path.home()),
+        options=QFileDialog.ReadOnly
+    )
+    return filepath, Path(filepath).exists()
+
+def gfx_save_folder_selector(parent, path):
     options = QFileDialog.Options()
     options |= QFileDialog.ReadOnly
     filepath = QFileDialog.getExistingDirectory(
         parent,
         "Select imported images save directory",
-        str(parent.mod.mod_base_dir / "gfx"),
+        path,
         QFileDialog.ShowDirsOnly
     )
     return filepath, Path(filepath).exists()

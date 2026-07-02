@@ -17,11 +17,6 @@ class GenericContextMenu(QMenu):
         self.parent_node = None
         self.parent_index = None
 
-    def call(self, parent, parent_idx, context):
-        self.clear()
-        self.menu_def = self._get_context_menu_options(node=parent, node_index=parent_idx, context=context)
-        self._build_menu()
-
     def _get_context_menu_options():
         return 
     
@@ -67,15 +62,25 @@ class GenericCategoryContextMenu(GenericContextMenu):
         super().__init__(parent, app_controller)
         self.menu_def:list = []
 
-    # def _get_context_menu_options(self, context):
-    #     context_actions = context.get_file_context()
-    #     return context_actions.file_actions(self.app_controller, node, node_index)
+    def call(self, file, context):
+        self.clear()
+        self.menu_def = self._get_context_menu_options(file=file, context=context)
+        self._build_menu()
+
+    def _get_context_menu_options(self, file, context):
+        context_actions = context.get_file_context()
+        return context_actions.file_actions(self.app_controller, file)
     
 class ParadoxNodesContextMenu(GenericContextMenu):
     request_expansion = pyqtSignal(object)
     def __init__(self, parent:QTreeWidget, app_controller):
         super().__init__(parent, app_controller)
         self.menu_def:list = []
+
+    def call(self, parent, parent_idx, context):
+        self.clear()
+        self.menu_def = self._get_context_menu_options(node=parent, node_index=parent_idx, context=context)
+        self._build_menu()
 
     def _get_context_menu_options(self, node, node_index, context):
         return [

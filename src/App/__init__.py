@@ -1,4 +1,5 @@
 import qdarktheme
+from contextlib import contextmanager
 
 from PyQt5.QtCore import QObject, pyqtSignal
 from PyQt5.QtWidgets import QApplication
@@ -27,6 +28,10 @@ class AppController(QObject):
         self.style_manager = StyleManager(self.configuration)
 
         self.main = MainWindow(self)
+
+        self._batch_depth = 0
+        self._batch_file = set()
+
         self.run()
 
     def run(self):
@@ -48,6 +53,22 @@ class AppController(QObject):
         self.main.load_mod(self.file_system.mod)
         self.main.load_file(self.file_system.open_file)
 
+    @contextmanager
+    def batch_manager(self):
+        self._batch_depth += 1
+        try:
+            yield
+        finally:
+            self._batch_depth -= 1
+            if self._batch_depth == 0:
+                self._refresh_file()
+
+    def _refresh_file(self):
+        for file in self._batch_file:
+            if file is self.file_system.open_file.file:
+                self.main.load_file(self.file_system.open_file)
+        self._batch_file.clear()
+
     def _request_node_mutation(self, request:NodeMutationRequest):
         file = request.file if request.file else self.file_system.open_file.file
         node = request.node
@@ -65,23 +86,26 @@ class AppController(QObject):
         file   = request.file if request.file else self.file_system.open_file.file
         parent = request.parent
         index  = request.index
-        value  = request.value
+        payload  = request.payload
         state  = request.state
 
         #ADDED - mutate (DELETE just marks item for deletion)
         if state == ChangeState.ADDED:
-            node = value()
+            node = payload() if callable(payload) else payload
             parent.nodes.insert(index, node)
-            if file is self.file_system.open_file.file:
-                self.main.load_file(self.file_system.open_file)
         else:
             node = parent.nodes[index]
+
         self.file_system.changed_file(file, node, state)
         self.main.propagation_request.emit(PropagationRequest(type=PropagationType.NODE, 
                                                        file=file,
                                                        node=node,
                                                        state=state))
-        
+        #refreshes file when batch is complete
+        self._batch_file.add(file)
+        if self._batch_depth ==0:
+            self._refresh_file()
+
     def _request_bulk_mutation(self, request:BulkMutationRequest):
         target = request.target
         action = request.action
