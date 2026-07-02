@@ -1,4 +1,4 @@
-from ParadoxParser.ParadoxNodes import GenericBlock, GenericKeyValue, GenericToken, GenericBool
+from ParadoxParser.ParadoxNodes import GenericBlock, GenericKeyValue, GenericToken, GenericBool, GenericComment
 ###          ###
 #  ROOT LEVEL  #
 ###          ###
@@ -10,6 +10,7 @@ def country_event_block(event_id=None):
     event_id = event_id if event_id else None
     return GenericBlock("country_event",[
                             *event_essentials(event_id),
+                            immediate_block(),
                             option_block(event_id)
                         ])
 
@@ -17,10 +18,8 @@ def news_event_block(event_id=None):
     event_id = event_id if event_id else None
     return GenericBlock("news_event",[
                             *event_essentials(event_id),
+                            immediate_block(),
                             option_block(event_id)
-                            # GenericBlock("option", [
-                            #     GenericKeyValue("name", GenericToken(f"{event_id}.a"))
-                            # ])
                         ])
 
 def event_essentials(event_id=None):
@@ -37,10 +36,13 @@ def event_essentials(event_id=None):
 #  EVENT BLOCKS  #
 ###            ###
 def immediate_block():
-    return GenericBlock("immediate")
+    return GenericBlock("immediate",[
+        GenericComment("##YOUR CODE HERE")
+    ])
 
-def option_block(option_name):
+def option_block(option_name=None):
     option_name = option_name if option_name else "option_name_here.a"
     return GenericBlock("option", [
-        GenericKeyValue("name", GenericToken(option_name))
+        GenericKeyValue("name", GenericToken(option_name)),
+        GenericComment("##YOUR CODE HERE")
     ])
