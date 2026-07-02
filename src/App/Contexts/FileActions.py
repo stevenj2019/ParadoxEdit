@@ -79,12 +79,12 @@ class GFXFileActions(ParadoxFileActions):
             *ParadoxFileActions.node_actions(app_controller, node, node_index),
             Action("Add Static Sprite",
                    lambda:app_controller.request_block_mutation.emit(
-                       BlockMutationRequest.add(selected, GFX_icon)
+                       BlockMutationRequest.add(node, node_index, GFX_icon)
                    ), True
             ),
             Action("Add Focus _shine Sprite",
                    lambda:app_controller.request_block_mutation.emit(
-                       BlockMutationRequest.add(selected, GFX_shine_icon)
+                       BlockMutationRequest.add(node, node_index, GFX_shine_icon)
                    ), True
             )
        ]
