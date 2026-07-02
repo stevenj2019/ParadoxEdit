@@ -4,6 +4,7 @@ from App.Contracts import BlockMutationRequest
 from App.GUI.Menus import Action
 from App.Contexts.FileActions import ParadoxFileActions
 from App.PDXFactory.Blocks.Generic import comment_node
+from App.PDXFactory.Blocks.Events import immediate_block, option_block
 from App.PDXFactory.Blocks import Generic, Events
 #dumb temporary bullshit
 def dummy():
@@ -22,20 +23,20 @@ class GenericNodeActions:
 ###          ###
 #  PRE-BUILTS  #
 ###          ###
-class EffectsContext:
+class EffectBlockActions:
     @staticmethod
     def node_actions(app_controller, node, node_index):
         return [
             *ParadoxFileActions.node_actions(app_controller, node, node_index),
-           Action("EffectsContext", dummy(), False)
+           Action("EffectBlockActions", dummy, False)
         ]
 
-class TriggersContext:
+class TriggerBlockActions:
     @staticmethod
     def node_actions(app_controller, node, node_index):
         return [
             *ParadoxFileActions.node_actions(app_controller, node, node_index),
-            Action("TriggersContext", dummy(), False)
+            Action("TriggerBlockActions", dummy, False)
         ]
     
 ###      ###
@@ -46,7 +47,19 @@ class EventBlockActions:
     def node_actions(app_controller, node, node_index):
         return [
             *ParadoxFileActions.node_actions(app_controller, node, node_index),
-            Action("Add Immediate Block", dummy, False)
+            # Action("Add Immediate Block", immediate_block, False)
+            Action("Add Immediate Block",
+                   lambda:app_controller.request_block_mutation.emit(
+                       BlockMutationRequest.add(node, node_index, immediate_block)
+                   ),
+                   True
+            ),
+            Action("Add Option Block",
+                   lambda:app_controller.request_block_mutation.emit(
+                       BlockMutationRequest.add(node, node_index, option_block)
+                   ),
+                   True
+            )
         ]
     
 class EventOptionContext:
@@ -54,6 +67,6 @@ class EventOptionContext:
     def node_actions(app_controller, node, node_index):
         return [
             *ParadoxFileActions.node_actions(app_controller, node, node_index),
-            # *TriggersContext.node_actions(ctx), 
-            # *EffectsContext.node_actions(ctx),
+            # *TriggerBlockActions.node_actions(ctx), 
+            # *EventBlockActions.node_actions(ctx),
         ]
