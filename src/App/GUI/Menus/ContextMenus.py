@@ -77,14 +77,13 @@ class ParadoxNodesContextMenu(GenericContextMenu):
         super().__init__(parent, app_controller)
         self.menu_def:list = []
 
-    #TODO need to disable delete if the PDXScriptFile is selected
     def _get_context_menu_options(self, node, node_index, context):
         return [
-            # ActionGroup("Tree Options", [
-            #     Action("Expand All", lambda:self.parent.set_expansion_rule(ExpansionMode.ALL), True),
-            #     Action("Collapse All", lambda:self.parent.set_expansion_rule(ExpansionMode.DEPTH, depth_limit=2), True),
-            #     Action("Expand This", lambda:self.parent.set_expansion_rule(ExpansionMode.FROM_NODE, root_item=selected), True),
-            # ]), 
+            ActionGroup("Tree Options", [
+                Action("Expand All", lambda:self.parent.set_expansion_rule(ExpansionMode.ALL), True),
+                Action("Collapse All", lambda:self.parent.set_expansion_rule(ExpansionMode.DEPTH, depth_limit=1), True),
+                Action("Expand This", lambda:self.parent.set_expansion_rule(ExpansionMode.FROM_NODE, root_item=node), True),
+            ]),
             ActionGroup("File Options", [
                 ActionSubMenu("Add", [
                     *context.node_actions(self.app_controller, node, node_index),

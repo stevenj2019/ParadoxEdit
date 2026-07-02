@@ -189,9 +189,8 @@ class ContentsPanel(QWidget):
 
     def set_expansion_rule(self, mode, depth_limit=1, root_item=None):
         self.tree.setUpdatesEnabled(False)
-        if root_item is None:
+        if isinstance(root_item, PDXScript) or not root_item:
             root_item = self.tree.invisibleRootItem()
-        root_item = root_item if root_item else self.tree.invisibleRootItem()
 
         def recurse(item, depth):
             for i in range(item.childCount()):
