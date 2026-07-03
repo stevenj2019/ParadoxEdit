@@ -12,7 +12,7 @@ from App.Contracts import BlockMutationRequest
 from App.PDXFactory.Blocks.Sprites import GFX_icon, GFX_shine_icon
 from App.GUI.Widgets.FileDialogues import (gfx_files_folder_selector, gfx_files_file_selector, 
                                            gfx_save_folder_selector)
-from App.GUI.Widgets.PopupModels import GFX_file_copying_warn
+from App.GUI.Widgets.PopupModels import GFX_file_copying_warn, form_missing_value
 
 ##TODO: all the individual widgets work ok, i still need to code the actual operations, and propogate changes to app_controller. 
 class AddNewGFXForm(QDialog):
@@ -110,12 +110,17 @@ class AddNewGFXForm(QDialog):
     def _submit(self):
         sprites = []
         def image_collection_loop(sprites, path):
-            for root, dirs, files in os.walk(path):
-                for name in dirs:
-                    image_collection_loop(sprites, os.path.join(root, name))
-                for name in files:
-                    if name.endswith("dds") or name.endswith("png"):
-                        sprites.append(Path(os.path.join(root, name)))
+            path = Path(path)
+            if path.is_dir():
+                for root, dirs, files in os.walk(path):
+                    for name in dirs:
+                        image_collection_loop(sprites, os.path.join(root, name))
+                    for name in files:
+                        if name.endswith("dds") or name.endswith("png"):
+                            sprites.append(Path(os.path.join(root, name)))
+            else:
+                if path.suffix in (".dds", ".png"):
+                    sprites.append(Path(path))
             return sprites
         
         def copy_file_to_new_directory(save_to, sprites):
@@ -146,6 +151,9 @@ class AddNewGFXForm(QDialog):
             #warning
             return
         if GFX_file_copying_warn(self):
+            if not self.storage_folder_path_element_text.text().strip() or not self.file_list:
+                form_missing_value(self)
+                return
             for path in self.file_list:
                 image_collection_loop(sprites, path)
             sprites = copy_file_to_new_directory(self.storage_folder_path_element_text.text(), sprites)
@@ -157,6 +165,6 @@ class AddNewGFXForm(QDialog):
                     blocks = generate_blocks(generate_shines, sprite, base_dir)
                     for block in blocks:
                         self.app_controller.request_block_mutation.emit(
-                            BlockMutationRequest.add(sprite_block, len(sprite_block.nodes)+1, block)
+                            BlockMutationRequest.add(sprite_block, len(sprite_block.nodes)+1, block, self.save_file)
                         )
             self.accept()

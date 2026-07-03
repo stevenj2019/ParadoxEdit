@@ -22,6 +22,11 @@ def settings_error_critical(game_dir_error:bool, mod_dir_error:bool):
         QMessageBox.Ok
     )
 
+def form_missing_value(parent):
+    return QMessageBox.warning(
+        parent, "Missing Value", "Form is missing essential values", QMessageBox.Ok
+    )
+
 def bulk_operation_warning(parent):
     if not parent.bulk_warning_shown:
         mode_text = (
