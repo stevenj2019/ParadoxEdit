@@ -2,6 +2,7 @@ from PyQt5.QtWidgets import QTreeWidget, QTreeWidgetItem, QMenu, QLabel, QWidget
 from PyQt5.QtCore import pyqtSignal
 
 from ParadoxParser import ParadoxScriptParser as PDXScriptFile
+from ParadoxParser.ParadoxNodes import GenericBlock
 
 from App.Enums import ExpansionMode, ChangeState
 from App.Contracts import BlockMutationRequest
@@ -87,7 +88,7 @@ class ParadoxNodesContextMenu(GenericContextMenu):
             ActionGroup("Tree Options", [
                 Action("Expand All", lambda:self.parent.set_expansion_rule(ExpansionMode.ALL), True),
                 Action("Collapse All", lambda:self.parent.set_expansion_rule(ExpansionMode.DEPTH, depth_limit=1), True),
-                Action("Expand This", lambda:self.parent.set_expansion_rule(ExpansionMode.FROM_NODE, root_item=node), True),
+                Action("Expand This", lambda:self.parent.set_expansion_rule(ExpansionMode.FROM_NODE, root_item=node), (node_index == 0 and isinstance(node, GenericBlock))),
             ]),
             ActionGroup("File Options", [
                 ActionSubMenu("Add", [

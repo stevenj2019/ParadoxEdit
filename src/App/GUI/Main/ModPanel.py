@@ -50,9 +50,9 @@ class ModPanel(QWidget):
     def _set_category_state(self, file):
         category_item = self.file_to_category[file]
         category = category_item.data(0, QtStorage.CATEGORY)
-        if all(self.app_controller.file_system.change_tracker.get_file_state(file) == ChangeState.CLEAN
+        if all(self.app_controller.file_system.change_tracker.get_file_state(file) == None
                 for file in category.files.values()):
-            category_item.setData(0, QtStorage.STATE, ChangeState.CLEAN)
+            category_item.setData(0, QtStorage.STATE, None)
         else:
             category_item.setData(0, QtStorage.STATE, ChangeState.MODIFIED)
 
@@ -74,21 +74,13 @@ class ModPanel(QWidget):
         categories_parent = QTreeWidgetItem(["Categories"])
         root.addChild(categories_parent)
 
-        def set_category_data(category_item, category_class, context):
-            category_item.setData(0, QtStorage.IS_CATEGORY, True)
-            category_item.setData(0, QtStorage.CATEGORY, category_class)
-            category_item.setData(0, QtStorage.CONTEXT, context)
-
-        def set_file_data(file_item, file, context):
-            file_item.setData(0, QtStorage.FILE, file)
-            file_item.setData(0, QtStorage.STATE, ChangeState.CLEAN)
-            file_item.setData(0, QtStorage.IS_CATEGORY, False)
-            file_item.setData(0, QtStorage.CONTEXT, context)
-
         for c_key, c_val in mod.categories.items():
             cat_sub = QTreeWidgetItem([c_key])
             category_context = c_val.context
-            set_category_data(cat_sub, c_val, category_context)
+
+            cat_sub.setData(0, QtStorage.IS_CATEGORY, True)
+            cat_sub.setData(0, QtStorage.CATEGORY, c_val)
+            cat_sub.setData(0, QtStorage.CONTEXT, category_context)
 
             self.node_to_item[c_val] = cat_sub
             for file, obj in c_val.files.items():
@@ -97,7 +89,12 @@ class ModPanel(QWidget):
                 self.file_to_category[obj] = cat_sub
 
                 widget.setText(0, file)
-                set_file_data(widget, obj, category_context)
+
+                widget.setData(0, QtStorage.FILE, obj)
+                widget.setData(0, QtStorage.STATE, None)
+                widget.setData(0, QtStorage.IS_CATEGORY, False)
+                widget.setData(0, QtStorage.CONTEXT, category_context)
+
                 cat_sub.addChild(widget)
 
             categories_parent.addChild(cat_sub)

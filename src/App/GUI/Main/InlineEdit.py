@@ -65,7 +65,7 @@ class InLineEditManager(QObject):
     def complete_request(self, new_value):
         print(f"{self.node_value}, {self.node_value.value} to {new_value}")
         if self.node_value.value != new_value:
-            self.mutate_callback.emit(NodeMutationRequest(file=None, node = self.node, node_value = self.node_value, value = new_value))
+            self.mutate_callback.emit(NodeMutationRequest(file=None, node=self.node, node_value=self.node_value, value=new_value))
         self._destroy(new_value)
         self._clear()
 

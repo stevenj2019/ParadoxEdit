@@ -95,7 +95,6 @@ class AppController(QObject):
             parent.nodes.insert(index, node)
         else:
             node = parent.nodes[index]
-
         self.file_system.changed_file(file, node, state)
         self.main.propagation_request.emit(PropagationRequest(type=PropagationType.NODE, 
                                                        file=file,
@@ -130,7 +129,8 @@ class AppController(QObject):
                 self.main.propagation_request.emit(PropagationRequest(type=PropagationType.FILE, 
                                                                       file=file,
                                                                       node=None,
-                                                                      state=ChangeState.CLEAN))
+                                                                      state=None
+                                                                      ))
 
         if target is SaveTarget.ALL:
             save_routine(self.file_system.mod.descriptor_object)

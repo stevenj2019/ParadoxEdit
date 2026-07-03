@@ -29,9 +29,7 @@ class ContentsPanel(QWidget):
         
         self.context_menu = ParadoxNodesContextMenu(self, app_controller)
         self.context_menu.request_expansion.connect(self.set_expansion_rule)
-        
-        # self.tree.setContextMenuPolicy(Qt.CustomContextMenu)
-        # self.tree.customContextMenuRequested.connect(self._request_context_menu)
+
         self.setContextMenuPolicy(Qt.CustomContextMenu)
         self.customContextMenuRequested.connect(self._request_context_menu)
         layout.addWidget(self.tree)
@@ -113,6 +111,7 @@ class ContentsPanel(QWidget):
         item.setData(0, QtStorage.PARENT, parent_node)
         item.setData(0, QtStorage.INDEX, parent_index)
 
+        
         parent_item.addChild(item)
 
         self._add_nodes(parent_item=item, 
@@ -144,6 +143,7 @@ class ContentsPanel(QWidget):
             effective_state = inherited_state
         else:
             effective_state = self.app_controller.file_system.change_tracker.get_node_state(node)
+
         node_context = open_file_context.derive_node_context(parent_node)
         item.setData(0, QtStorage.NODE, node)
         item.setData(0, QtStorage.STATE, effective_state)
@@ -189,7 +189,10 @@ class ContentsPanel(QWidget):
 
     def set_expansion_rule(self, mode, depth_limit=1, root_item=None):
         self.tree.setUpdatesEnabled(False)
-        if isinstance(root_item, PDXScript) or not root_item:
+        
+        if isinstance(root_item, GenericBlock):
+            root_item = self.node_to_item[root_item] 
+        elif isinstance(root_item, PDXScript) or not root_item:
             root_item = self.tree.invisibleRootItem()
 
         def recurse(item, depth):

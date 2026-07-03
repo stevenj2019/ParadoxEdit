@@ -120,7 +120,7 @@ class AddNewGFXForm(QDialog):
             sprite_name = sprite.stem
             sprite_path = sprite.relative_to(mod_base_dir)
             if get_shines:
-                return [GenericComment(f"Focus Icon for:{sprite.stem}"),
+                return [GenericComment(f"Focus Icon for: {sprite.stem}"),
                                         GFX_icon(sprite_name, sprite_path), 
                                         GFX_shine_icon(sprite_name, sprite_path)]
             else:

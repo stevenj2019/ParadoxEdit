@@ -54,6 +54,8 @@ class MainWindow(QMainWindow):
 
         self.propagation_request.connect(self._propogate_mutations)
     
+    #This marks descriptor as changed, if it is open blockmutation
+    #it also doesnt mark the changed file, if it is not open (fuck my life)
     def _propogate_mutations(self, request:PropagationRequest):
         type = request.type
         file = request.file

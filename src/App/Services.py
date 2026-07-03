@@ -91,25 +91,27 @@ class ChangeTracker:
         self.file_changes = {}
 
     def node_is_dirty(self, node):
-        return self.get_node_state(node) is not ChangeState.CLEAN
+        return self.get_node_state(node) is not None
 
     def set_node_state(self, node, state):
+        print(f"Setting {node} to {state}")
         self.node_changes[node] = state
 
     def get_node_state(self, node):
-        return self.node_changes.get(node, ChangeState.CLEAN)
+        return self.node_changes.get(node, None)
 
     def clear_node_state(self, node):
         self.node_changes.pop(node, None)
 
     def file_is_dirty(self, file):
-        return self.get_file_state(file) is not ChangeState.CLEAN
-    
+        return self.get_file_state(file) is not None
+
     def set_file_state(self, file, state):
+        print(f"Setting {file} to {state}")
         self.file_changes[file] = state
 
     def get_file_state(self, file):
-        return self.file_changes.get(file, ChangeState.CLEAN)
+        return self.file_changes.get(file, None)
 
     def clear_file_state(self, file):
         def recurse(node):
