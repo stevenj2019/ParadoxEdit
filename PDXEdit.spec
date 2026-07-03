@@ -2,7 +2,7 @@
 
 
 a = Analysis(
-    ['PDXEdit.py'],
+    ['src/PDXEdit.py'],
     pathex=[],
     binaries=[],
     datas=[],
