@@ -1,69 +1,4 @@
-# from App.GUI.Dialogues.PopupModels import GFX_file_copying_warn, GFX_is_focus_upload, invalid_GFX_file_warning, GFX_load_and_store_are_same
-# from App.GUI.Dialogues.FileDialogues import gfx_files_folder_selector, gfx_save_folder_selector
-# from ParadoxParser.ParadoxNodes import GenericBlock, GenericComment
-# from PDXFactory.Blocks.Sprites import GFX_icon, GFX_shine_icon
-# import os
-# from pathlib import Path
-# import shutil
-
-# def image_collection_loop(images, path):
-#     for root, dirs, files in os.walk(path):
-#         for name in dirs:
-#             image_collection_loop(images, os.path.join(root, name))
-#         for name in files:
-#             if name.endswith("dds") or name.endswith("png"):
-#                 images.append(Path(os.path.join(root, name)))
-#     return images
-
-# def copy_files_to_new_directory(save_to, image_list:list):
-#     image_paths = list()
-#     for img in image_list: #image is source Path
-#         if img.name.startswith("GFX_"):
-#             new_filename = f"GFX_{img.name}" #GFX_file.ext
-#         else:
-#             new_filename = img.name
-#         new_img = Path(os.path.join(save_to, new_filename))
-
-#         try:
-#             shutil.copyfile(img, new_img)
-#             image_paths.append(new_img)
-#         except shutil.SameFileError:
-#              TODO this needs to be moved to submission
-#             GFX_load_and_store_are_same()
-#             return
-#     return image_paths
-
-# def add_new_GFX(file):
-# 	try:
-# 		sprite_block = next(node for node in file.obj.nodes
-# 						if isinstance(node, GenericBlock) and node.key.lower() == "spritetypes")
-# 	except StopIteration:
-# 		invalid_GFX_file_warning()
-# 		return
-	
-# 	if GFX_file_copying_warn(get_main_window()):
-# 		path, cont = gfx_files_folder_selector(get_main_window())
-# 		if not cont:
-# 			return
-# 		save_path, cont = gfx_save_folder_selector(get_main_window())
-# 		if not cont:
-# 			return
-# 		image_list = image_collection_loop(list(), path)
-# 		sprites = copy_files_to_new_directory(save_path, image_list)
-# 		if not sprites:
-# 			return
-# 		generate_shines = GFX_is_focus_upload(get_main_window())
-# 		sprite_blocks = list()
-# 		base_dir = get_main_window().mod.mod_base_dir
-# 		for sprite in sprites:
-# 			if generate_shines:
-# 				sprite_blocks.extend([ 	GenericComment(f"Focus Icon for: {sprite.stem}"),
-# 									 	GFX_icon(sprite.stem, sprite.relative_to(base_dir)),
-# 										GFX_shine_icon(sprite.stem, sprite.relative_to(base_dir))])
-# 			else:
-# 				sprite_blocks.extend([GFX_icon(sprite.stem, sprite.relative_to(base_dir))])
-# 		sprite_block.children.extend(sprite_blocks)
-
+from ParadoxParser.ParadoxNodes import GenericBlock
 # def add_missing_shines(file):
 # 	focus_sprites = list()
 # 	for node in file.obj.nodes:
@@ -86,4 +21,39 @@
 # 			file.obj.nodes = [GenericBlock("spriteTypes", focus_icon_blocks)]
 # 		else:
 # 			pass
-      
+
+###NEW (unfinished) code
+# def get_node_name(block):
+#     try:
+#         name = next(
+#             node.value for node in block if node.key.lower() == "name"
+#         )
+#     except StopIteration:
+#         return
+#     return name
+
+# def collect_icons(block):
+#     icon_nodes = list()
+#     shine_nodes = list()
+#     for node in block.nodes:
+#         if isinstance(node, GenericBlock) and node.key.lower() == "spritetype":
+#             if any(isinstance(block, GenericBlock) for block in node.nodes):
+#                 shine_nodes.append(block)
+#             else:
+#                 icon_nodes.append(node)
+
+# def add_missing_shines(file, app_controller):
+#     try:
+#         spritetypes_block = next(
+#             node for node in file.nodes
+#             if node.key.lower() == "spritetypes"
+#         )
+#     except StopIteration:
+#         return
+#     normal_icons, shine_icons = collect_icons(spritetypes_block)
+#     if len(normal_icons) > len(shine_icons):
+#         shine_icon_names = [get_node_name(n) for n in shine_icons]
+#         for icon in normal_icons:
+#             icon_name = get_node_name(icon)
+#             if f"{icon_name}_shine" not in shine_icon_names:
+                
