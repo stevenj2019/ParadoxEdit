@@ -4,8 +4,13 @@ x-Edit Styled utility, packaged with scripts to modify certiain paradox objects/
 ### **Fair Warning, this is currently non-stable, i STRONGLY suggest to keep safe_mode active. this generates .bak files.**
 
 ## Current Functionality
-until i make a more complete version, this branch will be restrained to specific functionality i have already done: e.g. clear_node_stateing comments/whitespace, adding GFX, fixing missing _shines , event log injection (Not yet working)
-truthfully, i dont see a case for micro-edits this way, but i will work on out "for science" mostly, 
+until i make a more complete version, this branch will be restrained to specific functionality i have already done: e.g. clearing comments/whitespace, adding GFX, fixing missing _shines (Not yet working) , event log injection (Not yet working)
+truthfully, i dont see a case for micro-edits this way, but you can, right-clicking in the "node-tree" (right view), you can generate particular blocks/values for insertion, and you can double click on values to change with a little edit widget, 
+to access the scripts, you right click the left view, over the file/cateogry you wish to apply them too, 
+regardless of how you choose to interface with your files, you will get visual hints of modiciation (green=added, yellow=modifies red=marked for deletion) which will vanish when you save, 
+This is far from complete. but the functionality exists to replace the old, and janky GFX Tool, 
+
+Feel free to open issues for any problems(use bug tag) or for feature requests(use enhancement tag) there is currently no logging, next version will have this + remaining script conversion from the [gist](https://gist.github.com/stevenj2019/04b322de5374b9f0cec8dadfd2eb7c6d)
 
 ## Want to copy/contribute
 
