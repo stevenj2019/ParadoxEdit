@@ -36,7 +36,7 @@ the same [gist](https://gist.github.com/stevenj2019/04b322de5374b9f0cec8dadfd2eb
 you can just run this as i do while i code, via the python file directly, 
 Setup:
 ```
-pip install -r src/requirements.txt
+pip install -r requirements.txt
 python src/PDXEdit.py
 ```
 ### Build it yourself
@@ -44,8 +44,8 @@ python src/PDXEdit.py
 - Python(3.12)
 you can also build it yourself, if you like the idea, but dont trust me to do it (i am a little hurt but sure lol)
 ```
-pip install -r src/requirements.txt
+pip install -r requirements.txt
 pip install pyinstaller
-pyinstaller src/PDXEdit.spec
+pyinstaller PDXEdit.spec
 ```
 this will generate the relevant binary into your dist/ folder
