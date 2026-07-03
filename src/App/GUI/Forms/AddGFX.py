@@ -5,8 +5,8 @@ from pathlib import Path
 from ParadoxParser import ParadoxScriptParser as PDXFile
 from ParadoxParser.ParadoxNodes import GenericBlock, GenericComment
 
-from PyQt5.QtWidgets import (QDialog, QFormLayout, QTreeWidget, QTreeWidgetItem, 
-                             QPushButton, QLabel, QHBoxLayout, QLineEdit, QCheckBox, QComboBox)
+from PyQt5.QtWidgets import (QDialog, QFormLayout, QHBoxLayout, QTreeWidget, QTreeWidgetItem, 
+                             QPushButton, QLabel, QLineEdit, QCheckBox, QComboBox)
 
 from App.Contracts import BlockMutationRequest
 from App.PDXFactory.Blocks.Sprites import GFX_icon, GFX_shine_icon
@@ -34,13 +34,19 @@ class AddNewGFXForm(QDialog):
         self.file_list_item.setHeaderLabel("Folder(s)")
         self.form.addRow(self.file_list_item)
         
+        self.buttons = QHBoxLayout()
         self.add_folder_button = QPushButton("Add Folder", self)
         self.add_folder_button.clicked.connect(self._add_folder_to_input_list)
+        self.buttons.addWidget(self.add_folder_button)
         self.add_file_button = QPushButton("Add File", self)
         self.add_file_button.clicked.connect(self._add_file_to_input_list)
-        self.form.addRow(self.add_folder_button, self.add_file_button)
+        self.buttons.addWidget(self.add_file_button)
+        self.remove_entry_button = QPushButton("Delete Selected", self)
+        self.remove_entry_button.clicked.connect(self._remove_selected_from_input_list)
+        self.buttons.addWidget(self.remove_entry_button)
+        self.form.addRow(self.buttons)
 
-        self.save_to_file_label = QLabel("Save to:")
+        self.save_to_file_label = QLabel("GFX Definition:")
         self.file_dropdown = QComboBox()
         for index, _file in enumerate(self.category.files.values()):
             self.file_dropdown.addItem(_file.filename)
@@ -50,7 +56,7 @@ class AddNewGFXForm(QDialog):
         self.file_dropdown.currentIndexChanged.connect(self._change_save_file)
         self.form.addRow(self.save_to_file_label, self.file_dropdown)
 
-        self.storage_folder_path_label = QLabel("Save to:")
+        self.storage_folder_path_label = QLabel("GFX Location:")
         self.storage_folder_path_element = QHBoxLayout()
         self.storage_folder_path_element_text = QLineEdit()
         self.storage_folder_path_element_button = QPushButton("...")
@@ -80,8 +86,18 @@ class AddNewGFXForm(QDialog):
         if path:
             self.file_list.append(path)
             item = QTreeWidgetItem([path])
-            self.file_list_item.addChild(item)
+        self.file_list_item.invisibleRootItem().addChild(item)
     
+    def _remove_selected_from_input_list(self):
+        item = self.file_list_item.currentItem()
+        if item is None:
+            return
+        index = self.file_list_item.indexOfTopLevelItem(item)
+        if index == -1:
+            return
+        self.file_list.pop(index)
+        self.file_list_item.takeTopLevelItem(index)
+
     def _change_save_file(self, index):
         self.save_file = self.category.files[index].filename
 
@@ -89,10 +105,6 @@ class AddNewGFXForm(QDialog):
         path, _ = gfx_save_folder_selector(self, str(self.app_controller.file_system.mod.mod_base_dir / "gfx"))
         if path:
             self.storage_folder_path_element_text.setText(path)
-        return 
-    
-    def _select_save_file(self):
-        #sets self.save_file from index of 
         return 
     
     def _submit(self):
