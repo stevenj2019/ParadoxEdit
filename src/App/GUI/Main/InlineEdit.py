@@ -5,8 +5,9 @@ from PyQt5.QtCore import QObject, QEvent, Qt
 from ParadoxParser.ParadoxNodes import (GenericNode, GenericKeyValue, GenericNode, 
                                         GenericComment, GenericString, GenericToken, 
                                         GenericInt, GenericFloat, GenericBool)
-from App.Contracts import NodeMutationRequest
 
+from App.Services import AppLogger
+from App.Contracts import NodeMutationRequest
 from App.GUI.Widgets.PopupModels import change_rejected_warning
 
 class InLineEditManager(QObject):
@@ -51,19 +52,17 @@ class InLineEditManager(QObject):
                 parent:QTreeWidget, 
                 source:QTreeWidgetItem, 
                 node:GenericNode):
-        if self.active:
-            print("open_request when already open")
 
         self.parent = parent
         self.source = source
         self.node = node
         self.node_value = node.value if isinstance(node, GenericKeyValue) else node
         self.editor = self._get_widget()
-        print(f"{self.editor} created")
+        AppLogger.info(f"{self.editor} created")
         self._create()
 
     def complete_request(self, new_value):
-        print(f"{self.node_value}, {self.node_value.value} to {new_value}")
+        AppLogger.info(f"{self.node_value}, {self.node_value.value} to {new_value}")
         if self.node_value.value != new_value:
             self.mutate_callback.emit(NodeMutationRequest(file=None, node=self.node, node_value=self.node_value, value=new_value))
         self._destroy(new_value)
@@ -71,8 +70,8 @@ class InLineEditManager(QObject):
 
     def cancel_request(self, reason):
         if self.active:
-            print(f"{self.editor} cancelled due to {reason}, value: {self.node.value}")
-            self._destroy(self.node.value)
+            AppLogger.info(f"{self.editor} cancelled due to {reason}, value: {self.node.value}")
+            self._destroy(self.node_value.value)
         self._clear()
 
     def _get_widget(self):
@@ -81,7 +80,7 @@ class InLineEditManager(QObject):
         try:
             editor_fn = self.cell_editors.get(type(self.node_value))
         except Exception as e:
-            print(e)
+            AppLogger.exception(e)
             return None
         return editor_fn(self.node_value, emit)
 

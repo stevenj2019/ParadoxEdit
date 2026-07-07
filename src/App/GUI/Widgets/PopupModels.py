@@ -1,3 +1,4 @@
+from App.Services import AppLogger
 from PyQt5.QtWidgets import QMessageBox
 import traceback
 def could_not_load_mod_critical(exc: Exception):
@@ -8,7 +9,7 @@ def could_not_load_mod_critical(exc: Exception):
 
     msg.setDetailedText(traceback.format_exc())
     msg.exec_()
-    print(traceback.format_exc())
+    AppLogger.exception(exc)
 
 def settings_error_critical(game_dir_error:bool, mod_dir_error:bool):
     text = "The following Problems prevent saving:"
@@ -103,6 +104,7 @@ def invalid_GFX_file_warning(parent):
     )
 
 def change_rejected_warning(message):
+    AppLogger.warning(message)
     return QMessageBox.warning(
         None, 
         "Warning",

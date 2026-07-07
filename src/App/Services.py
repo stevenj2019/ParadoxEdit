@@ -1,16 +1,19 @@
+import sys
 import json
+import logging
 from pathlib import Path
-from platformdirs import user_config_dir
-
+from platformdirs import user_config_dir, user_log_dir
+from datetime import datetime
 from PyQt5.QtGui import QColor as QColour
 
 from ParadoxParser import ParadoxScriptParser as PDXScriptFile
-from ParadoxParser.ParadoxNodes import GenericBlock
+from ParadoxParser.ParadoxNodes import GenericBlock, GenericKeyValue, GenericNode
 
 from App.Contracts import OpenFile
 from App.Enums import ChangeState
 from App.Modules import ParadoxMod
 
+app_name = "PDXEdit"
 class Services:
     def __init__(self, app):
         self.configuration = app.configuration
@@ -19,7 +22,7 @@ class Services:
 
 class ConfigurationManager:
     def __init__(self):
-        self.file_path:Path = Path(user_config_dir("PDXEdit"), "configuration.json")
+        self.file_path:Path = Path(user_config_dir(app_name), "configuration.json")
         self.game_install_path:Path = ""
         self.mod_file_path:Path = ""
         self.safe_mode:bool = True
@@ -64,6 +67,76 @@ class ConfigurationManager:
         with open(self.file_path, "w") as CONFIG_FILE:
             json.dump(self.to_json(), CONFIG_FILE)
 
+class AppLogger:
+    _logger = logging.getLogger(app_name)
+    
+    @classmethod 
+    def initialise(cls):
+        log_directory = Path(user_log_dir(app_name))
+        log_directory.mkdir(parents=True, exist_ok=True)
+        timestamp = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
+        log_file = log_directory / f"{app_name}-{timestamp}.log"
+
+        cls._logger.setLevel(logging.DEBUG)
+        if cls._logger.handlers:
+            return
+        
+        formatter = logging.Formatter(
+            "[%(asctime)s] %(levelname)s: %(message)s",
+            datefmt="%Y-%m-%d %H:%M:%S"
+        )
+        #file out
+        file_handler = logging.FileHandler(log_file, encoding="utf-8")
+        file_handler.setFormatter(formatter)
+        cls._logger.addHandler(file_handler)
+        #console out 
+        console_handler = logging.StreamHandler(sys.stdout)
+        console_handler.setFormatter(formatter)
+        cls._logger.addHandler(console_handler)
+        cls.info(f"Logging initialised: {log_file}")
+
+    @classmethod
+    def debug(cls, message):
+        cls._logger.debug(cls._format(message))
+
+    @classmethod
+    def info(cls, message):
+        cls._logger.info(cls._format(message))
+
+    @classmethod
+    def warning(cls, message):
+        cls._logger.warning(cls._format(message))
+
+    @classmethod
+    def error(cls, message):
+        cls._logger.error(cls._format(message))
+
+    @classmethod
+    def exception(cls, exc):
+        cls._logger.exception(exc)
+    
+    @classmethod
+    def mutation(cls, node, state):
+        cls.info(
+            f"Setting {cls._format(node)} -> {state}"
+        )
+
+    @staticmethod
+    def _format(obj):
+        if isinstance(obj, PDXScriptFile):
+            return f"{obj.filename}"
+        
+        if isinstance(obj, GenericBlock):
+            return f"{obj.key} {{...}}"
+        
+        if isinstance(obj, GenericKeyValue):
+            return f"{obj.key} = {obj.value}"
+
+        if isinstance(obj, GenericNode):
+            return str(obj.value)
+
+        return str(obj)
+    
 class StyleManager:
     def __init__(self, configuration):
         self.configuration = configuration
@@ -93,7 +166,7 @@ class ChangeTracker:
         return self.get_node_state(node) is not None
 
     def set_node_state(self, node, state):
-        print(f"Setting {node} to {state}")
+        AppLogger.mutation(node, state)
         self.node_changes[node] = state
 
     def get_node_state(self, node):
@@ -106,7 +179,7 @@ class ChangeTracker:
         return self.get_file_state(file) is not None
 
     def set_file_state(self, file, state):
-        print(f"Setting {file} to {state}")
+        AppLogger.mutation(file, state)
         self.file_changes[file] = state
 
     def get_file_state(self, file):

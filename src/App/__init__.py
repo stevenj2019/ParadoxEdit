@@ -5,7 +5,7 @@ from PyQt5.QtCore import QObject, pyqtSignal
 from PyQt5.QtWidgets import QApplication
 
 from App.Modules.Base import GenericCategory, ParadoxContext
-from App.Services import ConfigurationManager, StyleManager, FilesystemMananger
+from App.Services import ConfigurationManager, AppLogger, StyleManager, FilesystemMananger
 from App.GUI.Main import MainWindow
 
 from App.Enums import SaveTarget, PropagationType, ChangeState
@@ -23,6 +23,7 @@ class AppController(QObject):
         self.configuration = ConfigurationManager()
         self.file_system   = FilesystemMananger(self.configuration)
         self.style_manager = StyleManager(self.configuration)
+        AppLogger.initialise()
 
         self.main = MainWindow(self)
 
