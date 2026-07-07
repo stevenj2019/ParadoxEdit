@@ -8,6 +8,7 @@ def could_not_load_mod_critical(exc: Exception):
 
     msg.setDetailedText(traceback.format_exc())
     msg.exec_()
+    print(traceback.format_exc())
 
 def settings_error_critical(game_dir_error:bool, mod_dir_error:bool):
     text = "The following Problems prevent saving:"

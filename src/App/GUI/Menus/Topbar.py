@@ -2,7 +2,7 @@ from PyQt5.QtWidgets import QMainWindow, QToolBar, QMenu, QAction
 from PyQt5.QtCore import pyqtSignal
 
 from App.Enums import SaveTarget
-from App.GUI.Menus import ActionGroup, Action
+from App.GUI.Actions import ActionGroup, Action
 
 class Topbar(QToolBar):
     request_load_mod = pyqtSignal()

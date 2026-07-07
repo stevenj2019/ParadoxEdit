@@ -9,8 +9,7 @@ from ParadoxParser.ParadoxNodes import GenericBlock
 
 from App.Contracts import OpenFile
 from App.Enums import ChangeState
-from App.ModClasses import ParadoxMod
-from App.Contexts.FileContexts import ParadoxFileContext
+from App.Modules import ParadoxMod
 
 class Services:
     def __init__(self, app):

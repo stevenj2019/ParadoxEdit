@@ -3,9 +3,9 @@ from PyQt5.QtCore import Qt, pyqtSignal
 
 from ParadoxParser import ParadoxScriptParser as PDXScript
 
-from App.Contracts import OpenFile
+from App.Contracts import OpenFile, FileContext
 from App.Enums import QtStorage, ChangeState
-from App.Contexts.FileContexts import ParadoxFileContext
+from App.Modules.Base import ParadoxContext
 from App.GUI.Menus.ContextMenus import GenericCategoryContextMenu
 from App.GUI.StyledDelegate import ParadoxFileDelegate
 
@@ -66,7 +66,7 @@ class ModPanel(QWidget):
 
         descriptor_item.setData(0, QtStorage.FILE, mod.descriptor_object)
         descriptor_item.setData(0, QtStorage.STATE, ChangeState.CLEAN)
-        descriptor_item.setData(0, QtStorage.CONTEXT, ParadoxFileContext)
+        descriptor_item.setData(0, QtStorage.CONTEXT, ParadoxContext)
         
         self.node_to_item[mod.descriptor_object] = descriptor_item
         root.addChild(descriptor_item)
@@ -76,11 +76,10 @@ class ModPanel(QWidget):
 
         for c_key, c_val in mod.categories.items():
             cat_sub = QTreeWidgetItem([c_key])
-            category_context = c_val.context
-
+            context = c_val.context
             cat_sub.setData(0, QtStorage.IS_CATEGORY, True)
             cat_sub.setData(0, QtStorage.CATEGORY, c_val)
-            cat_sub.setData(0, QtStorage.CONTEXT, category_context)
+            cat_sub.setData(0, QtStorage.CONTEXT, context)
 
             self.node_to_item[c_val] = cat_sub
             for file, obj in c_val.files.items():
@@ -93,7 +92,7 @@ class ModPanel(QWidget):
                 widget.setData(0, QtStorage.FILE, obj)
                 widget.setData(0, QtStorage.STATE, None)
                 widget.setData(0, QtStorage.IS_CATEGORY, False)
-                widget.setData(0, QtStorage.CONTEXT, category_context)
+                widget.setData(0, QtStorage.CONTEXT, context)
 
                 cat_sub.addChild(widget)
 
@@ -121,10 +120,9 @@ class ModPanel(QWidget):
             return
         is_category = selected.data(0, QtStorage.IS_CATEGORY)
         item = selected.data(0, QtStorage.CATEGORY) if is_category else selected.data(0, QtStorage.FILE)
-
-        context = selected.data(0, QtStorage.CONTEXT)
         if not item:
             return
+        context = selected.data(0, QtStorage.CONTEXT).get_file_context()
         
-        self.context_menu.call(item, context)
+        self.context_menu.call(FileContext(target=item, context=context))
         self.context_menu.exec_(self.tree.viewport().mapToGlobal(pos))

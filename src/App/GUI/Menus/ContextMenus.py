@@ -6,7 +6,7 @@ from ParadoxParser.ParadoxNodes import GenericBlock
 
 from App.Enums import ExpansionMode, ChangeState
 from App.Contracts import BlockMutationRequest
-from App.GUI.Menus import ActionGroup, ActionSubMenu, Action
+from App.GUI.Actions import ActionGroup, ActionSubMenu, Action
 
 def dummy(): return 
 class GenericContextMenu(QMenu):
@@ -63,14 +63,14 @@ class GenericCategoryContextMenu(GenericContextMenu):
         super().__init__(parent, app_controller)
         self.menu_def:list = []
 
-    def call(self, file, context):
+    # def call(self, file, context):
+    def call(self, file_context):
         self.clear()
-        self.menu_def = self._get_context_menu_options(file=file, context=context)
+        self.menu_def = self._get_context_menu_options(file_context)
         self._build_menu()
 
-    def _get_context_menu_options(self, file, context):
-        context_actions = context.get_file_context()
-        return context_actions.file_actions(self.app_controller, file)
+    def _get_context_menu_options(self, context):
+        return context.context.get_actions(self.app_controller, context.target)
     
 class ParadoxNodesContextMenu(GenericContextMenu):
     request_expansion = pyqtSignal(object)

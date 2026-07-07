@@ -5,7 +5,7 @@ from ParadoxParser import ParadoxScriptParser as PDXScript
 from ParadoxParser.ParadoxNodes import GenericBlock, GenericKeyValue, GenericNode, GenericComment, GenericString, GenericToken
 
 from App.Enums import QtStorage, ExpansionMode, ChangeState
-from App.Contexts.FileContexts import ParadoxFileContext
+from App.Modules.Base import ParadoxContext
 from App.GUI.Menus.ContextMenus import ParadoxNodesContextMenu
 from App.GUI.StyledDelegate import NodeStateDelegate
 
@@ -69,7 +69,7 @@ class ContentsPanel(QWidget):
                    parent_item:QTreeWidgetItem, 
                    parent_node:PDXScript|GenericBlock,
                    nodes:list, 
-                   open_file_context:ParadoxFileContext, 
+                   open_file_context:ParadoxContext, 
                    inherited_state:ChangeState=None):
         for index, node in enumerate(nodes):
             effective_state = (
@@ -96,13 +96,13 @@ class ContentsPanel(QWidget):
                      parent_node:PDXScript|GenericBlock,
                      parent_index:int,
                      node:GenericKeyValue|GenericNode, 
-                     open_file_context:ParadoxFileContext, 
+                     open_file_context:ParadoxContext, 
                      inherited_state:ChangeState
     ):
         item = QTreeWidgetItem([str(node.key), ""])
         self.node_to_item[node] = item
         effective_state = inherited_state or self.app_controller.file_system.change_tracker.get_node_state(node)
-        context = open_file_context.derive_node_context(node)
+        context = open_file_context.get_block_context(node)
 
         item.setData(0, QtStorage.NODE, node)
         item.setData(0, QtStorage.IS_BLOCK, True)
@@ -125,7 +125,7 @@ class ContentsPanel(QWidget):
                    parent_node:PDXScript|GenericKeyValue,
                    parent_index:int,
                    node:GenericKeyValue|GenericNode, 
-                   open_file_context:ParadoxFileContext, 
+                   open_file_context:ParadoxContext, 
                    inherited_state:ChangeState=None
     ):
         if isinstance(node, GenericKeyValue):
@@ -144,7 +144,7 @@ class ContentsPanel(QWidget):
         else:
             effective_state = self.app_controller.file_system.change_tracker.get_node_state(node)
 
-        node_context = open_file_context.derive_node_context(parent_node)
+        node_context = open_file_context.get_block_context(parent_node)
         item.setData(0, QtStorage.NODE, node)
         item.setData(0, QtStorage.STATE, effective_state)
         item.setData(0, QtStorage.CONTEXT, node_context)
@@ -179,7 +179,7 @@ class ContentsPanel(QWidget):
 
             parent = open_file.file
             index = len(open_file.file.nodes)+1
-            context = file_context.derive_node_context(None)
+            context = file_context.get_block_context(None)
 
         self.context_menu.call(parent, index, context)
         self.context_menu.exec_(self.tree.viewport().mapToGlobal(pos))

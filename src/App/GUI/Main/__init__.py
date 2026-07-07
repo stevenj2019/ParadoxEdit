@@ -5,7 +5,6 @@ from ParadoxParser.ParadoxNodes import GenericBlock
 
 from App.Contracts import PropagationRequest, OpenFile
 from App.Enums import PropagationType, ChangeState
-from App.Contexts.FileContexts import ParadoxFileContext
 from App.GUI.Menus.Topbar import Topbar
 from App.GUI.Main.InlineEdit import InLineEditManager
 from App.GUI.Main.ModPanel import ModPanel
