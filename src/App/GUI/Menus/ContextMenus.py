@@ -69,8 +69,8 @@ class GenericCategoryContextMenu(GenericContextMenu):
         self.menu_def = self._get_context_menu_options(file_context)
         self._build_menu()
 
-    def _get_context_menu_options(self, context):
-        return context.context.get_actions(self.app_controller, context.target)
+    def _get_context_menu_options(self, file_context):
+        return file_context.context.get_actions(self.app_controller, file_context.target)
     
 class ParadoxNodesContextMenu(GenericContextMenu):
     request_expansion = pyqtSignal(object)
