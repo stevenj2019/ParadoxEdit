@@ -4,6 +4,7 @@ from PyQt5.QtCore import Qt, pyqtSignal
 from ParadoxParser import ParadoxScriptParser as PDXScript
 from ParadoxParser.ParadoxNodes import GenericBlock, GenericKeyValue, GenericNode, GenericComment, GenericString, GenericToken
 
+from App.Contracts import BlockContext, NodeContext
 from App.Enums import QtStorage, ExpansionMode, ChangeState
 from App.Modules.Base import ParadoxContext
 from App.GUI.Menus.ContextMenus import ParadoxNodesContextMenu
@@ -144,11 +145,13 @@ class ContentsPanel(QWidget):
         else:
             effective_state = self.app_controller.file_system.change_tracker.get_node_state(node)
 
-        node_context = open_file_context.get_block_context(parent_node)
+        node_context = open_file_context.get_node_context(node)
+        block_context = open_file_context.get_block_context(parent_node)
         item.setData(0, QtStorage.NODE, node)
         item.setData(0, QtStorage.STATE, effective_state)
         item.setData(0, QtStorage.CONTEXT, node_context)
         item.setData(0, QtStorage.PARENT, parent_node)
+        item.setData(0, QtStorage.PARENT_CONTEXT, block_context)
         item.setData(0, QtStorage.INDEX, parent_index)
         
         parent_item.addChild(item)
@@ -160,28 +163,40 @@ class ContentsPanel(QWidget):
                 if node:
                     self.edit_open_request.emit(self.tree, item, node)
 
+    #TODO this is flawed
+    #ISSUE1: clicking on the root of the file allows to remove comments and whitespace (it shouldnt?)
     def _request_context_menu(self, pos):
         pos = self.tree.viewport().mapFrom(self, pos)
         selected = self.tree.itemAt(pos)
         if selected:
             node = selected.data(0, QtStorage.NODE)
-            context = selected.data(0, QtStorage.CONTEXT)
+            node_context = NodeContext(
+                node=node,
+                node_context=selected.data(0, QtStorage.CONTEXT)
+            )
             if isinstance(node, GenericBlock):
-                parent = node
-                index = 0
-                context = selected.data(0, QtStorage.CONTEXT)
+                block_context = BlockContext(
+                    parent=node,
+                    parent_index=0,
+                    parent_context=selected.data(0, QtStorage.CONTEXT)
+                )
             else:
-                parent = selected.data(0, QtStorage.PARENT)
-                index = selected.data(0, QtStorage.INDEX)+1
+                block_context = BlockContext(
+                    parent = selected.data(0, QtStorage.PARENT),
+                    parent_index= selected.data(0, QtStorage.INDEX)+1,
+                    parent_context= selected.data(0, QtStorage.PARENT_CONTEXT)
+                )
         else:
             open_file = self.app_controller.file_system.open_file
-            file_context = open_file.context
 
-            parent = open_file.file
-            index = len(open_file.file.nodes)+1
-            context = file_context.get_block_context(None)
+            block_context = BlockContext(
+                parent=open_file.file,
+                parent_index=len(open_file.file.nodes)+1,
+                parent_context=open_file.context.get_block_context(None)
+            )
+            node_context = None
 
-        self.context_menu.call(parent, index, context)
+        self.context_menu.call(block_context, node_context)
         self.context_menu.exec_(self.tree.viewport().mapToGlobal(pos))
 
     def request_node_mutation(self, request):

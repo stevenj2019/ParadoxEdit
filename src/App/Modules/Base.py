@@ -4,7 +4,7 @@ from pathlib import Path
 
 from ParadoxParser import ParadoxScriptParser as PDXScriptFile
 
-from App.Contracts import BulkMutationRequest
+from App.Contracts import BulkMutationRequest, BlockMutationRequest
 from App.GUI.Actions import Action
 from App.Scripts.Generic import clear_comments, clear_whitespace
 
@@ -38,8 +38,12 @@ class ParadoxContext:
     
     @staticmethod
     def get_block_context(node):
-        return ParadoxNodeContext
+        return ParadoxBlockContext
 
+    @staticmethod
+    def get_node_context(node):
+        return ParadoxNodeContext
+            
 class ParadoxFileContext:
     @staticmethod
     def get_actions(app_controller, file):
@@ -60,16 +64,16 @@ class ParadoxFileContext:
 
 class ParadoxBlockContext:
     @staticmethod
-    def get_actions(app_controller, node, node_index):
+    def get_actions(app_controller, block_context):
         return
     
 class ParadoxNodeContext:
     @staticmethod
-    def get_actions(app_controller, node, node_index):
+    def get_actions(app_controller, block_context):
         return [
             Action("Add Comment", 
                    lambda:app_controller.request_block_mutation.emit(
-                       BlockMutationRequest.add(node, node_index, comment_node)
+                       BlockMutationRequest.add(block_context.parent, block_context.parent_index, comment_node)
                    ), 
                    True
             )
@@ -77,10 +81,10 @@ class ParadoxNodeContext:
 
 class LocalisationContext:
     @staticmethod
-    def node_actions():
+    def get_actions():
         return []
     
 class GFXContext:
     @staticmethod
-    def node_actions():
+    def get_actions():
         return []

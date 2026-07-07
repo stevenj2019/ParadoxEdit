@@ -12,6 +12,7 @@ class QtStorage(IntEnum):
     IS_CATEGORY = auto()
     CONTEXT = auto()
     PARENT = auto()
+    PARENT_CONTEXT = auto()
     INDEX = auto()
     
 class ChangeState(Enum):

@@ -3,8 +3,9 @@ import os
 from ParadoxParser.ParadoxNodes import GenericBlock, GenericKeyValue
 
 from App.Contracts import BlockMutationRequest
-from App.Modules.Base import (GenericCategory, ParadoxContext, ParadoxFileContext, 
-                         LocalisationContext, GFXContext)
+from App.Modules.Base import (GenericCategory, ParadoxContext, 
+                              ParadoxFileContext, ParadoxNodeContext,
+                              LocalisationContext, GFXContext)
 from App.GUI.Actions import Action
 from App.PDXFactory.Blocks.Events import (add_namespace_keyval, country_event_block, news_event_block, 
                                           immediate_block, option_block)
@@ -33,7 +34,7 @@ class EventContext(ParadoxContext):
                 return EventBlockContext
             elif node.key in ["option", "immediate"]:
                 return EventOptionContext
-        return EventFileContext
+        return EventRootContext
     
     @staticmethod
     def get_node_context(node):
@@ -54,42 +55,42 @@ class EventFileContext(ParadoxFileContext):
 
 class EventRootContext(ParadoxFileContext):
     @staticmethod
-    def get_actions(app_controller, node, node_index):
+    def get_actions(app_controller, block_context):
         return [
-            *ParadoxFileContext.get_actions(app_controller, node, node_index),
+            *ParadoxNodeContext.get_actions(app_controller, block_context),
             Action("Add Namespace", 
                    lambda:app_controller.request_block_mutation.emit(
-                       BlockMutationRequest.add(node, node_index, add_namespace_keyval)
+                       BlockMutationRequest.add(block_context.parent, block_context.parent_index, add_namespace_keyval)
                    ), 
                    True
             ),
             Action("Add Country Event",
                    lambda:app_controller.request_block_mutation.emit(
-                       BlockMutationRequest.add(node, node_index, country_event_block)
+                       BlockMutationRequest.add(block_context.parent, block_context.parent_index, country_event_block)
                    ),
                    True
             ),
             Action("Add News Event",
                    lambda:app_controller.request_block_mutation.emit(
-                       BlockMutationRequest.add(node, node_index, news_event_block)
+                       BlockMutationRequest.add(block_context.parent, block_context.parent_index, news_event_block)
                    ),
                    True
             )
         ]
 class EventBlockContext:
     @staticmethod
-    def get_actions(app_controller, node, node_index):
+    def get_actions(app_controller, block_context):
         return [
-            *EventFileContext.get_actions(app_controller, node, node_index),
+            *ParadoxNodeContext.get_actions(app_controller, block_context),
             Action("Add Immediate Block",
                    lambda:app_controller.request_block_mutation.emit(
-                       BlockMutationRequest.add(node, node_index, immediate_block)
+                       BlockMutationRequest.add(block_context.parent, block_context.parent_index, immediate_block)
                    ),
                    True
             ),
             Action("Add Option Block",
                    lambda:app_controller.request_block_mutation.emit(
-                       BlockMutationRequest.add(node, node_index, option_block)
+                       BlockMutationRequest.add(block_context.parent, block_context.parent_index, option_block)
                    ),
                    True
             )
@@ -97,9 +98,9 @@ class EventBlockContext:
     
 class EventOptionContext:
     @staticmethod
-    def get_actions(app_controller, node, node_index):
+    def get_actions(app_controller, block_context):
         return [
-            *ParadoxFileContext.node_actions(app_controller, node, node_index),
-            # *TriggerBlockActions.node_actions(ctx), 
-            # *EventBlockContext.node_actions(ctx),
+            *ParadoxNodeContext.get_actions(app_controller, block_context),
+            # *TriggerBlockActions.get_actions(context), 
+            # *EventBlockContext.get_actions(context),
         ]

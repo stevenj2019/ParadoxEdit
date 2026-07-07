@@ -63,7 +63,6 @@ class GenericCategoryContextMenu(GenericContextMenu):
         super().__init__(parent, app_controller)
         self.menu_def:list = []
 
-    # def call(self, file, context):
     def call(self, file_context):
         self.clear()
         self.menu_def = self._get_context_menu_options(file_context)
@@ -78,30 +77,35 @@ class ParadoxNodesContextMenu(GenericContextMenu):
         super().__init__(parent, app_controller)
         self.menu_def:list = []
 
-    def call(self, parent, parent_idx, context):
+    # def call(self, parent, parent_idx, context):
+    def call(self, block_context, node_context):
+        parent = block_context.parent
+        parent_idx = block_context.parent_index
+        context = block_context.parent_context
+
         self.clear()
-        self.menu_def = self._get_context_menu_options(node=parent, node_index=parent_idx, context=context)
+        self.menu_def = self._get_context_menu_options(block_context, node_context)
         self._build_menu()
 
-    def _get_context_menu_options(self, node, node_index, context):
+    def _get_context_menu_options(self, block_context, node_context):
         return [
             ActionGroup("Tree Options", [
                 Action("Expand All", lambda:self.parent.set_expansion_rule(ExpansionMode.ALL), True),
                 Action("Collapse All", lambda:self.parent.set_expansion_rule(ExpansionMode.DEPTH, depth_limit=1), True),
-                Action("Expand This", lambda:self.parent.set_expansion_rule(ExpansionMode.FROM_NODE, root_item=node), (node_index == 0 and isinstance(node, GenericBlock))),
+                Action("Expand This", lambda:self.parent.set_expansion_rule(ExpansionMode.FROM_NODE, root_item=block_context.parent), (block_context.parent_index == 0 and isinstance(block_context.parent, GenericBlock))),
             ]),
             ActionGroup("File Options", [
                 ActionSubMenu("Add", [
-                    *context.node_actions(self.app_controller, node, node_index),
+                    *block_context.parent_context.get_actions(self.app_controller, block_context),
                 ]),
                 Action("Delete", 
                        lambda:self.app_controller.request_block_mutation.emit(
                            BlockMutationRequest(file=None,
-                                                parent=node,
-                                                index=node_index, 
+                                                parent=block_context.parent,
+                                                index=block_context.parent_index, 
                                                 value=None,
                                                 state=ChangeState.DELETED)), 
-                    (not isinstance(node, PDXScriptFile))
+                    (not isinstance(block_context.parent, PDXScriptFile))
                 )
             ])
         ]

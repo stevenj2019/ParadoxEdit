@@ -17,32 +17,20 @@ class OpenFile:
     file:PDXScriptFile
     context:ParadoxFileContext
 
-# @dataclass
-# class Context:
-#     file:Optional[ParadoxFileContext] #this should be target
-#     block:Optional[ParadoxBlockContext]
-#     node:Optional[ParadoxNodeContext]
-#     index:Optional[int]
-
-#     @classmethod
-#     def add_file_context(cls, file):
-#         return cls(file)
-
-#     @classmethod
-#     def add_node_context(cls, file=None, block=None, node=None, index=None):
-#         return cls(
-#             file=file, block=block, node=node, index=index
-#         )
-    
 @dataclass
 class FileContext:
     target:GenericCategory|PDXScriptFile
     context:ParadoxFileContext
 
 @dataclass
+class BlockContext:
+    parent:GenericBlock
+    parent_index:int
+    parent_context:ParadoxBlockContext
+
+@dataclass
 class NodeContext:
-    target:PDXScriptFile|GenericBlock|GenericKeyValue|GenericNode
-    block_context:ParadoxBlockContext
+    node:GenericBlock|GenericKeyValue|GenericNode
     node_context:ParadoxNodeContext
     
 @dataclass
