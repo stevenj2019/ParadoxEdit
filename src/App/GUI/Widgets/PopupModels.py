@@ -111,3 +111,8 @@ def change_rejected_warning(message):
         message,
         QMessageBox.Ok
     )
+
+def no_icon_available_warning(message):
+    return QMessageBox.warning(
+        None, "Warning", message, QMessageBox.Ok
+    )

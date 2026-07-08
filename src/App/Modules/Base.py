@@ -6,8 +6,12 @@ from ParadoxParser import ParadoxScriptParser as PDXScriptFile
 
 from App.Contracts import BulkMutationRequest, BlockMutationRequest
 from App.GUI.Actions import Action
+from App.PDXFactory.Blocks.Generic import comment_node
 from App.Scripts.Generic import clear_comments, clear_whitespace
 
+###        ###
+#  CATEGORY  #
+###        ###
 class GenericCategory:
     def __init__(self, base:os.PathLike, paths:list[os.PathLike], context:ParadoxContext, file_type:str=None):
         self.file_type = file_type
@@ -15,7 +19,8 @@ class GenericCategory:
         self.context = context
         for path in paths:
             self._read_directory(os.path.join(base, path))
-    
+        self._build_metadata()
+
     def _read_file(self, file):
         self._parse_file(file)
         
@@ -31,6 +36,9 @@ class GenericCategory:
     def _parse_files(self, path:os.PathLike):
         self.files[path.name] = PDXScriptFile(path)
 
+###        ###
+#  CONTEXTS  #
+###        ###
 class ParadoxContext:
     @staticmethod
     def get_file_context():
@@ -81,10 +89,14 @@ class ParadoxNodeContext:
 
 class LocalisationContext:
     @staticmethod
-    def get_actions():
+    def get_actions(app_controller, node_context):
         return []
     
 class GFXContext:
     @staticmethod
-    def get_actions():
-        return []
+    def get_actions(app_controller, node_context):
+        return [
+            Action("Preview Icon", 
+                   lambda:app_controller.main.request_icon_preview.emit(node_context.node.value),
+                   True)
+        ]

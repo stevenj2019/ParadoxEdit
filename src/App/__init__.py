@@ -7,7 +7,6 @@ from PyQt5.QtWidgets import QApplication
 from App.Modules.Base import GenericCategory, ParadoxContext
 from App.Services import ConfigurationManager, AppLogger, StyleManager, FilesystemMananger
 from App.GUI.Main import MainWindow
-
 from App.Enums import SaveTarget, PropagationType, ChangeState
 from App.Contracts import OpenFile, PropagationRequest, NodeMutationRequest, BlockMutationRequest, BulkMutationRequest
 
@@ -75,7 +74,7 @@ class AppController(QObject):
         if node_value.value != value:
             node_value.value = value
             self.file_system.changed_file(file, node, ChangeState.MODIFIED)
-            self.main.propagation_request.emit(PropagationRequest(type=PropagationType.NODE,
+            self.main.request_propagation.emit(PropagationRequest(type=PropagationType.NODE,
                                                                   file=file,
                                                                   node=node,
                                                                   state=ChangeState.MODIFIED))
@@ -94,7 +93,7 @@ class AppController(QObject):
         else:
             node = parent.nodes[index]
         self.file_system.changed_file(file, node, state)
-        self.main.propagation_request.emit(PropagationRequest(type=PropagationType.NODE, 
+        self.main.request_propagation.emit(PropagationRequest(type=PropagationType.NODE, 
                                                        file=file,
                                                        node=node,
                                                        state=state))
@@ -113,7 +112,7 @@ class AppController(QObject):
 
         for file in file_list:
             action(file, self)
-            self.main.propagation_request.emit(PropagationRequest(type=PropagationType.FILE,
+            self.main.request_propagation.emit(PropagationRequest(type=PropagationType.FILE,
                                                                   file=file,
                                                                   node=None,
                                                                   state=ChangeState.MODIFIED))
@@ -124,7 +123,7 @@ class AppController(QObject):
         def save_routine(file):
             saved = self.file_system.save_file(file)
             if saved:
-                self.main.propagation_request.emit(PropagationRequest(type=PropagationType.FILE, 
+                self.main.request_propagation.emit(PropagationRequest(type=PropagationType.FILE, 
                                                                       file=file,
                                                                       node=None,
                                                                       state=None

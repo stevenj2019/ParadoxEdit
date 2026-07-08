@@ -11,7 +11,6 @@ from App.PDXFactory.Blocks.Events import (add_namespace_keyval, country_event_bl
                                           immediate_block, option_block)
 from App.GUI.Actions import Action
 
-#TODO: need to update front-end to use this
 ###        ###
 #  CATEGORY  #
 ###        ###
@@ -19,6 +18,8 @@ class EventCategory(GenericCategory):
     def __init__(self, mod_path:os.PathLike):
         super().__init__(mod_path, ["events/"], EventContext)
 
+    def _build_metadata(self):
+        return
 ###        ###
 #  CONTEXTS  #
 ###        ###

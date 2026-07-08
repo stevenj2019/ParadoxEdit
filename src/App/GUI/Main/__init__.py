@@ -9,12 +9,15 @@ from App.GUI.Menus.Topbar import Topbar
 from App.GUI.Main.InlineEdit import InLineEditManager
 from App.GUI.Main.ModPanel import ModPanel
 from App.GUI.Main.ContentsPanel import ContentsPanel
+
+from App.GUI.Widgets.IconPreview import IconPreviewDialog
 from App.GUI.Widgets.FileDialogues import select_mod_file
-from App.GUI.Widgets.PopupModels import could_not_load_mod_critical
+from App.GUI.Widgets.PopupModels import could_not_load_mod_critical, no_icon_available_warning
 from App.GUI.Forms.Settings import SettingsForm
 
 class MainWindow(QMainWindow):
-    propagation_request = pyqtSignal(object)
+    request_propagation = pyqtSignal(object)
+    request_icon_preview = pyqtSignal(object)
     def __init__(self, app):
         super().__init__()
         self.app_controller = app
@@ -51,7 +54,8 @@ class MainWindow(QMainWindow):
         if not self.app_controller.configuration.initialised:
             self.settings_window_requested()
 
-        self.propagation_request.connect(self._propogate_mutations)
+        self.request_propagation.connect(self._propogate_mutations)
+        self.request_icon_preview.connect(self._preview_icon)
 
     def _propogate_mutations(self, request:PropagationRequest):
         type = request.type
@@ -93,3 +97,15 @@ class MainWindow(QMainWindow):
         self.editor_session.cancel_request(reason="file switch")
         self.app_controller.file_system.load_file(file)
         self.contents_panel.load_block(file)
+
+    def _preview_icon(self, icon):
+        icon = icon.value
+        mod = self.app_controller.file_system.mod
+        gfx_cat = mod.categories["GFXCategory"]
+        icon_relative_path = gfx_cat._get_metadata(icon)
+        if not icon_relative_path:
+            no_icon_available_warning(f"{icon} does not exist in Mod Metadata")
+            return
+        full_path = mod._resolve_path(icon_relative_path)
+        dialog = IconPreviewDialog(icon, full_path)
+        dialog.exec()

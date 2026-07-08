@@ -39,3 +39,6 @@ class ParadoxMod:
             (Path(node.value.value.strip('"')) for node in self.descriptor_object.nodes
             if isinstance(node, GenericKeyValue) and node.key == "path"), None
         )
+
+    def _resolve_path(self, path):
+        return self.mod_base_dir / path

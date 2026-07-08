@@ -94,7 +94,7 @@ class ParadoxNodesContextMenu(GenericContextMenu):
                 Action("Collapse All", lambda:self.parent.set_expansion_rule(ExpansionMode.DEPTH, depth_limit=1), True),
                 Action("Expand This", lambda:self.parent.set_expansion_rule(ExpansionMode.FROM_NODE, root_item=block_context.parent), (block_context.parent_index == 0 and isinstance(block_context.parent, GenericBlock))),
             ]),
-            ActionGroup("File Options", [
+            ActionGroup("Block Options", [
                 ActionSubMenu("Add", [
                     *block_context.parent_context.get_actions(self.app_controller, block_context),
                 ]),
@@ -107,5 +107,8 @@ class ParadoxNodesContextMenu(GenericContextMenu):
                                                 state=ChangeState.DELETED)), 
                     (not isinstance(block_context.parent, PDXScriptFile))
                 )
+            ]),
+            ActionGroup("Node Options",[
+                *node_context.node_context.get_actions(self.app_controller, node_context)
             ])
         ]
