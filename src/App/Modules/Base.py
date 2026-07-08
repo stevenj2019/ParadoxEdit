@@ -7,6 +7,7 @@ from ParadoxParser import ParadoxLocParser as PDXLocFile
 
 from App.Contracts import BulkMutationRequest, BlockMutationRequest
 from App.GUI.Actions import Action
+from App.GUI.Forms.LocaliseKey import LocaliseForm
 from App.PDXFactory.Blocks.Generic import comment_node
 from App.Scripts.Generic import clear_comments, clear_whitespace
 
@@ -94,9 +95,14 @@ class ParadoxNodeContext:
 class LocalisationContext:
     @staticmethod
     def get_actions(app_controller, node_context):
-        return []
-    def errors(app_controller, node_context):
-        return 
+        return [
+            Action("Localise", 
+                   lambda:LocaliseForm(app_controller, node_context.node.value.value), 
+                   True)
+        ]
+    def errors(app_controller, node):
+        if not node.value in app_controller.file_system.mod.categories["LocalisationCategory"].metadata.keys():
+            return "Localisation does not exist"
     
 class GFXContext:
     @staticmethod

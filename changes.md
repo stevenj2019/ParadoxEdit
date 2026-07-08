@@ -5,3 +5,6 @@
 * Added GFXIcon Tooling (Error checking in files + inspect icon)
 * Added Localisation Files to load
 * Fix Comparators (something > something else) crashing
+* Added Legacy->modern loc converstion (removing :0 stuff)
+* Added Error-checking for missing loc keys
+* Added form to localise selected key

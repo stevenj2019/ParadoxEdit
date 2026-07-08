@@ -1,6 +1,7 @@
 import os
 
 from ParadoxParser import ParadoxLocParser as PDXLocFile
+from ParadoxParser.ParadoxNodes import GenericComment
 from App.Modules.Base import (GenericCategory, ParadoxContext, 
                               ParadoxFileContext, ParadoxNodeContext)
 from App.Contracts import BulkMutationRequest
@@ -17,8 +18,12 @@ class LocalisationCategory(GenericCategory):
                          parser=PDXLocFile)
 
     def _build_metadata(self):
-        return
-    
+        self.metadata = dict()
+        for file in self.files.values():
+            for node in file.nodes:
+                if not isinstance(node, GenericComment):
+                    self.metadata[node.key] = {"file":file, "node":node}
+
 ###        ###
 #  CONTEXTS  #
 ###        ###
