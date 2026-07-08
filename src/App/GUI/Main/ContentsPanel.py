@@ -2,7 +2,8 @@ from PyQt5.QtWidgets import QWidget, QVBoxLayout, QTreeWidget, QTreeWidgetItem
 from PyQt5.QtCore import Qt, pyqtSignal
 
 from ParadoxParser import ParadoxScriptParser as PDXScript
-from ParadoxParser.ParadoxNodes import GenericBlock, GenericKeyValue, GenericNode
+from ParadoxParser.ParadoxNodes import (GenericBlock, GenericKeyValue, GenericNode, 
+                                        GenericLocKey, GenericLegacyLocKey, GenericComparator)
 
 from App.Contracts import BlockContext, NodeContext
 from App.Enums import QtStorage, ExpansionMode, ChangeState
@@ -111,8 +112,8 @@ class ContentsPanel(QWidget):
         item.setData(0, QtStorage.CONTEXT, context)
         item.setData(0, QtStorage.PARENT, parent_node)
         item.setData(0, QtStorage.INDEX, parent_index)
+        item.setData(0, QtStorage.IS_COMPARATOR, False)
 
-        
         parent_item.addChild(item)
 
         self._add_nodes(parent_item=item, 
@@ -129,12 +130,19 @@ class ContentsPanel(QWidget):
                    open_file_context:ParadoxContext, 
                    inherited_state:ChangeState=None
     ):
-        if isinstance(node, GenericKeyValue):
-            value_label = node.key
-            value_node = node.value
-        else:
-            value_label = ""
-            value_node = node
+        match node:
+            case GenericKeyValue():
+                value_label = node.key
+                value_node = node.value
+            case GenericLocKey():
+                value_label = node.key
+                value_node = node
+            case GenericLegacyLocKey():
+                value_label = f"{node.key}:{node.num}"
+                value_node = node
+            case _:
+                value_label = ""
+                value_node = node
 
         item = QTreeWidgetItem([value_label, str(value_node._get_value())])
         self.node_to_item[node] = item
@@ -154,6 +162,7 @@ class ContentsPanel(QWidget):
         item.setData(0, QtStorage.PARENT, parent_node)
         item.setData(0, QtStorage.PARENT_CONTEXT, block_context)
         item.setData(0, QtStorage.INDEX, parent_index)
+        item.setData(0, QtStorage.IS_COMPARATOR, isinstance(node, GenericComparator))
 
         parent_item.addChild(item)
 

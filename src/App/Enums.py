@@ -5,11 +5,12 @@ class QtStorage(IntEnum):
     def _generate_next_value_(name, start, count, last_values):
         return Qt.UserRole + count
     FILE = auto()
-    NODE = auto()
     IS_BLOCK = auto()
-    STATE = auto()
-    CATEGORY = auto()
+    IS_COMPARATOR = auto()
     IS_CATEGORY = auto()
+    CATEGORY = auto()
+    NODE = auto()
+    STATE = auto()
     CONTEXT = auto()
     PARENT = auto()
     PARENT_CONTEXT = auto()

@@ -3,6 +3,7 @@ import os
 from pathlib import Path
 
 from ParadoxParser import ParadoxScriptParser as PDXScriptFile
+from ParadoxParser import ParadoxLocParser as PDXLocFile
 
 from App.Contracts import BulkMutationRequest, BlockMutationRequest
 from App.GUI.Actions import Action
@@ -13,10 +14,11 @@ from App.Scripts.Generic import clear_comments, clear_whitespace
 #  CATEGORY  #
 ###        ###
 class GenericCategory:
-    def __init__(self, base:os.PathLike, paths:list[os.PathLike], context:ParadoxContext, file_type:str=None):
+    def __init__(self, base:os.PathLike, paths:list[os.PathLike], context:ParadoxContext, file_type:str=None, parser:PDXScriptFile|PDXLocFile=PDXScriptFile):
         self.file_type = file_type
-        self.files:dict[str, PDXScriptFile] = {}
         self.context = context
+        self.parser = parser
+        self.files:dict[str, PDXScriptFile] = {}
         for path in paths:
             self._read_directory(os.path.join(base, path))
         self._build_metadata()
@@ -34,7 +36,7 @@ class GenericCategory:
                     self._parse_files(Path(os.path.join(root, name)))
 
     def _parse_files(self, path:os.PathLike):
-        self.files[path.name] = PDXScriptFile(path)
+        self.files[path.name] = self.parser(path)
 
 ###        ###
 #  CONTEXTS  #

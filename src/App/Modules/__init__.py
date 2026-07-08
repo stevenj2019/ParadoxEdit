@@ -4,7 +4,6 @@ from pathlib import Path
 from ParadoxParser import ParadoxScriptParser as PDXScriptFile
 from ParadoxParser.ParadoxNodes import GenericKeyValue
 from App.Modules.Base import GenericCategory
-# from App.Modules import (EventCategory, GFXCategory)
 
 # implemented_arr = [EventCategory, GFXCategory]
 class ParadoxMod:
@@ -13,10 +12,6 @@ class ParadoxMod:
         self.descriptor_file = path.name
         self.descriptor_object = PDXScriptFile(path)
 
-        from App.Modules.Event import EventCategory
-        from App.Modules.GFX import GFXCategory
-        implemented_categories = [EventCategory, GFXCategory]
-        
         self.mod_name:str = ""
         self.mod_base_dir:os.PathLike = None
         self._collect_mod_info()
@@ -26,7 +21,9 @@ class ParadoxMod:
         self.categories:dict[str, GenericCategory] = {}
         self.error_categories:list[GenericCategory] = []
 
-        for category in implemented_categories:
+
+        from App.Modules._Registry import IMPLEMENTED
+        for category in IMPLEMENTED:
             obj = category(self.mod_base_dir)
             self.categories[type(obj).__name__] = obj
 

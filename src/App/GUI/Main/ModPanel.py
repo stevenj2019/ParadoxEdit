@@ -29,7 +29,7 @@ class ModPanel(QWidget):
         header.setSectionResizeMode(0, QHeaderView.Stretch)
         self.tree.setHeaderHidden(True)
         self.tree.setTextElideMode(Qt.ElideRight)
-        self.tree.setItemDelegate(ParadoxFileDelegate(self.app_controller.style_manager, self.tree))
+        self.tree.setItemDelegate(ParadoxFileDelegate(self.app_controller, self.tree))
         layout.addWidget(self.tree)
 
         self.context_menu = GenericCategoryContextMenu(self, app_controller)

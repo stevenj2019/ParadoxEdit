@@ -72,7 +72,8 @@ class NodeStateDelegate(QStyledItemDelegate):
         
         source_index = index.sibling(index.row(), 0)
         is_block = source_index.model().data(source_index, QtStorage.IS_BLOCK)
-        if not is_block:
+        is_comparator = source_index.model().data(source_index, QtStorage.IS_COMPARATOR)
+        if not (is_block or is_comparator):
             node = source_index.model().data(source_index, QtStorage.NODE)
             context = source_index.model().data(source_index, QtStorage.CONTEXT)
             error = context.errors(self.app_controller, node.value)

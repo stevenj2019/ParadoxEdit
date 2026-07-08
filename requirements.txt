@@ -2,7 +2,7 @@ altgraph==0.17.5
 Jinja2==3.1.6
 MarkupSafe==3.0.3
 packaging==26.2
-ParadoxParser @ git+https://github.com/stevenj2019/ParadoxParser.git@ee3393cdd1e040f475861ab03af641a050738d23
+ParadoxParser @ git+https://github.com/stevenj2019/ParadoxParser.git@d295e9da94719be6a1285c5151d20eae599211df
 pillow==12.3.0
 platformdirs==4.10.0
 pyinstaller==6.21.0
