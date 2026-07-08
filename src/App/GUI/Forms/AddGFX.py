@@ -99,7 +99,8 @@ class AddNewGFXForm(QDialog):
         self.file_list_item.takeTopLevelItem(index)
 
     def _change_save_file(self, index):
-        self.save_file = self.category.files[index].filename
+        file = self.file_dropdown.itemText(index)
+        self.save_file = self.category.files[file]
 
     def _select_save_folder(self):
         path, _ = gfx_save_folder_selector(self, str(self.app_controller.file_system.mod.mod_base_dir / "gfx"))
