@@ -86,11 +86,15 @@ class ParadoxNodeContext:
                    True
             )
         ]
+    def errors(app_controller, node_context):
+        return
 
 class LocalisationContext:
     @staticmethod
     def get_actions(app_controller, node_context):
         return []
+    def errors(app_controller, node_context):
+        return 
     
 class GFXContext:
     @staticmethod
@@ -100,3 +104,8 @@ class GFXContext:
                    lambda:app_controller.main.request_icon_preview.emit(node_context.node.value),
                    True)
         ]
+    def errors(app_controller, node):
+        if not node.value in app_controller.file_system.mod.categories["GFXCategory"].metadata.keys():
+            return "Icon does not exist"
+        else:
+            return

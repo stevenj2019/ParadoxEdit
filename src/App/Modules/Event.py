@@ -44,6 +44,7 @@ class EventContext(ParadoxContext):
                 return LocalisationContext
             elif node.key == "picture":
                 return GFXContext
+        return ParadoxNodeContext
             
 class EventFileContext(ParadoxFileContext):
     @staticmethod

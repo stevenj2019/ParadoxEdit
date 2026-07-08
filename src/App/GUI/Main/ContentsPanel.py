@@ -2,7 +2,7 @@ from PyQt5.QtWidgets import QWidget, QVBoxLayout, QTreeWidget, QTreeWidgetItem
 from PyQt5.QtCore import Qt, pyqtSignal
 
 from ParadoxParser import ParadoxScriptParser as PDXScript
-from ParadoxParser.ParadoxNodes import GenericBlock, GenericKeyValue, GenericNode, GenericComment, GenericString, GenericToken
+from ParadoxParser.ParadoxNodes import GenericBlock, GenericKeyValue, GenericNode
 
 from App.Contracts import BlockContext, NodeContext
 from App.Enums import QtStorage, ExpansionMode, ChangeState
@@ -25,7 +25,7 @@ class ContentsPanel(QWidget):
         self.tree.setColumnCount(2)
         self.tree.setHeaderLabels(["Key", "Value"])
         self.tree_fully_expanded = False
-        self.tree.setItemDelegate(NodeStateDelegate(self.app_controller.style_manager, self.tree))
+        self.tree.setItemDelegate(NodeStateDelegate(self.app_controller, self.tree))
         self.tree.itemDoubleClicked.connect(self._on_item_double_click)
         
         self.context_menu = ParadoxNodesContextMenu(self, app_controller)
@@ -148,12 +148,13 @@ class ContentsPanel(QWidget):
         node_context = open_file_context.get_node_context(node)
         block_context = open_file_context.get_block_context(parent_node)
         item.setData(0, QtStorage.NODE, node)
+        item.setData(0, QtStorage.IS_BLOCK, False)
         item.setData(0, QtStorage.STATE, effective_state)
         item.setData(0, QtStorage.CONTEXT, node_context)
         item.setData(0, QtStorage.PARENT, parent_node)
         item.setData(0, QtStorage.PARENT_CONTEXT, block_context)
         item.setData(0, QtStorage.INDEX, parent_index)
-        
+
         parent_item.addChild(item)
 
     def _on_item_double_click(self, item, column):
@@ -163,8 +164,6 @@ class ContentsPanel(QWidget):
                 if node:
                     self.edit_open_request.emit(self.tree, item, node)
 
-    #TODO this is flawed
-    #ISSUE1: clicking on the root of the file allows to remove comments and whitespace (it shouldnt?)
     def _request_context_menu(self, pos):
         pos = self.tree.viewport().mapFrom(self, pos)
         selected = self.tree.itemAt(pos)
