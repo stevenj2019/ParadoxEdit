@@ -5,6 +5,7 @@ from PyQt5.QtGui import QColor as QColour, QBrush, QPen
 from App.Enums import QtStorage
 from App.Enums import ChangeState
 
+from App.Modules.Event import EventOptionContext #added for debug purposes
 class ParadoxFileDelegate(QStyledItemDelegate):
     def __init__(self, app_controller, parent=None):
         super().__init__(parent)
@@ -99,6 +100,10 @@ class NodeStateDelegate(QStyledItemDelegate):
                 source_index = index.sibling(index.row(), 0)
                 node = source_index.model().data(source_index, QtStorage.NODE)
                 context = source_index.model().data(source_index, QtStorage.CONTEXT)
+                #debug block
+                if isinstance(context, EventOptionContext):
+                    print()
+                #end of debug block
                 error = context.errors(self.app_controller, node.value)
                 if error:
                     QToolTip.showText(
