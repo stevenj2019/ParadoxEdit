@@ -5,7 +5,7 @@ from PyQt5.QtCore import QObject, pyqtSignal
 from PyQt5.QtWidgets import QApplication
 
 from App.Modules.Base import GenericCategory, ParadoxContext
-from App.Services import ConfigurationManager, AppLogger, StyleManager, FilesystemMananger
+from App.Services import ConfigurationManager, AppLogger, StyleManager, FilesystemMananger, AppMetaData
 from App.GUI.Main import MainWindow
 from App.Enums import SaveTarget, PropagationType, ChangeState
 from App.Contracts import OpenFile, PropagationRequest, NodeMutationRequest, BlockMutationRequest, BulkMutationRequest
@@ -22,6 +22,7 @@ class AppController(QObject):
         self.configuration = ConfigurationManager()
         self.file_system   = FilesystemMananger(self.configuration)
         self.style_manager = StyleManager(self.configuration)
+        self.registry      = AppMetaData()
         AppLogger.initialise()
 
         self.main = MainWindow(self)
@@ -46,6 +47,7 @@ class AppController(QObject):
         except Exception as e:
             self.main.load_mod_failed(e)
             return 
+        self.registry.load_mod(self.file_system.mod)
         self.file_system.load_file(OpenFile(self.file_system.mod.descriptor_object, ParadoxContext))
         self.main.load_mod(self.file_system.mod)
         self.main.load_file(self.file_system.open_file)

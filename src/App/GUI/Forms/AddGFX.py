@@ -8,18 +8,20 @@ from ParadoxParser.ParadoxNodes import GenericBlock, GenericComment
 from PyQt5.QtWidgets import (QDialog, QFormLayout, QHBoxLayout, QTreeWidget, QTreeWidgetItem, 
                              QPushButton, QLabel, QLineEdit, QCheckBox, QComboBox)
 
+# from App.Modules.GFX import GFXCategory
 from App.Contracts import BlockMutationRequest
 from App.PDXFactory.Blocks.Sprites import GFX_icon, GFX_shine_icon
 from App.GUI.Widgets.FileDialogues import (gfx_files_folder_selector, gfx_files_file_selector, 
                                            gfx_save_folder_selector)
 from App.GUI.Widgets.PopupModels import GFX_file_copying_warn, form_missing_value
 
-##TODO: all the individual widgets work ok, i still need to code the actual operations, and propogate changes to app_controller. 
+CATEGORY = "GFXCategory"
 class AddNewGFXForm(QDialog):
     def __init__(self, app_controller, file):
         super().__init__()
         self.app_controller = app_controller
-        self.category = app_controller.file_system.mod.categories["GFXCategory"]
+        self.mod = app_controller.registry.mod
+        self.category = app_controller.registry.get_category(CATEGORY)
         self.file_list:list = []
         self.save_location:Path = None
         self.save_file:PDXFile = file
@@ -48,9 +50,10 @@ class AddNewGFXForm(QDialog):
 
         self.save_to_file_label = QLabel("GFX Definition:")
         self.file_dropdown = QComboBox()
-        for index, _file in enumerate(self.category.files.values()):
-            self.file_dropdown.addItem(_file.filename)
-            if _file is self.save_file:
+        # for index, _file in enumerate(self.category.files.values()):
+        for index, file in enumerate(self.category.files.values()):
+            self.file_dropdown.addItem(file.filename)
+            if file is self.save_file:
                 self.file_dropdown.setCurrentIndex(index)
         self.save_to_file_label.setBuddy(self.file_dropdown)
         self.file_dropdown.currentIndexChanged.connect(self._change_save_file)
@@ -103,7 +106,7 @@ class AddNewGFXForm(QDialog):
         self.save_file = self.category.files[file]
 
     def _select_save_folder(self):
-        path, _ = gfx_save_folder_selector(self, str(self.app_controller.file_system.mod.mod_base_dir / "gfx"))
+        path, _ = gfx_save_folder_selector(self, str(self.mod.mod_base_dir / "gfx"))
         if path:
             self.storage_folder_path_element_text.setText(path)
         return 
@@ -158,7 +161,7 @@ class AddNewGFXForm(QDialog):
             for path in self.file_list:
                 image_collection_loop(sprites, path)
             sprites = copy_file_to_new_directory(self.storage_folder_path_element_text.text(), sprites)
-            base_dir = self.app_controller.file_system.mod.mod_base_dir
+            base_dir = self.app_controller.registry.mod.mod_base_dir
             generate_shines = self.is_focus_type_check.isChecked()
 
             with self.app_controller.batch_manager():

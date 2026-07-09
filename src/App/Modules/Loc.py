@@ -17,13 +17,13 @@ class LocalisationCategory(GenericCategory):
                          context=LocalisationContext,
                          parser=PDXLocFile)
 
-    def _build_metadata(self):
-        self.metadata = dict()
+    def build_metadata(self):
+        metadata = dict()
         for file in self.files.values():
             for node in file.nodes:
                 if not isinstance(node, GenericComment):
-                    self.metadata[node.key] = {"file":file, "node":node}
-
+                    metadata[node.key] = {"file":file, "node":node}
+        return metadata
 ###        ###
 #  CONTEXTS  #
 ###        ###

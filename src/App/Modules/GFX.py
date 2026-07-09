@@ -7,7 +7,6 @@ from App.Services import AppLogger
 from App.Contracts import BlockMutationRequest
 from App.Modules.Base import GenericCategory, ParadoxContext, ParadoxFileContext, ParadoxNodeContext
 from App.GUI.Actions import Action
-from App.GUI.Forms.AddGFX import AddNewGFXForm
 from App.PDXFactory.Blocks.Sprites import GFX_icon, GFX_shine_icon
 
 ###        ###
@@ -17,8 +16,8 @@ class GFXCategory(GenericCategory):
     def __init__(self, mod_path:os.PathLike):
         super().__init__(mod_path, ["interface/"], GFXContext, ".gfx")
 
-    def _build_metadata(self):
-        self.metadata = dict()
+    def build_metadata(self):
+        metadata = dict()
         for file in self.files.values():
             try:
                 block = next(block for block in file.nodes
@@ -37,16 +36,16 @@ class GFXCategory(GenericCategory):
                                     if isinstance(kvnode, GenericKeyValue)
                                     and kvnode.key.lower() == "texturefile"), "")
                     if name and texture:
-                        self.metadata[name] = texture
+                        metadata[name] = texture
                     else:
                         AppLogger.error(f"{file.filename} in {node.key} block, missing name:{name} or texturefile:{texture}")
-        print()
+        return metadata
 
-    def _get_metadata(self, key):
-        try:
-            return self.metadata[key]
-        except KeyError:
-            return None
+    # def _get_metadata(self, key):
+    #     try:
+    #         return self.metadata[key]
+    #     except KeyError:
+    #         return None
 ###        ###
 #  CONTEXTS  #
 ###        ###
@@ -69,6 +68,7 @@ class GFXContext(ParadoxContext):
 class GFXFileContext(ParadoxFileContext):
     @staticmethod
     def get_actions(app_controller, file):
+        from App.GUI.Forms.AddGFX import AddNewGFXForm
         return [
             *ParadoxFileContext.get_actions(app_controller, file),
             Action("Bulk-Upload Sprites",

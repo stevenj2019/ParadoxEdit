@@ -7,7 +7,8 @@ from ParadoxParser import ParadoxLocParser as PDXLocFile
 
 from App.Contracts import BulkMutationRequest, BlockMutationRequest
 from App.GUI.Actions import Action
-from App.GUI.Forms.LocaliseKey import LocaliseForm
+
+from App.GUI.Forms.LocaliseKey import LocaliseNodeForm
 from App.PDXFactory.Blocks.Generic import comment_node
 from App.Scripts.Generic import clear_comments, clear_whitespace
 
@@ -22,7 +23,6 @@ class GenericCategory:
         self.files:dict[str, PDXScriptFile] = {}
         for path in paths:
             self._read_directory(os.path.join(base, path))
-        self._build_metadata()
 
     def _read_file(self, file):
         self._parse_file(file)
@@ -97,11 +97,13 @@ class LocalisationContext:
     def get_actions(app_controller, node_context):
         return [
             Action("Localise", 
-                   lambda:LocaliseForm(app_controller, node_context.node.value.value), 
+                   lambda:LocaliseNodeForm(app_controller, node_context.node.value.value), 
                    True)
         ]
     def errors(app_controller, node):
-        if not node.value in app_controller.file_system.mod.categories["LocalisationCategory"].metadata.keys():
+        # from App.Modules.Loc import LocalisationCategory
+        CATEGORY = "LocalisationCategory"
+        if not node.value in app_controller.registry.get_category_metadata(CATEGORY).keys():
             return "Localisation does not exist"
     
 class GFXContext:
@@ -113,7 +115,9 @@ class GFXContext:
                    True)
         ]
     def errors(app_controller, node):
-        if not node.value in app_controller.file_system.mod.categories["GFXCategory"].metadata.keys():
+        # from App.Modules.GFX import GFXCategory
+        CATEGORY = "GFXCategory"
+        if not node.value in app_controller.registry.get_category_metadata(CATEGORY).keys():
             return "Icon does not exist"
         else:
             return

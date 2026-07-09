@@ -2,7 +2,7 @@ from PyQt5.QtWidgets import QMainWindow, QSplitter
 from PyQt5.QtCore import Qt, pyqtSignal
 
 from ParadoxParser.ParadoxNodes import GenericBlock
-
+from App.Modules.GFX import GFXCategory
 from App.Contracts import PropagationRequest, OpenFile
 from App.Enums import PropagationType, ChangeState
 from App.GUI.Menus.Topbar import Topbar
@@ -99,10 +99,11 @@ class MainWindow(QMainWindow):
         self.contents_panel.load_block(file)
 
     def _preview_icon(self, icon):
+        CATEGORY = "GFXCategory"
         icon = icon.value
-        mod = self.app_controller.file_system.mod
-        gfx_cat = mod.categories["GFXCategory"]
-        icon_relative_path = gfx_cat._get_metadata(icon)
+        mod = self.app_controller.registry.mod
+        category_metadata = self.app_controller.registry.get_category_metadata(CATEGORY)
+        icon_relative_path = category_metadata[icon]
         if not icon_relative_path:
             no_icon_available_warning(f"{icon} does not exist in Mod Metadata")
             return

@@ -1,3 +1,8 @@
+from __future__ import annotations
+from typing import TYPE_CHECKING
+if TYPE_CHECKING:
+    from App.Modules.Base import GenericCategory
+
 import sys
 import json
 import logging
@@ -7,6 +12,7 @@ from datetime import datetime
 from PyQt5.QtGui import QColor as QColour
 
 from ParadoxParser import ParadoxScriptParser as PDXScriptFile
+from ParadoxParser import ParadoxLocParser as PDXLocFile
 from ParadoxParser.ParadoxNodes import GenericBlock, GenericKeyValue, GenericNode
 
 from App.Contracts import OpenFile
@@ -123,7 +129,7 @@ class AppLogger:
 
     @staticmethod
     def _format(obj):
-        if isinstance(obj, PDXScriptFile):
+        if isinstance(obj, PDXScriptFile|PDXLocFile):
             return f"{obj.filename}"
         
         if isinstance(obj, GenericBlock):
@@ -245,3 +251,32 @@ class FilesystemMananger:
             return True
         else:
             return False
+        
+class AppMetaData:
+    def __init__(self):
+        self.mod:ParadoxMod = None
+        self.categories:dict[type[GenericCategory]:GenericCategory] = {}
+        self.metadata:dict[type[GenericCategory]:dict] = {}
+        #generalise, GenericCateogry does _most_ of the work,
+        #but we need to not bother holding the nodes, we just care about metadata
+        # self.document:dict[type[MdCategory]:dict] = {}
+        #e.g. class Effects(MdCategory) or class Triggers(MdCategory)
+    # def load_document(self):
+
+    def load_mod(self, mod:ParadoxMod):
+        self.mod = mod
+        self.categories = mod.categories
+        for category in self.categories.values():
+            self._register_category(category)
+
+    def _register_category(self, category:GenericCategory):
+        cat_name = type(category).__name__
+        self.categories[cat_name] = category
+        self.metadata[cat_name] = category.build_metadata()
+
+    def get_category(self, category_name:str):
+        return self.categories.get(category_name, {})
+        # return self.categories[category_type]
+    
+    def get_category_metadata(self, category_name:str):
+        return self.metadata.get(category_name, {})
