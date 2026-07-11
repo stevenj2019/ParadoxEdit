@@ -2,6 +2,7 @@ from __future__ import annotations
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
+    from App.Modules import ParadoxMod
     from App.Modules.Base import GenericCategory, ParadoxFileContext, ParadoxBlockContext, ParadoxNodeContext
 
 from dataclasses import dataclass
@@ -12,6 +13,12 @@ from ParadoxParser import GenericBlock, GenericKeyValue, GenericNode
 
 from App.Enums import PropagationType, ChangeState
 
+@dataclass
+class ModLoaderResult:
+    mod:ParadoxMod
+    tokens:dict
+    docs:dict
+    
 @dataclass
 class OpenFile:
     file:PDXScriptFile

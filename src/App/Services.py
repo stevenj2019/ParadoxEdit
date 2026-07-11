@@ -1,6 +1,7 @@
 from __future__ import annotations
 from typing import TYPE_CHECKING
 if TYPE_CHECKING:
+    from App.Modules import ParadoxMod
     from App.Modules.Base import GenericCategory
 
 import sys
@@ -17,7 +18,6 @@ from ParadoxParser.ParadoxNodes import GenericBlock, GenericKeyValue, GenericNod
 
 from App.Contracts import OpenFile
 from App.Enums import ChangeState
-from App.Modules import ParadoxMod
 
 app_name = "PDXEdit"
 class Services:
@@ -210,8 +210,8 @@ class FilesystemMananger:
 
         self.open_file:OpenFile = None
 
-    def load_mod(self, path):
-        self.mod = ParadoxMod(path)
+    def load_mod(self, mod:ParadoxMod):
+        self.mod = mod
 
     def load_file(self, file:OpenFile):
         self.open_file = file
@@ -252,16 +252,18 @@ class FilesystemMananger:
         else:
             return False
         
-class AppMetaData:
+class AppRegistry:
     def __init__(self):
         self.mod:ParadoxMod = None
         self.categories:dict[type[GenericCategory]:GenericCategory] = {}
-        self.metadata:dict[type[GenericCategory]:dict] = {}
-        #generalise, GenericCateogry does _most_ of the work,
-        #but we need to not bother holding the nodes, we just care about metadata
-        # self.document:dict[type[MdCategory]:dict] = {}
-        #e.g. class Effects(MdCategory) or class Triggers(MdCategory)
-    # def load_document(self):
+
+        self.tokens:dict[str, list]
+    #     self.metadata:dict[type[GenericCategory]:dict] = {}
+    #     #generalise, GenericCateogry does _most_ of the work,
+    #     #but we need to not bother holding the nodes, we just care about metadata
+    #     # self.document:dict[type[MdCategory]:dict] = {}
+    #     #e.g. class Effects(MdCategory) or class Triggers(MdCategory)
+    # # def load_document(self):
 
     def load_mod(self, mod:ParadoxMod):
         self.mod = mod
@@ -276,7 +278,9 @@ class AppMetaData:
 
     def get_category(self, category_name:str):
         return self.categories.get(category_name, {})
-        # return self.categories[category_type]
     
     def get_category_metadata(self, category_name:str):
         return self.metadata.get(category_name, {})
+
+    def load_scope_tokens(self, tokens:dict):
+        self.tokens = tokens

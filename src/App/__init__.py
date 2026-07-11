@@ -1,11 +1,12 @@
 import qdarktheme
 from contextlib import contextmanager
 
-from PyQt5.QtCore import QObject, pyqtSignal
+from PyQt5.QtCore import QObject, pyqtSignal, QThread
 from PyQt5.QtWidgets import QApplication
 
+from App.ModLoader import LoadingDialog, ModLoader
 from App.Modules.Base import GenericCategory, ParadoxContext
-from App.Services import ConfigurationManager, AppLogger, StyleManager, FilesystemMananger, AppMetaData
+from App.Services import ConfigurationManager, AppLogger, StyleManager, FilesystemMananger, AppRegistry
 from App.GUI.Main import MainWindow
 from App.Enums import SaveTarget, PropagationType, ChangeState
 from App.Contracts import OpenFile, PropagationRequest, NodeMutationRequest, BlockMutationRequest, BulkMutationRequest
@@ -22,7 +23,7 @@ class AppController(QObject):
         self.configuration = ConfigurationManager()
         self.file_system   = FilesystemMananger(self.configuration)
         self.style_manager = StyleManager(self.configuration)
-        self.registry      = AppMetaData()
+        self.registry      = AppRegistry()
         AppLogger.initialise()
 
         self.main = MainWindow(self)
@@ -42,15 +43,44 @@ class AppController(QObject):
         self.app.exec_()
 
     def load_mod(self, path):
-        try:
-            self.file_system.load_mod(path)
-        except Exception as e:
-            self.main.load_mod_failed(e)
-            return 
-        self.registry.load_mod(self.file_system.mod)
+        self.loading_screen = LoadingDialog()
+
+        self.thread = QThread()
+        self.loading_process = ModLoader(
+            path, 
+            self.configuration.game_install_path
+        )
+        
+        self.loading_process.moveToThread(self.thread)
+        self.thread.started.connect(self.loading_process.run)
+        self.loading_process.progress.connect(self.loading_screen.update_message)
+        self.loading_process.finished.connect(self.mod_loaded)
+        self.loading_process.failed.connect(self.mod_load_failed)
+        self.loading_screen.show()
+        self.thread.start()
+
+    def mod_loaded(self, result):
+        self.loading_screen.close()
+
+        #Load Registry
+        self.registry.load_mod(result.mod)
+        self.registry.load_scope_tokens(result.tokens)
+        #self.registry.load_docs(result.docs)
+        #Load FileSystem
+        self.file_system.load_mod(result.mod)
         self.file_system.load_file(OpenFile(self.file_system.mod.descriptor_object, ParadoxContext))
+        #Load UI
         self.main.load_mod(self.file_system.mod)
         self.main.load_file(self.file_system.open_file)
+
+        self.thread.quit()
+        self.thread.wait()
+
+    def mod_load_failed(self, error):
+        self.loading_screen.close()
+        self.main.load_mod_failed(error)
+        self.thread.quit()
+        self.thread.wait()
 
     @contextmanager
     def batch_manager(self):
