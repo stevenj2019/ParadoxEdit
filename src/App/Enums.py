@@ -16,6 +16,18 @@ class QtStorage(IntEnum):
     PARENT_CONTEXT = auto()
     INDEX = auto()
     
+class PDXTokens(Enum):
+    ANY = auto()
+    CHARACTER = auto()
+    COUNTRY = auto()
+    ORGANISATION = auto()
+    OPERATION = auto()
+    CONTRACTS = auto()
+    RAID = auto()
+    SPECIAL_PROJECT = auto()
+    STATE = auto()
+    STRATEGIC_REGION = auto()
+
 class ChangeState(Enum):
     CLEAN = auto()
     MODIFIED = auto()
