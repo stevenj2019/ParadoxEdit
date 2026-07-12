@@ -5,6 +5,7 @@ from ParadoxParser.ParadoxNodes import GenericBlock, GenericKeyValue
 
 from App.Loading.Directories.Base import GenericDirectoryContext
 from App.Contexts.Event import EventContext
+from App.Enums import PDXTokens
 
 class EventDirectoryContext(GenericDirectoryContext):
     def __init__(self, file_path:os.PathLike):
@@ -20,4 +21,4 @@ class EventDirectoryContext(GenericDirectoryContext):
                                   and node.key.lower()=="id"), None)
                     if token:
                         tokens.add(token)
-        return {"events":tokens}
+        return {PDXTokens:tokens}

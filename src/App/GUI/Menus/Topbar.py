@@ -6,6 +6,9 @@ from App.GUI.Actions import ActionGroup, Action
 
 class Topbar(QToolBar):
     request_load_mod = pyqtSignal()
+    request_load_vanilla = pyqtSignal()
+    request_load_workspace = pyqtSignal()
+    request_workspace_save = pyqtSignal()
     request_settings_window = pyqtSignal()
     def __init__(self, parent, app_controller):
         super().__init__(parent)
@@ -20,9 +23,14 @@ class Topbar(QToolBar):
     def _get_topbar_actions(self):
         return [
             ActionGroup("File", [
-                Action("Open Mod", self.request_load_mod.emit, True), 
                 Action("Save Open", lambda:self.app_controller.request_save.emit(SaveTarget.OPEN), False),
                 Action("Save All", lambda:self.app_controller.request_save.emit(SaveTarget.ALL), False)
+            ]),
+            ActionGroup("Workspace", [
+                Action("Open Mod", self.request_load_mod.emit, True),
+                Action("Load Vanilla to workspace", self.request_load_vanilla.emit, True), 
+                Action("Load Workspace", self.request_load_workspace.emit, True), 
+                Action("Save Workspace as File", self.request_workspace_save.emit, True)
             ]),
             Action("Settings", self.request_settings_window.emit, True)
         ]

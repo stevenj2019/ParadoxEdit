@@ -2,7 +2,7 @@ from PyQt5.QtCore import Qt
 from enum import Enum, auto, IntEnum
     
 class PDXTokens(Enum):
-    ANY = auto()
+    EVENT = auto()
     CHARACTER = auto()
     COUNTRY = auto()
     ORGANISATION = auto()
@@ -12,3 +12,7 @@ class PDXTokens(Enum):
     SPECIAL_PROJECT = auto()
     STATE = auto()
     STRATEGIC_REGION = auto()
+
+class PDXMetadata(Enum):
+    GFXIcon = auto()
+    LocKey = auto()

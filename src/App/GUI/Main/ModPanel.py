@@ -1,9 +1,10 @@
-from PyQt5.QtWidgets import QWidget, QVBoxLayout, QHeaderView, QTreeWidget, QTreeWidgetItem
+from PyQt5.QtWidgets import QApplication, QWidget, QVBoxLayout, QHeaderView, QTreeWidget, QTreeWidgetItem, QStyle
 from PyQt5.QtCore import Qt, pyqtSignal
 
 from App.Loading.ParadoxSource import ParadoxMod
 from App.Contexts import FileContext
 from App.Loading.Directories.Base import GenericDirectoryContext
+from App.Loading.Models import UnloadedFile
 from App.Contracts import OpenFile
 from App.Contracts.Enums import ChangeState
 from App.GUI.Enums import QtStorage
@@ -106,6 +107,8 @@ class ModPanel(QWidget):
         text = f"{file.filename}, {con_text}"
         item = QTreeWidgetItem([text])
         self.node_to_item[file] = item
+        if isinstance(file, UnloadedFile):
+            item.setIcon(0, QApplication.style().standardIcon(QStyle.SP_MessageBoxWarning))
         item.setData(0, QtStorage.NODE, file)
         item.setData(0, QtStorage.STATE, None)
         item.setData(0, QtStorage.CONTEXT, context)

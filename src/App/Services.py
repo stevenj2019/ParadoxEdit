@@ -20,12 +20,6 @@ from App.Contracts import OpenFile
 from App.Contracts.Enums import ChangeState
 
 app_name = "PDXEdit"
-class Services:
-    def __init__(self, app):
-        self.configuration = app.configuration
-        self.file_system =   app.file_system
-        self.style_manager = app.style_manager
-
 class ConfigurationManager:
     def __init__(self):
         self.file_path:Path = Path(user_config_dir(app_name), "configuration.json")
@@ -202,16 +196,51 @@ class ChangeTracker:
             for node in file.nodes:
                 recurse(node)
 
+class Workspace:
+    def __init__(self):
+        self.vanilla_loaded:bool = False
+        self.mods:list[str] = []
+
+    def set_vanilla_status(self, enabled:bool):
+        self.vanilla_loaded = enabled
+
+    def add_mod_to_workspace(self, descriptor_path:str):
+        #TODO add error handling
+        if descriptor_path not in self.mods:
+            self.mods.append(descriptor_path)
+
+    def _to_json(self):
+        return {
+            'vanilla_loaded': self.vanilla_loaded,
+            'mods': self.mods
+        }
+
+    def read_file(self, file_path):
+        #TODO add error handling
+        with open(str(file_path)) as FILE:
+            file_path = json.load(FILE)
+    
+        self.vanilla_loaded = file_path['vanilla_loaded']
+        self.mods = file_path['mods']
+    
+    def write_file(self, path):
+        file_path = Path(path)
+        file_path.touch()
+        with open(file_path, "w") as CONFIG_FILE:
+            json.dump(self._to_json(), CONFIG_FILE)
+    
 class FilesystemMananger:
     def __init__(self, configuration):
+        self.workspace:Workspace = Workspace()
+        self.load_order:list = []
+
         self.configuration = configuration
         self.change_tracker = ChangeTracker()
-        # self.mod = None
 
         self.open_file:OpenFile = None
 
-    # def load_mod(self, mod:ParadoxMod):
-    #     self.mod = mod
+    def load_workspace(self, workspace:Workspace):
+        self.workspace = workspace
 
     def load_file(self, file:OpenFile):
         self.open_file = file

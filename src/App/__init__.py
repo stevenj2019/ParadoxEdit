@@ -1,13 +1,14 @@
 import qdarktheme
 from contextlib import contextmanager
 import traceback
+import copy
 
 from PyQt5.QtCore import QObject, pyqtSignal, QThread
 from PyQt5.QtWidgets import QApplication
 
 from App.Loading import LoadingDialog, LoadProcess
 from App.Loading.Directories.Base import GenericDirectoryContext
-from App.Services import ConfigurationManager, AppLogger, StyleManager, FilesystemMananger, ParadoxRegistry
+from App.Services import ConfigurationManager, AppLogger, StyleManager, FilesystemMananger, ParadoxRegistry, Workspace
 from App.GUI.Main import MainWindow
 from App.Contracts import PropagationRequest, NodeMutationRequest, BlockMutationRequest, BulkMutationRequest
 from App.Contracts.Enums import SaveTarget, PropagationType, ChangeState
@@ -41,45 +42,61 @@ class AppController(QObject):
         self.request_bulk_mutation.connect(self._request_bulk_mutation)
         self.request_save.connect(self._save_target)
         self.main.show()
+
         self.app.exec_()
 
-    def load_mod(self, path):
+    def load_vanilla_files(self):
+        workspace_candidate = copy.deepcopy(self.file_system.workspace)
+        workspace_candidate.set_vanilla_status(True)
+
+        self.reload_workspace(workspace_candidate)
+
+    def add_mod_to_workspace(self, path):
+        workspace_candidate = copy.deepcopy(self.file_system.workspace)
+        workspace_candidate.add_mod_to_workspace(path)
+
+        self.reload_workspace(workspace_candidate)
+
+    def load_workspace(self, path):
+        workspace_candidate = Workspace()
+        workspace_candidate.read_file(path)
+
+        self.reload_workspace(workspace_candidate)
+
+    def reload_workspace(self, workspace):
         self.loading_screen = LoadingDialog()
 
         self.thread = QThread()
-        self.loading_process = LoadProcess(
-            path, 
-            self.configuration.game_install_path
-        )
+        self.loading_process = LoadProcess(workspace, self.configuration.game_install_path)
         
         self.loading_process.moveToThread(self.thread)
         self.thread.started.connect(self.loading_process.run)
         self.loading_process.progress.connect(self.loading_screen.update_message)
-        self.loading_process.finished.connect(self.mod_loaded)
-        self.loading_process.failed.connect(self.mod_load_failed)
+        self.loading_process.finished.connect(self.workspace_loaded)
+        self.loading_process.failed.connect(self.workspace_load_failed)
         self.loading_screen.show()
         self.thread.start()
 
-    def mod_loaded(self, result):
+    def workspace_loaded(self, result):
         self.registry.load_tokens(result.tokens)
-        #Load FileSystem
-        # self.file_system.load_mod(result.load_order) #this probabaly needs to be changed lol
-        # self.file_system.load_file(OpenFile(self.file_system.mod.descriptor_object, ParadoxContext))
-        #Load UI
+        
+        self.file_system.load_workspace(result.workspace)
+        
         self.main.load_mod(result.load_order)
-        # self.main.load_file(self.file_system.open_file)
-
-
+        
         self.loading_screen.close()
         self.thread.quit()
         self.thread.wait()
 
-    def mod_load_failed(self, error):
+    def workspace_load_failed(self, error):
         print(traceback.format_exc())
         self.loading_screen.close()
-        self.main.load_mod_failed(error)
+        self.main.load_workspace_failed(error)
         self.thread.quit()
         self.thread.wait()
+
+    def save_workspace(self, file_path):
+        self.file_system.workspace.write_file(file_path)
 
     def _refresh_file(self):
         for file in self._batch_file:

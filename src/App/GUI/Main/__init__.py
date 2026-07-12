@@ -2,6 +2,8 @@ from PyQt5.QtWidgets import QMainWindow, QSplitter
 from PyQt5.QtCore import Qt, pyqtSignal
 
 from ParadoxParser.ParadoxNodes import GenericBlock
+
+from App.Services import AppLogger
 from App.Contracts import PropagationRequest
 from App.Contracts.Enums import PropagationType, ChangeState
 from App.GUI.Menus.Topbar import Topbar
@@ -10,10 +12,11 @@ from App.GUI.Main.ModPanel import ModPanel
 from App.GUI.Main.ContentsPanel import ContentsPanel
 
 from App.GUI.Widgets.IconPreview import IconPreviewDialog
-from App.GUI.Widgets.FileDialogues import select_mod_file
-from App.GUI.Widgets.PopupModels import could_not_load_mod_critical, no_icon_available_warning
+from App.GUI.Widgets.FileDialogues import select_mod_file, workspace_selector, workspace_save_selector
+from App.GUI.Widgets.PopupModels import could_not_load_mod_critical, no_icon_available_warning, file_is_unsupported
 from App.GUI.Forms.Settings import SettingsForm
 
+from App.Loading.Models import UnloadedFile
 class MainWindow(QMainWindow):
     request_propagation = pyqtSignal(object)
     request_icon_preview = pyqtSignal(object)
@@ -30,8 +33,10 @@ class MainWindow(QMainWindow):
         self.topbar = Topbar(self, app)
         self.addToolBar(self.topbar)
         self.topbar.request_load_mod.connect(self.load_mod_requested)
+        self.topbar.request_load_vanilla.connect(self.app_controller.load_vanilla_files)
+        self.topbar.request_load_workspace.connect(self.load_workspace)
+        self.topbar.request_workspace_save.connect(self.save_workspace_as_file)
         self.topbar.request_settings_window.connect(self.settings_window_requested)
-
         #Splitter
         self.splitter = QSplitter(Qt.Horizontal)
         self.setCentralWidget(self.splitter)
@@ -83,16 +88,28 @@ class MainWindow(QMainWindow):
 
     def load_mod_requested(self):
         path = select_mod_file(self)
-        self.app_controller.load_mod(path)
-
+        self.app_controller.add_mod_to_workspace(path)
+     
+    def load_workspace(self):
+        path = workspace_selector(self)
+        self.app_controller.load_workspace(path)
+    
     def load_mod(self, mod):
         self.mod_panel._populate_tree(mod)
         self.topbar._enable_actions()
 
-    def load_mod_failed(self, exc):
+    def load_workspace_failed(self, exc):
         could_not_load_mod_critical(exc)
 
+    def save_workspace_as_file(self):
+        file_path = workspace_save_selector(self)
+        self.app_controller.save_workspace(file_path)
+
     def load_file(self, file):
+        if isinstance(file.file, UnloadedFile):
+            file_is_unsupported()
+            AppLogger.warning(f"attemped to open {file.file.path}/{file.file.filename}, is unsupported.")
+            return
         self.editor_session.cancel_request(reason="file switch")
         self.app_controller.file_system.load_file(file)
         self.contents_panel.load_block(file)

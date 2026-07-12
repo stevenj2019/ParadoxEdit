@@ -116,3 +116,8 @@ def no_icon_available_warning(message):
     return QMessageBox.warning(
         None, "Warning", message, QMessageBox.Ok
     )
+
+def file_is_unsupported():
+    return QMessageBox.warning(
+        None, "Warning", "This File is currently unsupported", QMessageBox.Ok
+    )

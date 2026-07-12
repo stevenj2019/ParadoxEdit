@@ -22,10 +22,6 @@ def select_mod_directory():
     )
 
 def select_mod_file(parent):
-    """
-    Opens a file dialog for selecting a .mod file,
-    loads it into a ParadoxMod instance, and returns it.
-    """
     options = QFileDialog.Options()
     options |= QFileDialog.ReadOnly
     filepath, _ = QFileDialog.getOpenFileName(
@@ -69,3 +65,24 @@ def gfx_save_folder_selector(parent, path):
         QFileDialog.ShowDirsOnly
     )
     return filepath, Path(filepath).exists()
+
+def workspace_selector(parent):
+    options = QFileDialog.Options()
+    options |= QFileDialog.ReadOnly
+    filepath, _ = QFileDialog.getOpenFileName(
+        parent,
+        "Open Workspace",
+        "" if not parent.app_controller.configuration.mod_file_path else str(parent.app_controller.configuration.mod_file_path),
+        "PDXEdit Workspace Files(*.json);;All Files (*)",
+        options=options
+    )
+    return filepath
+
+def workspace_save_selector(parent):
+    filepath, _ = QFileDialog.getSaveFileName(
+        parent, 
+        "Save Workspace",
+        "" if not parent.app_controller.configuration.mod_file_path else str(parent.app_controller.configuration.mod_file_path),
+        "PDXEdit Workspace Files(*.json);;All Files (*)"
+    )
+    return filepath if filepath.endswith(".json") else f"{filepath}.json"

@@ -4,6 +4,7 @@ from typing import TYPE_CHECKING
 if TYPE_CHECKING:
     from App.Loading.LoadOrder import ParadoxLoadOrder
     from App.Loading.Directories.Base import GenericDirectoryContext, ParadoxFileContext, ParadoxBlockContext, ParadoxNodeContext
+    from App.Services import Workspace
 
 from dataclasses import dataclass
 from typing import Optional, Callable
@@ -15,8 +16,10 @@ from ParadoxParser import GenericBlock, GenericKeyValue, GenericNode
 from App.Contracts.Enums import PropagationType, ChangeState
 @dataclass
 class ModLoaderResult:
+    workspace:Workspace
     load_order:ParadoxLoadOrder
     tokens:dict
+    metadata:dict
     
 @dataclass
 class OpenFile:

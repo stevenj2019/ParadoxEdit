@@ -28,22 +28,24 @@ class LoadProcess(QObject):
     finished = pyqtSignal(object)
     failed = pyqtSignal(Exception)
 
-    def __init__(self, mod_file_path, game_install_path):
+    def __init__(self, workspace, game_path):
         super().__init__()
-        self.descriptor_path = mod_file_path
-        self.game_path = game_install_path
+        self.workspace = workspace
+        self.game_path = game_path
 
     def run(self):
         # try:
-        load_order = ParadoxLoadOrder()
-        self.progress.emit("Loading Vanilla Files")
-        #TODO: 2. load vanilla files
+        load_order = ParadoxLoadOrder(True)
+        if self.workspace.vanilla_loaded:
+            self.progress.emit("Loading Vanilla Files")
+            load_order.load_vanilla(self.game_path)
 
         self.progress.emit("Loading Mod Files")
-        load_order.load_mod(self.descriptor_path)
+        for mod in self.workspace.mods:
+            load_order.load_mod(mod)
         
         self.progress.emit("Resolving Load Order")
-        #TODO 3. resolve load order
+        load_order.resolve()
         
         self.progress.emit("Parsing Files")
         load_order.parse_files()
@@ -55,7 +57,7 @@ class LoadProcess(QObject):
         #TODO: 1. get metadata
 
         self.progress.emit("Finishing Up")
-        self.finished.emit(ModLoaderResult(load_order, tokens))
+        self.finished.emit(ModLoaderResult(self.workspace, load_order, tokens, {}))
         # except Exception as e:
         #     traceback.format_exc()
         #     self.failed.emit(e)
