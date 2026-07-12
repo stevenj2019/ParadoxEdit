@@ -1,15 +1,16 @@
 import qdarktheme
 from contextlib import contextmanager
+import traceback
 
 from PyQt5.QtCore import QObject, pyqtSignal, QThread
 from PyQt5.QtWidgets import QApplication
 
-from App.ModLoader import LoadingDialog, ModLoader
-from App.Modules.Base import GenericCategory, ParadoxContext
-from App.Services import ConfigurationManager, AppLogger, StyleManager, FilesystemMananger, AppRegistry
+from App.Loading import LoadingDialog, LoadProcess
+from App.Loading.Directories.Base import GenericDirectoryContext
+from App.Services import ConfigurationManager, AppLogger, StyleManager, FilesystemMananger, ParadoxRegistry
 from App.GUI.Main import MainWindow
-from App.Enums import SaveTarget, PropagationType, ChangeState
-from App.Contracts import OpenFile, PropagationRequest, NodeMutationRequest, BlockMutationRequest, BulkMutationRequest
+from App.Contracts import PropagationRequest, NodeMutationRequest, BlockMutationRequest, BulkMutationRequest
+from App.Contracts.Enums import SaveTarget, PropagationType, ChangeState
 
 class AppController(QObject):
     request_node_mutation = pyqtSignal(object)
@@ -23,7 +24,7 @@ class AppController(QObject):
         self.configuration = ConfigurationManager()
         self.file_system   = FilesystemMananger(self.configuration)
         self.style_manager = StyleManager(self.configuration)
-        self.registry      = AppRegistry()
+        self.registry      = ParadoxRegistry()
         AppLogger.initialise()
 
         self.main = MainWindow(self)
@@ -46,7 +47,7 @@ class AppController(QObject):
         self.loading_screen = LoadingDialog()
 
         self.thread = QThread()
-        self.loading_process = ModLoader(
+        self.loading_process = LoadProcess(
             path, 
             self.configuration.game_install_path
         )
@@ -60,27 +61,31 @@ class AppController(QObject):
         self.thread.start()
 
     def mod_loaded(self, result):
-        self.loading_screen.close()
-
-        #Load Registry
-        self.registry.load_mod(result.mod)
-        self.registry.load_scope_tokens(result.tokens)
-        #self.registry.load_docs(result.docs)
+        self.registry.load_tokens(result.tokens)
         #Load FileSystem
-        self.file_system.load_mod(result.mod)
-        self.file_system.load_file(OpenFile(self.file_system.mod.descriptor_object, ParadoxContext))
+        # self.file_system.load_mod(result.load_order) #this probabaly needs to be changed lol
+        # self.file_system.load_file(OpenFile(self.file_system.mod.descriptor_object, ParadoxContext))
         #Load UI
-        self.main.load_mod(self.file_system.mod)
-        self.main.load_file(self.file_system.open_file)
+        self.main.load_mod(result.load_order)
+        # self.main.load_file(self.file_system.open_file)
 
+
+        self.loading_screen.close()
         self.thread.quit()
         self.thread.wait()
 
     def mod_load_failed(self, error):
+        print(traceback.format_exc())
         self.loading_screen.close()
         self.main.load_mod_failed(error)
         self.thread.quit()
         self.thread.wait()
+
+    def _refresh_file(self):
+        for file in self._batch_file:
+            if file is self.file_system.open_file.file:
+                self.main.load_file(self.file_system.open_file)
+        self._batch_file.clear()
 
     @contextmanager
     def batch_manager(self):
@@ -91,12 +96,6 @@ class AppController(QObject):
             self._batch_depth -= 1
             if self._batch_depth == 0:
                 self._refresh_file()
-
-    def _refresh_file(self):
-        for file in self._batch_file:
-            if file is self.file_system.open_file.file:
-                self.main.load_file(self.file_system.open_file)
-        self._batch_file.clear()
 
     def _request_node_mutation(self, request:NodeMutationRequest):
         file = request.file if request.file else self.file_system.open_file.file
@@ -137,18 +136,18 @@ class AppController(QObject):
     def _request_bulk_mutation(self, request:BulkMutationRequest):
         target = request.target
         action = request.action
-        if isinstance(target, GenericCategory):
-            file_list = [f for f in target.files.values()]
+        if isinstance(target, GenericDirectoryContext):
+            files = target.iter_files()
         else:
-            file_list = [target]
+            files = [target]
 
-        for file in file_list:
+        for file in files:
             action(file, self)
             self.main.request_propagation.emit(PropagationRequest(type=PropagationType.FILE,
                                                                   file=file,
                                                                   node=None,
                                                                   state=ChangeState.MODIFIED))
-        if self.file_system.open_file.file in file_list:
+        if self.file_system.open_file.file in files:
             self.main.load_file(self.file_system.open_file)
 
     def _save_target(self, target):

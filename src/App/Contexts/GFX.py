@@ -1,54 +1,13 @@
 import os
 
 from ParadoxParser import ParadoxScriptParser as PDXFile
-from ParadoxParser.ParadoxNodes import GenericBlock, GenericKeyValue
+from ParadoxParser.ParadoxNodes import GenericBlock
 
-from App.Services import AppLogger
 from App.Contracts import BlockMutationRequest
-from App.Modules.Base import GenericCategory, ParadoxContext, ParadoxFileContext, ParadoxNodeContext
+from App.Contexts.Base import ParadoxContext, ParadoxFileContext, ParadoxNodeContext
 from App.GUI.Actions import Action
 from App.PDXFactory.Blocks.Sprites import GFX_icon, GFX_shine_icon
 
-###        ###
-#  CATEGORY  #
-###        ###
-class GFXCategory(GenericCategory):
-    def __init__(self, mod_path:os.PathLike):
-        super().__init__(mod_path, ["interface/"], GFXContext, ".gfx")
-
-    def build_metadata(self):
-        metadata = dict()
-        for file in self.files.values():
-            try:
-                block = next(block for block in file.nodes
-                            if isinstance(block, GenericBlock)
-                            and block.key.lower() == "spritetypes")
-            except StopIteration:
-                print(file.filename, "has no spritetypes block")
-                AppLogger.error(f"{file.filename} malformed, cannot find SpriteTypes block")
-                pass
-            for node in block.nodes:
-                if isinstance(node, GenericBlock) and node.key.lower() == "spritetype":
-                    name = next((kvnode.value.value for kvnode in node.nodes
-                                if isinstance(kvnode, GenericKeyValue)
-                                and kvnode.key.lower() == "name"), "")
-                    texture = next((kvnode.value.value for kvnode in node.nodes
-                                    if isinstance(kvnode, GenericKeyValue)
-                                    and kvnode.key.lower() == "texturefile"), "")
-                    if name and texture:
-                        metadata[name] = texture
-                    else:
-                        AppLogger.error(f"{file.filename} in {node.key} block, missing name:{name} or texturefile:{texture}")
-        return metadata
-
-    # def _get_metadata(self, key):
-    #     try:
-    #         return self.metadata[key]
-    #     except KeyError:
-    #         return None
-###        ###
-#  CONTEXTS  #
-###        ###
 class GFXContext(ParadoxContext):
     @staticmethod
     def get_file_context():

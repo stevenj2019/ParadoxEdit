@@ -1,12 +1,14 @@
 from PyQt5.QtWidgets import QWidget, QVBoxLayout, QHeaderView, QTreeWidget, QTreeWidgetItem
 from PyQt5.QtCore import Qt, pyqtSignal
 
-from ParadoxParser import ParadoxScriptParser as PDXScript
-
-from App.Contracts import OpenFile, FileContext
-from App.Enums import QtStorage, ChangeState
-from App.Modules.Base import ParadoxContext
-from App.GUI.Menus.ContextMenus import GenericCategoryContextMenu
+from App.Loading.ParadoxSource import ParadoxMod
+from App.Contexts import FileContext
+from App.Loading.Directories.Base import GenericDirectoryContext
+from App.Contracts import OpenFile
+from App.Contracts.Enums import ChangeState
+from App.GUI.Enums import QtStorage
+from App.Contexts.Base import ParadoxContext
+from App.GUI.Menus.ContextMenus import GenericDirectoryContextMenu
 from App.GUI.StyledDelegate import ParadoxFileDelegate
 
 class ModPanel(QWidget):
@@ -17,7 +19,6 @@ class ModPanel(QWidget):
         self.parent = parent
         self.app_controller = app_controller
         self.node_to_item:dict = {}
-        self.file_to_category:dict = {}
 
         layout = QVBoxLayout()
         self.setLayout(layout)
@@ -32,97 +33,107 @@ class ModPanel(QWidget):
         self.tree.setItemDelegate(ParadoxFileDelegate(self.app_controller, self.tree))
         layout.addWidget(self.tree)
 
-        self.context_menu = GenericCategoryContextMenu(self, app_controller)
+        self.context_menu = GenericDirectoryContextMenu(self, app_controller)
 
         self.tree.itemClicked.connect(self._on_element_click)
         self.tree.setContextMenuPolicy(Qt.CustomContextMenu)
         self.tree.customContextMenuRequested.connect(self._request_context_menu)
 
+    #this needs to just keep propogating up, i do not know how easy that will be?
     def set_file_state(self, file, status):
         file_item = self.node_to_item[file]
         file_item.setData(0, QtStorage.STATE, status)
-        try:
-            self._set_category_state(file)
-        except KeyError:
-            pass
+        self._propagate_state(file_item.parent())
         self.tree.update()
 
-    def _set_category_state(self, file):
-        category_item = self.file_to_category[file]
-        category = category_item.data(0, QtStorage.CATEGORY)
-        if all(self.app_controller.file_system.change_tracker.get_file_state(file) == None
-                for file in category.files.values()):
-            category_item.setData(0, QtStorage.STATE, None)
-        else:
-            category_item.setData(0, QtStorage.STATE, ChangeState.MODIFIED)
+    def _propagate_state(self, item):
+        if item is None:
+            return 
+        state = self._calculate_child_state(item)
+        item.setData(0, QtStorage.STATE, state)
+        self._propagate_state(item.parent())
 
-    def _populate_tree(self, mod):
+    def _calculate_child_state(self, item):
+        for i in range(item.childCount()):
+            child = item.child(i)
+            if child.data(0, QtStorage.STATE) is not None:
+                return ChangeState.MODIFIED
+        return None
+
+    def _populate_tree(self, load_order):
         self.tree.clear()
+        for source in load_order.sources:
+            self._load_source_tree(source)
 
-        root = QTreeWidgetItem([mod.mod_name or "Unnamed Mod"])
+    def _load_source_tree(self, source):
+        root = QTreeWidgetItem([source.source_name or "Unnamed Mod"])
+        root.setData(0, QtStorage.NODE, source)
         self.tree.addTopLevelItem(root)
 
-        descriptor_item = QTreeWidgetItem(["Descriptor"])
+        if isinstance(source, ParadoxMod):
+            descriptor_item = QTreeWidgetItem(["Descriptor"])
+            descriptor_item.setData(0, QtStorage.NODE, source.descriptor_object)
+            descriptor_item.setData(0, QtStorage.STATE, None)
+            descriptor_item.setData(0, QtStorage.CONTEXT, ParadoxContext)
+            descriptor_item.setData(0, QtStorage.READ_ONLY, False)
+            self.node_to_item[source.descriptor_object] = descriptor_item
 
-        descriptor_item.setData(0, QtStorage.FILE, mod.descriptor_object)
-        descriptor_item.setData(0, QtStorage.STATE, ChangeState.CLEAN)
-        descriptor_item.setData(0, QtStorage.CONTEXT, ParadoxContext)
-        
-        self.node_to_item[mod.descriptor_object] = descriptor_item
-        root.addChild(descriptor_item)
+            root.addChild(descriptor_item)
+        for entry in source.root.directories.values():
+            self._add_directory(root, entry, None, None)
 
-        categories_parent = QTreeWidgetItem(["Categories"])
-        root.addChild(categories_parent)
+    def _add_directory(self, parent_item, directory, context, read_only):
+        context = directory.context if not context else context
+        read_only = directory.read_only if not read_only else read_only
+        con_text = context.__name__ if directory.context else None
+        text = f"{directory.path.name}, {con_text}"
+        item = QTreeWidgetItem([text])
+        self.node_to_item[directory] = item
+        item.setData(0, QtStorage.NODE, directory)
+        item.setData(0, QtStorage.STATE, None) #i am unsure if this is needed here or not....
+        item.setData(0, QtStorage.CONTEXT, context)
+        item.setData(0, QtStorage.READ_ONLY, read_only)
+        parent_item.addChild(item)
 
-        for c_key, c_val in mod.categories.items():
-            cat_sub = QTreeWidgetItem([c_key])
-            context = c_val.context
-            cat_sub.setData(0, QtStorage.IS_CATEGORY, True)
-            cat_sub.setData(0, QtStorage.CATEGORY, c_val)
-            cat_sub.setData(0, QtStorage.CONTEXT, context)
+        for child in directory.directories.values():
+            self._add_directory(item, child, context, read_only)
 
-            self.node_to_item[c_val] = cat_sub
-            for file, obj in c_val.files.items():
-                widget = QTreeWidgetItem([file])
-                self.node_to_item[obj] = widget
-                self.file_to_category[obj] = cat_sub
+        for file in directory.files.values():
+            self._add_file(item, file, context, read_only)
 
-                widget.setText(0, file)
-
-                widget.setData(0, QtStorage.FILE, obj)
-                widget.setData(0, QtStorage.STATE, None)
-                widget.setData(0, QtStorage.IS_CATEGORY, False)
-                widget.setData(0, QtStorage.CONTEXT, context)
-
-                cat_sub.addChild(widget)
-
-            categories_parent.addChild(cat_sub)
-        
-        root.setExpanded(True)
-        categories_parent.setExpanded(True)
-
-        if mod.error_categories:
-            print("Failed categories:")
-            for name in mod.error_categories:
-                print(f" - {name}")
+    def _add_file(self, parent_item, file, context, read_only):
+        con_text = context.__name__ if context else None
+        text = f"{file.filename}, {con_text}"
+        item = QTreeWidgetItem([text])
+        self.node_to_item[file] = item
+        item.setData(0, QtStorage.NODE, file)
+        item.setData(0, QtStorage.STATE, None)
+        item.setData(0, QtStorage.CONTEXT, context)
+        item.setData(0, QtStorage.READ_ONLY, read_only)
+        parent_item.addChild(item)
 
     def _on_element_click(self, item, column):
-        if item.data(0, QtStorage.IS_BLOCK):
-            return
-        file = item.data(0, QtStorage.FILE)
+        file = item.data(0, QtStorage.NODE)
         context = item.data(0, QtStorage.CONTEXT)
         if file:
+            if isinstance(file, GenericDirectoryContext):
+                return
             self.request_load_block.emit(OpenFile(file, context))
 
+    #TODO this is also shit housed lol
     def _request_context_menu(self, pos):
         selected = self.tree.itemAt(pos)
         if not selected:
             return
-        is_category = selected.data(0, QtStorage.IS_CATEGORY)
-        item = selected.data(0, QtStorage.CATEGORY) if is_category else selected.data(0, QtStorage.FILE)
+        # is_category = selected.data(0, QtStorage.IS_CATEGORY)
+        # item = selected.data(0, QtStorage.CATEGORY) if is_category else selected.data(0, QtStorage.FILE)
+        item = selected.data(0, QtStorage.NODE)
         if not item:
             return
-        context = selected.data(0, QtStorage.CONTEXT).get_file_context()
+        context = selected.data(0, QtStorage.CONTEXT)
+        if not context:
+            return 
+        context = context.get_file_context()
         
         self.context_menu.call(FileContext(target=item, context=context))
         self.context_menu.exec_(self.tree.viewport().mapToGlobal(pos))

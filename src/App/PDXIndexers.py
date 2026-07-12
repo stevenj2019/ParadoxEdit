@@ -7,7 +7,7 @@ from ParadoxParser.ParadoxNodes import GenericBlock, GenericKeyValue, GenericNod
 from App.Enums import PDXTokens
 from App.Services import AppLogger
 
-def get_scope_indices(base_path:os.PathLike, mod_path:os.PathLike):
+def get_scope_indices(base_path:os.PathLike, file_path:os.PathLike):
     data = {}
     INDEXERS = {
         PDXTokens.CHARACTER: CharacterTokenIndexer,
@@ -21,7 +21,7 @@ def get_scope_indices(base_path:os.PathLike, mod_path:os.PathLike):
         PDXTokens.STRATEGIC_REGION:StrategicRegionIndexer,
     }
     for key, cls in INDEXERS.items():
-        indexer = cls(base_path, mod_path)
+        indexer = cls(base_path, file_path)
         data[key] = indexer.get_tokens()
     return data
 
@@ -34,7 +34,7 @@ class GenericIndexer:
             self._read_directory(base, path)
             self._read_directory(mod, path)
 
-        self._parse_files()
+        self.parse_files()
         try:
             self._tokenise()
         except NotImplementedError:
@@ -50,7 +50,7 @@ class GenericIndexer:
                 path_key = full_path.relative_to(base_path)
                 self.file_paths[path_key] = full_path
     
-    def _parse_files(self):
+    def parse_files(self):
         for path in self.file_paths.values():
             try:
                 file = PDXScriptFile(path)
@@ -59,6 +59,7 @@ class GenericIndexer:
             except Exception as e:
                 AppLogger.error(f"loading of {path.name} failed.")
                 AppLogger.exception(e)
+                
 
     def _tokenise(self):
         return NotImplementedError
@@ -67,8 +68,8 @@ class GenericIndexer:
         return self.tokens
     
 class CharacterTokenIndexer(GenericIndexer):
-    def __init__(self, base_path:os.PathLike, mod_path:os.PathLike):
-        super().__init__(base_path, mod_path, ["common/characters"])
+    def __init__(self, base_path:os.PathLike, file_path:os.PathLike):
+        super().__init__(base_path, file_path, ["common/characters"])
 
     def _tokenise(self):
         for file in self.files:
@@ -79,8 +80,8 @@ class CharacterTokenIndexer(GenericIndexer):
                         self.tokens.add(node.key)
 
 class CountryTagIndexer(GenericIndexer):
-    def __init__(self, base_path:os.PathLike, mod_path:os.PathLike):
-        super().__init__(base_path, mod_path, ["common/country_tags"])
+    def __init__(self, base_path:os.PathLike, file_path:os.PathLike):
+        super().__init__(base_path, file_path, ["common/country_tags"])
 
     def _tokenise(self):
         for file in self.files:
@@ -91,8 +92,8 @@ class CountryTagIndexer(GenericIndexer):
                         self.tokens.add(node.key)
 
 class IndustrialOrganisationIndexer(GenericIndexer):
-    def __init__(self, base_path:os.PathLike, mod_path:os.PathLike):
-        super().__init__(base_path, mod_path, ["common/military_industrial_organization/organizations"]) #"organization" lol
+    def __init__(self, base_path:os.PathLike, file_path:os.PathLike):
+        super().__init__(base_path, file_path, ["common/military_industrial_organization/organizations"]) #"organization" lol
 
     def _tokenise(self):
         for file in self.files:
@@ -101,8 +102,8 @@ class IndustrialOrganisationIndexer(GenericIndexer):
                     self.tokens.add(block.key)
 
 class OperationsIndexer(GenericIndexer):
-    def __init__(self, base_path:os.PathLike, mod_path:os.PathLike):
-        super().__init__(base_path, mod_path, ["common/operations"])
+    def __init__(self, base_path:os.PathLike, file_path:os.PathLike):
+        super().__init__(base_path, file_path, ["common/operations"])
 
     def _tokenise(self):
         for file in self.files:
@@ -111,12 +112,12 @@ class OperationsIndexer(GenericIndexer):
                     self.tokens.add(block.key)
 
 class ContractIndexer(GenericIndexer):
-    def __init__(self, base_path:os.PathLike, mod_path:os.PathLike):
-        super().__init__(base_path, mod_path, ["common/operations"])
+    def __init__(self, base_path:os.PathLike, file_path:os.PathLike):
+        super().__init__(base_path, file_path, ["common/operations"])
 
 class RaidIndexer(GenericIndexer):
-    def __init__(self, base_path:os.PathLike, mod_path:os.PathLike):
-        super().__init__(base_path, mod_path, ["common/raids"])
+    def __init__(self, base_path:os.PathLike, file_path:os.PathLike):
+        super().__init__(base_path, file_path, ["common/raids"])
 
     def _tokenise(self):
         for file in self.files:
@@ -127,8 +128,8 @@ class RaidIndexer(GenericIndexer):
                         self.tokens.add(node.key)
 
 class SpecialProjectIndexer(GenericIndexer):
-    def __init__(self, base_path:os.PathLike, mod_path:os.PathLike):
-        super().__init__(base_path, mod_path, ["common/special_projects/projects"])
+    def __init__(self, base_path:os.PathLike, file_path:os.PathLike):
+        super().__init__(base_path, file_path, ["common/special_projects/projects"])
 
     def _tokenise(self):
         for file in self.files:
@@ -138,8 +139,8 @@ class SpecialProjectIndexer(GenericIndexer):
 
 #Unsure about these
 class StateIndexer(GenericIndexer):
-    def __init__(self, base_path:os.PathLike, mod_path:os.PathLike):
-        super().__init__(base_path, mod_path, ["history/states"])
+    def __init__(self, base_path:os.PathLike, file_path:os.PathLike):
+        super().__init__(base_path, file_path, ["history/states"])
 
     def _tokenise(self):
         for file in self.files:
@@ -150,5 +151,5 @@ class StateIndexer(GenericIndexer):
                     self.tokens.add(str(id_keyval.value.value))
 
 class StrategicRegionIndexer(GenericIndexer):
-    def __init__(self, base_path:os.PathLike, mod_path:os.PathLike):
-        super().__init__(base_path, mod_path, ["map/strategicregions"])
+    def __init__(self, base_path:os.PathLike, file_path:os.PathLike):
+        super().__init__(base_path, file_path, ["map/strategicregions"])

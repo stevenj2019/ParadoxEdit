@@ -1,8 +1,8 @@
 from __future__ import annotations
 from typing import TYPE_CHECKING
 if TYPE_CHECKING:
-    from App.Modules import ParadoxMod
-    from App.Modules.Base import GenericCategory
+    from App.Loading.ParadoxSource import ParadoxMod
+    from App.Loading.Directories.Base import GenericDirectoryContext
 
 import sys
 import json
@@ -17,7 +17,7 @@ from ParadoxParser import ParadoxLocParser as PDXLocFile
 from ParadoxParser.ParadoxNodes import GenericBlock, GenericKeyValue, GenericNode
 
 from App.Contracts import OpenFile
-from App.Enums import ChangeState
+from App.Contracts.Enums import ChangeState
 
 app_name = "PDXEdit"
 class Services:
@@ -206,12 +206,12 @@ class FilesystemMananger:
     def __init__(self, configuration):
         self.configuration = configuration
         self.change_tracker = ChangeTracker()
-        self.mod = None
+        # self.mod = None
 
         self.open_file:OpenFile = None
 
-    def load_mod(self, mod:ParadoxMod):
-        self.mod = mod
+    # def load_mod(self, mod:ParadoxMod):
+    #     self.mod = mod
 
     def load_file(self, file:OpenFile):
         self.open_file = file
@@ -252,35 +252,19 @@ class FilesystemMananger:
         else:
             return False
         
-class AppRegistry:
+class ParadoxRegistry:
     def __init__(self):
-        self.mod:ParadoxMod = None
-        self.categories:dict[type[GenericCategory]:GenericCategory] = {}
+        self.tokens:dict[str, set] = {}
+        self.metadata:dict[str, dict] = {}
 
-        self.tokens:dict[str, list]
-    #     self.metadata:dict[type[GenericCategory]:dict] = {}
-    #     #generalise, GenericCateogry does _most_ of the work,
-    #     #but we need to not bother holding the nodes, we just care about metadata
-    #     # self.document:dict[type[MdCategory]:dict] = {}
-    #     #e.g. class Effects(MdCategory) or class Triggers(MdCategory)
-    # # def load_document(self):
-
-    def load_mod(self, mod:ParadoxMod):
-        self.mod = mod
-        self.categories = mod.categories
-        for category in self.categories.values():
-            self._register_category(category)
-
-    def _register_category(self, category:GenericCategory):
-        cat_name = type(category).__name__
-        self.categories[cat_name] = category
-        self.metadata[cat_name] = category.build_metadata()
-
-    def get_category(self, category_name:str):
-        return self.categories.get(category_name, {})
-    
-    def get_category_metadata(self, category_name:str):
-        return self.metadata.get(category_name, {})
-
-    def load_scope_tokens(self, tokens:dict):
+    def load_tokens(self, tokens:dict):
         self.tokens = tokens
+
+    # def get_tokens():
+    # def add_tokens():
+    # def remove_tokens():
+
+    # def load_metadata(self, metadata:dict):
+    # def get_metadata():
+    # def add_metadata():
+    # def remove_metadata():

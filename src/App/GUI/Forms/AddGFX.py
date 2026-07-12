@@ -8,14 +8,14 @@ from ParadoxParser.ParadoxNodes import GenericBlock, GenericComment
 from PyQt5.QtWidgets import (QDialog, QFormLayout, QHBoxLayout, QTreeWidget, QTreeWidgetItem, 
                              QPushButton, QLabel, QLineEdit, QCheckBox, QComboBox)
 
-# from App.Modules.GFX import GFXCategory
+# from App.Contexts.GFX import GFXDirectoryContext
 from App.Contracts import BlockMutationRequest
 from App.PDXFactory.Blocks.Sprites import GFX_icon, GFX_shine_icon
 from App.GUI.Widgets.FileDialogues import (gfx_files_folder_selector, gfx_files_file_selector, 
                                            gfx_save_folder_selector)
 from App.GUI.Widgets.PopupModels import GFX_file_copying_warn, form_missing_value
 
-CATEGORY = "GFXCategory"
+CATEGORY = "GFXDirectoryContext"
 class AddNewGFXForm(QDialog):
     def __init__(self, app_controller, file):
         super().__init__()
@@ -106,7 +106,7 @@ class AddNewGFXForm(QDialog):
         self.save_file = self.category.files[file]
 
     def _select_save_folder(self):
-        path, _ = gfx_save_folder_selector(self, str(self.mod.mod_base_dir / "gfx"))
+        path, _ = gfx_save_folder_selector(self, str(self.mod.file_path / "gfx"))
         if path:
             self.storage_folder_path_element_text.setText(path)
         return 
@@ -137,9 +137,9 @@ class AddNewGFXForm(QDialog):
                 sprite_paths.append(new_sprite)
             return sprite_paths
         
-        def generate_blocks(get_shines, sprite, mod_base_dir):
+        def generate_blocks(get_shines, sprite, file_path):
             sprite_name = sprite.stem
-            sprite_path = sprite.relative_to(mod_base_dir)
+            sprite_path = sprite.relative_to(file_path)
             if get_shines:
                 return [GenericComment(f"Focus Icon for: {sprite.stem}"),
                                         GFX_icon(sprite_name, sprite_path), 
@@ -161,7 +161,7 @@ class AddNewGFXForm(QDialog):
             for path in self.file_list:
                 image_collection_loop(sprites, path)
             sprites = copy_file_to_new_directory(self.storage_folder_path_element_text.text(), sprites)
-            base_dir = self.app_controller.registry.mod.mod_base_dir
+            base_dir = self.app_controller.registry.mod.file_path
             generate_shines = self.is_focus_type_check.isChecked()
 
             with self.app_controller.batch_manager():

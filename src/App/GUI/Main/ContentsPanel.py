@@ -5,9 +5,10 @@ from ParadoxParser import ParadoxScriptParser as PDXScript
 from ParadoxParser.ParadoxNodes import (GenericBlock, GenericKeyValue, GenericNode, 
                                         GenericLocKey, GenericLegacyLocKey, GenericComparator)
 
-from App.Contracts import BlockContext, NodeContext
-from App.Enums import QtStorage, ExpansionMode, ChangeState
-from App.Modules.Base import ParadoxContext
+from App.Contexts import BlockContext, NodeContext
+from App.Contracts.Enums import ChangeState
+from App.GUI.Enums import QtStorage, ExpansionMode
+from App.Contexts.Base import ParadoxContext
 from App.GUI.Menus.ContextMenus import ParadoxNodesContextMenu
 from App.GUI.StyledDelegate import NodeStateDelegate
 

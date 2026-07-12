@@ -2,9 +2,8 @@ from PyQt5.QtWidgets import QMainWindow, QSplitter
 from PyQt5.QtCore import Qt, pyqtSignal
 
 from ParadoxParser.ParadoxNodes import GenericBlock
-from App.Modules.GFX import GFXCategory
-from App.Contracts import PropagationRequest, OpenFile
-from App.Enums import PropagationType, ChangeState
+from App.Contracts import PropagationRequest
+from App.Contracts.Enums import PropagationType, ChangeState
 from App.GUI.Menus.Topbar import Topbar
 from App.GUI.Main.InlineEdit import InLineEditManager
 from App.GUI.Main.ModPanel import ModPanel
@@ -99,7 +98,7 @@ class MainWindow(QMainWindow):
         self.contents_panel.load_block(file)
 
     def _preview_icon(self, icon):
-        CATEGORY = "GFXCategory"
+        CATEGORY = "GFXDirectoryContext"
         icon = icon.value
         mod = self.app_controller.registry.mod
         category_metadata = self.app_controller.registry.get_category_metadata(CATEGORY)

@@ -2,44 +2,27 @@ from __future__ import annotations
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
-    from App.Modules import ParadoxMod
-    from App.Modules.Base import GenericCategory, ParadoxFileContext, ParadoxBlockContext, ParadoxNodeContext
+    from App.Loading.LoadOrder import ParadoxLoadOrder
+    from App.Loading.Directories.Base import GenericDirectoryContext, ParadoxFileContext, ParadoxBlockContext, ParadoxNodeContext
 
 from dataclasses import dataclass
-from typing import Optional, Callable, List
+from typing import Optional, Callable
 
 from ParadoxParser import ParadoxScriptParser as PDXScriptFile
+from ParadoxParser import ParadoxLocParser as PDXLocFile
 from ParadoxParser import GenericBlock, GenericKeyValue, GenericNode
 
-from App.Enums import PropagationType, ChangeState
-
+from App.Contracts.Enums import PropagationType, ChangeState
 @dataclass
 class ModLoaderResult:
-    mod:ParadoxMod
+    load_order:ParadoxLoadOrder
     tokens:dict
-    docs:dict
     
 @dataclass
 class OpenFile:
-    file:PDXScriptFile
+    file:PDXScriptFile|PDXLocFile
     context:ParadoxFileContext
 
-@dataclass
-class FileContext:
-    target:GenericCategory|PDXScriptFile
-    context:ParadoxFileContext
-
-@dataclass
-class BlockContext:
-    parent:GenericBlock
-    parent_index:int
-    parent_context:ParadoxBlockContext
-
-@dataclass
-class NodeContext:
-    node:GenericBlock|GenericKeyValue|GenericNode
-    node_context:ParadoxNodeContext
-    
 @dataclass
 class PropagationRequest:
     type  :PropagationType
@@ -74,5 +57,5 @@ class BlockMutationRequest:
 
 @dataclass
 class BulkMutationRequest:
-    target:GenericCategory|PDXScriptFile
+    target:GenericDirectoryContext|PDXScriptFile
     action:Callable

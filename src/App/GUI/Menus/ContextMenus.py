@@ -4,8 +4,9 @@ from PyQt5.QtCore import pyqtSignal
 from ParadoxParser import ParadoxScriptParser as PDXScriptFile
 from ParadoxParser.ParadoxNodes import GenericBlock
 
-from App.Enums import ExpansionMode, ChangeState
+from App.Contracts.Enums import ChangeState
 from App.Contracts import BlockMutationRequest
+from App.GUI.Enums import ExpansionMode
 from App.GUI.Actions import ActionGroup, ActionSubMenu, Action
 
 def dummy(): return 
@@ -58,7 +59,7 @@ class GenericContextMenu(QMenu):
         action.setEnabled(item.enabled)
         menu.addAction(action)
 
-class GenericCategoryContextMenu(GenericContextMenu):
+class GenericDirectoryContextMenu(GenericContextMenu):
     def __init__(self, parent:QTreeWidget, app_controller):
         super().__init__(parent, app_controller)
         self.menu_def:list = []

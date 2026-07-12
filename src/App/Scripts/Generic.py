@@ -1,7 +1,7 @@
 from ParadoxParser import ParadoxScriptParser as PDXScriptFile
 from ParadoxParser.ParadoxNodes import GenericBlock, GenericComment
 
-from App.Enums import ChangeState
+from App.Contracts.Enums import ChangeState
 
 def clear_comments(file, app_controller):
     def tombstone_comments(node):

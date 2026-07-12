@@ -1,28 +1,13 @@
-import os 
-
 from ParadoxParser.ParadoxNodes import GenericBlock, GenericKeyValue
 
 from App.Contracts import BlockMutationRequest
-from App.Modules.Base import (GenericCategory, ParadoxContext, 
-                              ParadoxFileContext, ParadoxNodeContext,
+from App.Contexts.Base import (ParadoxContext, ParadoxFileContext, ParadoxNodeContext,
                               LocalisationContext, GFXContext)
 from App.GUI.Actions import Action
 from App.PDXFactory.Blocks.Events import (add_namespace_keyval, country_event_block, news_event_block, 
                                           immediate_block, option_block)
 from App.GUI.Actions import Action
 
-###        ###
-#  CATEGORY  #
-###        ###
-class EventCategory(GenericCategory):
-    def __init__(self, mod_path:os.PathLike):
-        super().__init__(mod_path, ["events/"], EventContext)
-
-    def build_metadata(self):
-        return {}
-###        ###
-#  CONTEXTS  #
-###        ###
 class EventContext(ParadoxContext):
     @staticmethod
     def get_file_context():

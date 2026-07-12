@@ -1,6 +1,6 @@
 from ParadoxParser.ParadoxNodes import GenericLegacyLocKey, GenericLocKey
 
-from App.Enums import ChangeState
+from App.Contracts.Enums import ChangeState
 
 def convert_legacy(file, app_controller):
     node_changes = dict()

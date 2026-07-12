@@ -1,32 +1,9 @@
-import os
-
-from ParadoxParser import ParadoxLocParser as PDXLocFile
-from ParadoxParser.ParadoxNodes import GenericComment
-from App.Modules.Base import (GenericCategory, ParadoxContext, 
+from App.Contexts.Base import (ParadoxContext, 
                               ParadoxFileContext, ParadoxNodeContext)
 from App.Contracts import BulkMutationRequest
 from App.GUI.Actions import Action
 from App.Scripts.Localisation import convert_legacy
-###        ###
-#  CATEGORY  #
-###        ###
-class LocalisationCategory(GenericCategory):
-    def __init__(self, mod_path:os.PathLike):
-        super().__init__(base=mod_path, 
-                         paths=["localisation"], 
-                         context=LocalisationContext,
-                         parser=PDXLocFile)
 
-    def build_metadata(self):
-        metadata = dict()
-        for file in self.files.values():
-            for node in file.nodes:
-                if not isinstance(node, GenericComment):
-                    metadata[node.key] = {"file":file, "node":node}
-        return metadata
-###        ###
-#  CONTEXTS  #
-###        ###
 class LocalisationContext(ParadoxContext):
     @staticmethod
     def get_file_context():
