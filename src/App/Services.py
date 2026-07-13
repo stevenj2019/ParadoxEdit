@@ -33,6 +33,7 @@ class ConfigurationManager:
             self.read_file()
         else:
             self.initialised = False
+            self.create_file()
     
     def change_setting(self, **kwargs):
         for k, v in kwargs.items():
@@ -58,14 +59,15 @@ class ConfigurationManager:
     def create_file(self):
         self.safe_mode = True
         self.dark_mode = False
+        print(repr(self.file_path.parent))
+        print(self.file_path.parent.is_absolute())
         self.file_path.parent.mkdir(exist_ok=True, parents=True)
         self.file_path.touch()
-
-        self.initialised = True
 
     def write_file(self):
         with open(self.file_path, "w") as CONFIG_FILE:
             json.dump(self.to_json(), CONFIG_FILE)
+        self.initialised = True
 
 class AppLogger:
     _logger = logging.getLogger(app_name)
