@@ -8,14 +8,14 @@ from ParadoxParser.ParadoxNodes import GenericBlock, GenericComment
 from PyQt5.QtWidgets import (QDialog, QFormLayout, QHBoxLayout, QTreeWidget, QTreeWidgetItem, 
                              QPushButton, QLabel, QLineEdit, QCheckBox, QComboBox)
 
-# from App.Contexts.GFX import GFXDirectoryContext
+# from App.Contexts.GFX import GFXDirectory
 from App.Contracts import BlockMutationRequest
 from App.PDXFactory.Blocks.Sprites import GFX_icon, GFX_shine_icon
 from App.GUI.Widgets.FileDialogues import (gfx_files_folder_selector, gfx_files_file_selector, 
                                            gfx_save_folder_selector)
 from App.GUI.Widgets.PopupModels import GFX_file_copying_warn, form_missing_value
 
-CATEGORY = "GFXDirectoryContext"
+CATEGORY = "GFXDirectory"
 class AddNewGFXForm(QDialog):
     def __init__(self, app_controller, file):
         super().__init__()

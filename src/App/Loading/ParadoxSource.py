@@ -2,7 +2,7 @@ from pathlib import Path
 import os
 
 from App.Services import AppLogger
-from App.Loading.Directories.Base import GenericDirectoryContext
+from App.Loading.Directories.Base import GenericDirectory
 from App.Loading.Directories import DIRECTORY_REGISTRY
 from ParadoxParser import ParadoxScriptParser
 from ParadoxParser.ParadoxNodes import GenericBlock, GenericKeyValue
@@ -13,7 +13,7 @@ class ParadoxSource:
     def __init__(self, name, path):
         self.source_name = name
         self.file_path = path
-        self.root = GenericDirectoryContext(self.file_path, GenericDirectoryContext)
+        self.root = GenericDirectory(self.file_path, GenericDirectory)
         self.directories = {
             Path("."): self.root
         }
@@ -49,7 +49,7 @@ class ParadoxSource:
         rel_path = path.relative_to(self.file_path)
         category = DIRECTORY_REGISTRY.get(
             str(rel_path),
-            GenericDirectoryContext
+            GenericDirectory
         )
         print(path, category)
         return category(path)

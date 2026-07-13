@@ -75,8 +75,8 @@ class LocalisationContext:
                    True)
         ]
     def errors(app_controller, node):
-        # from App.Contexts.Loc import LocDirectoryContext
-        CATEGORY = "LocDirectoryContext"
+        # from App.Contexts.Loc import LocDirectory
+        CATEGORY = "LocDirectory"
         if not node.value in app_controller.registry.get_category_metadata(CATEGORY).keys():
             return "Localisation does not exist"
     
@@ -89,8 +89,8 @@ class GFXContext:
                    True)
         ]
     def errors(app_controller, node):
-        # from App.Contexts.GFX import GFXDirectoryContext
-        CATEGORY = "GFXDirectoryContext"
+        # from App.Contexts.GFX import GFXDirectory
+        CATEGORY = "GFXDirectory"
         if not node.value in app_controller.registry.get_category_metadata(CATEGORY).keys():
             return "Icon does not exist"
         else:

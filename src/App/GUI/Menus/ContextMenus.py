@@ -59,7 +59,7 @@ class GenericContextMenu(QMenu):
         action.setEnabled(item.enabled)
         menu.addAction(action)
 
-class GenericDirectoryContextMenu(GenericContextMenu):
+class GenericDirectoryMenu(GenericContextMenu):
     def __init__(self, parent:QTreeWidget, app_controller):
         super().__init__(parent, app_controller)
         self.menu_def:list = []

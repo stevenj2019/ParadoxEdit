@@ -3,11 +3,11 @@ import os
 from ParadoxParser import ParadoxScriptParser as PDXScriptFile
 from ParadoxParser.ParadoxNodes import GenericBlock, GenericKeyValue
 
-from App.Loading.Directories.Base import GenericDirectoryContext
+from App.Loading.Directories.Base import GenericDirectory
 from App.Contexts.Event import EventContext
 from App.Enums import PDXTokens
 
-class EventDirectoryContext(GenericDirectoryContext):
+class EventDirectory(GenericDirectory):
     def __init__(self, file_path:os.PathLike):
         super().__init__(file_path, EventContext, PDXScriptFile, False)
         

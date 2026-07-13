@@ -2,10 +2,10 @@ from PyQt5.QtWidgets import QDialog, QFormLayout, QLabel, QLineEdit, QTextEdit, 
 
 from ParadoxParser.ParadoxNodes import GenericBlock, GenericLocKey
 
-# from App.Contexts.Loc import LocDirectoryContext
+# from App.Contexts.Loc import LocDirectory
 from App.Contracts import NodeMutationRequest, BlockMutationRequest
 
-CATEGORY = "LocDirectoryContext"
+CATEGORY = "LocDirectory"
 class BaseLocaliseForm(QDialog):
     def __init__(self, app_controller, name):
         super().__init__()

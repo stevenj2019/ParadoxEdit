@@ -1,9 +1,9 @@
-from App.Loading.Directories.Event import EventDirectoryContext
-from App.Loading.Directories.GFX import GFXDirectoryContext
-from App.Loading.Directories.Loc import LocDirectoryContext
+from App.Loading.Directories.Event import EventDirectory
+from App.Loading.Directories.GFX import GFXDirectory
+from App.Loading.Directories.Loc import LocDirectory
 
 DIRECTORY_REGISTRY = {
-    "events": EventDirectoryContext,
-    "interface": GFXDirectoryContext,
-    "localisation": LocDirectoryContext
+    "events": EventDirectory,
+    "interface": GFXDirectory,
+    "localisation": LocDirectory
 }

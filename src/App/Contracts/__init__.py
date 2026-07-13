@@ -3,7 +3,7 @@ from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
     from App.Loading.LoadOrder import ParadoxLoadOrder
-    from App.Loading.Directories.Base import GenericDirectoryContext, ParadoxFileContext, ParadoxBlockContext, ParadoxNodeContext
+    from App.Loading.Directories.Base import GenericDirectory, ParadoxFileContext, ParadoxBlockContext, ParadoxNodeContext
     from App.Services import Workspace
 
 from dataclasses import dataclass
@@ -60,5 +60,5 @@ class BlockMutationRequest:
 
 @dataclass
 class BulkMutationRequest:
-    target:GenericDirectoryContext|PDXScriptFile
+    target:GenericDirectory|PDXScriptFile
     action:Callable

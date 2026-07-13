@@ -1,7 +1,7 @@
 from __future__ import annotations
 from typing import TYPE_CHECKING
 if TYPE_CHECKING:
-    from App.Contexts.Base import (GenericDirectoryContext, ParadoxFileContext, 
+    from App.Contexts.Base import (GenericDirectory, ParadoxFileContext, 
                                    ParadoxBlockContext, ParadoxNodeContext)
     
 from dataclasses import dataclass
@@ -12,7 +12,7 @@ from ParadoxParser.ParadoxNodes import GenericBlock, GenericKeyValue, GenericNod
 
 @dataclass
 class FileContext:
-    target:GenericDirectoryContext|PDXScriptFile|PDXLocFile
+    target:GenericDirectory|PDXScriptFile|PDXLocFile
     context:ParadoxFileContext
 
 @dataclass

@@ -2,7 +2,7 @@ from __future__ import annotations
 from typing import TYPE_CHECKING
 if TYPE_CHECKING:
     from App.Loading.ParadoxSource import ParadoxMod
-    from App.Loading.Directories.Base import GenericDirectoryContext
+    from App.Loading.Directories.Base import GenericDirectory
 
 import sys
 import json

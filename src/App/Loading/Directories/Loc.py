@@ -3,11 +3,11 @@ import os
 from ParadoxParser import ParadoxLocParser as PDXLocFile
 from ParadoxParser.ParadoxNodes import GenericComment
 
-from App.Loading.Directories.Base import GenericDirectoryContext
+from App.Loading.Directories.Base import GenericDirectory
 from App.Contexts.Loc import LocalisationContext
 from App.Enums import PDXMetadata
 
-class LocDirectoryContext(GenericDirectoryContext):
+class LocDirectory(GenericDirectory):
     def __init__(self, file_path:os.PathLike):
         super().__init__(file_path, LocalisationContext, PDXLocFile, False)
 

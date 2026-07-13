@@ -95,7 +95,7 @@ class MainWindow(QMainWindow):
         self.app_controller.load_workspace(path)
     
     def load_mod(self, mod):
-        self.mod_panel._populate_tree(mod)
+        self.mod_panel.populate_tree(mod)
         self.topbar._enable_actions()
 
     def load_workspace_failed(self, exc):
@@ -115,7 +115,7 @@ class MainWindow(QMainWindow):
         self.contents_panel.load_block(file)
 
     def _preview_icon(self, icon):
-        CATEGORY = "GFXDirectoryContext"
+        CATEGORY = "GFXDirectory"
         icon = icon.value
         mod = self.app_controller.registry.mod
         category_metadata = self.app_controller.registry.get_category_metadata(CATEGORY)

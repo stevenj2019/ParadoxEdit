@@ -3,13 +3,13 @@ from PyQt5.QtCore import Qt, pyqtSignal
 
 from App.Loading.ParadoxSource import ParadoxMod
 from App.Contexts import FileContext
-from App.Loading.Directories.Base import GenericDirectoryContext
+from App.Loading.Directories.Base import GenericDirectory
 from App.Loading.Models import UnloadedFile
 from App.Contracts import OpenFile
 from App.Contracts.Enums import ChangeState
 from App.GUI.Enums import QtStorage
 from App.Contexts.Base import ParadoxContext
-from App.GUI.Menus.ContextMenus import GenericDirectoryContextMenu
+from App.GUI.Menus.ContextMenus import GenericDirectoryMenu
 from App.GUI.StyledDelegate import ParadoxFileDelegate
 
 class ModPanel(QWidget):
@@ -34,13 +34,12 @@ class ModPanel(QWidget):
         self.tree.setItemDelegate(ParadoxFileDelegate(self.app_controller, self.tree))
         layout.addWidget(self.tree)
 
-        self.context_menu = GenericDirectoryContextMenu(self, app_controller)
+        self.context_menu = GenericDirectoryMenu(self, app_controller)
 
         self.tree.itemClicked.connect(self._on_element_click)
         self.tree.setContextMenuPolicy(Qt.CustomContextMenu)
         self.tree.customContextMenuRequested.connect(self._request_context_menu)
 
-    #this needs to just keep propogating up, i do not know how easy that will be?
     def set_file_state(self, file, status):
         file_item = self.node_to_item[file]
         file_item.setData(0, QtStorage.STATE, status)
@@ -61,7 +60,7 @@ class ModPanel(QWidget):
                 return ChangeState.MODIFIED
         return None
 
-    def _populate_tree(self, load_order):
+    def populate_tree(self, load_order):
         self.tree.clear()
         for source in load_order.sources:
             self._load_source_tree(source)
@@ -119,7 +118,7 @@ class ModPanel(QWidget):
         file = item.data(0, QtStorage.NODE)
         context = item.data(0, QtStorage.CONTEXT)
         if file:
-            if isinstance(file, GenericDirectoryContext):
+            if isinstance(file, GenericDirectory):
                 return
             self.request_load_block.emit(OpenFile(file, context))
 

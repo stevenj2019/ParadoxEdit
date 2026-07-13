@@ -7,7 +7,7 @@ from PyQt5.QtCore import QObject, pyqtSignal, QThread
 from PyQt5.QtWidgets import QApplication
 
 from App.Loading import LoadingDialog, LoadProcess
-from App.Loading.Directories.Base import GenericDirectoryContext
+from App.Loading.Directories.Base import GenericDirectory
 from App.Services import ConfigurationManager, AppLogger, StyleManager, FilesystemMananger, ParadoxRegistry, Workspace
 from App.GUI.Main import MainWindow
 from App.Contracts import PropagationRequest, NodeMutationRequest, BlockMutationRequest, BulkMutationRequest
@@ -153,7 +153,7 @@ class AppController(QObject):
     def _request_bulk_mutation(self, request:BulkMutationRequest):
         target = request.target
         action = request.action
-        if isinstance(target, GenericDirectoryContext):
+        if isinstance(target, GenericDirectory):
             files = target.iter_files()
         else:
             files = [target]
