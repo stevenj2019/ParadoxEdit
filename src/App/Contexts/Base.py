@@ -6,16 +6,12 @@ from ParadoxParser import ParadoxScriptParser as PDXScriptFile
 from ParadoxParser import ParadoxLocParser as PDXLocFile
 
 from App.Services import AppLogger
-from App.Loading.Models import UnloadedFile
 from App.Contracts import BulkMutationRequest, BlockMutationRequest
 from App.GUI.Actions import Action
 from App.GUI.Forms.LocaliseKey import LocaliseNodeForm
 from App.PDXFactory.Blocks.Generic import comment_node
 from App.Scripts.Generic import clear_comments, clear_whitespace
 
-##############
-#  CONTEXTS  #
-###        ###
 class ParadoxContext:
     @staticmethod
     def get_file_context():
@@ -66,7 +62,7 @@ class ParadoxNodeContext:
     def errors(app_controller, node_context):
         return
 
-class LocalisationContext:
+class LocalisationFieldContext:
     @staticmethod
     def get_actions(app_controller, node_context):
         return [
@@ -80,7 +76,7 @@ class LocalisationContext:
         if not node.value in app_controller.registry.get_category_metadata(CATEGORY).keys():
             return "Localisation does not exist"
     
-class GFXContext:
+class GFXFieldContext:
     @staticmethod
     def get_actions(app_controller, node_context):
         return [
@@ -89,8 +85,8 @@ class GFXContext:
                    True)
         ]
     def errors(app_controller, node):
-        # from App.Contexts.GFX import GFXDirectory
-        CATEGORY = "GFXDirectory"
+        # from App.Contexts.GFX import InterfaceDirectory
+        CATEGORY = "InterfaceDirectory"
         if not node.value in app_controller.registry.get_category_metadata(CATEGORY).keys():
             return "Icon does not exist"
         else:

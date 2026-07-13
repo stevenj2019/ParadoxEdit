@@ -4,22 +4,26 @@ from pathlib import Path
 
 from ParadoxParser import ParadoxScriptParser as PDXScriptFile
 from ParadoxParser import ParadoxLocParser as PDXLocFile
-from App.Loading.Models import UnloadedFile
+from App.Loading.Models import FileReference, UnloadedFile
 
 from App.Contexts.Base import ParadoxContext
 
 ACCEPTED_TYPES = [".txt", ".gui", ".gfx"]
 class GenericDirectory:
-    def __init__(self, base_path:os.PathLike, context:ParadoxContext=None, parser:PDXScriptFile|PDXLocFile=None, read_only:bool=True):
+    def __init__(self, base_path:os.PathLike, context:ParadoxContext=ParadoxContext, parser:PDXScriptFile|PDXLocFile=PDXScriptFile, read_only:bool=True):
         self.path = Path(base_path)
         self.context = context
         self.parser = parser
         self.read_only = read_only
         self.directories:dict[str, GenericDirectory] = {}
-        self.files:dict[str:UnloadedFile|PDXScriptFile|PDXLocFile] = {}
+        self.files:dict[str:FileReference] = {}
 
     def add_file(self, path, name):
-        self.files[name] = UnloadedFile(path, name, self.parser)
+        self.files[name] = FileReference(
+            UnloadedFile(path, name, self.parser),
+            self.context if isinstance(self.context, type) and issubclass(self.context, ParadoxContext) 
+            else self.context[path.suffix]
+        )
 
     def delete_file(self, file):
         self.files.pop(file, None)
@@ -33,8 +37,8 @@ class GenericDirectory:
 
     def parse_files(self):
         for key, file in self.files.items():
-            if file.path.suffix in ACCEPTED_TYPES:
-                self.files[key] = file.load()
+            if file.file.path.suffix in ACCEPTED_TYPES:
+                self.files[key].file = file.file.load()
         for directory in self.directories.values():
             directory.parse_files()
 

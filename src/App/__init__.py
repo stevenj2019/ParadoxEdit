@@ -2,6 +2,7 @@ import qdarktheme
 from contextlib import contextmanager
 import traceback
 import copy
+import sys
 
 from PyQt5.QtCore import QObject, pyqtSignal, QThread
 from PyQt5.QtWidgets import QApplication
@@ -18,22 +19,43 @@ class AppController(QObject):
     request_block_mutation = pyqtSignal(object)
     request_bulk_mutation = pyqtSignal(object)
     request_save = pyqtSignal(object)
+
     def __init__(self):
         super().__init__()
-        self.app           = QApplication([])
+        AppLogger.initialise()
+        self.excepthook = self.global_exception_handler
+        self.app           = QApplication(sys.argv)
 
         self.configuration = ConfigurationManager()
         self.file_system   = FilesystemMananger(self.configuration)
         self.style_manager = StyleManager(self.configuration)
         self.registry      = ParadoxRegistry()
-        AppLogger.initialise()
 
         self.main = MainWindow(self)
+
+        if not self.configuration.initialised:
+            self.main.settings_window_requested()
 
         self._batch_depth = 0
         self._batch_file = set()
 
         self.run()
+
+    def global_exception_handler(self, exc_type, exc_value, exc_traceback):
+        if exc_type is KeyboardInterrupt:
+            sys.__excepthook__(exc_type, exc_value, exc_traceback)
+            return
+        error = "".join(
+            traceback.format_exception(
+                exc_type,
+                exc_value,
+                exc_traceback
+            )
+        )
+
+        AppLogger.error(
+            f"Unhandled exception:\n{error}"
+        )
 
     def run(self):
         self.app.setStyleSheet(qdarktheme.load_stylesheet("dark" if self.configuration.dark_mode else "light"))

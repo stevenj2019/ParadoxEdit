@@ -4,6 +4,7 @@ import os
 from App.Services import AppLogger
 from App.Loading.Directories.Base import GenericDirectory
 from App.Loading.Directories import DIRECTORY_REGISTRY
+from App.Contexts.Base import ParadoxContext
 from ParadoxParser import ParadoxScriptParser
 from ParadoxParser.ParadoxNodes import GenericBlock, GenericKeyValue
 
@@ -13,7 +14,7 @@ class ParadoxSource:
     def __init__(self, name, path):
         self.source_name = name
         self.file_path = path
-        self.root = GenericDirectory(self.file_path, GenericDirectory)
+        self.root = GenericDirectory(self.file_path, ParadoxContext)
         self.directories = {
             Path("."): self.root
         }
@@ -58,7 +59,7 @@ class ParadoxSource:
         try:
             removed = self.directories[Path(path)]
             removed.delete_directory()
-            AppLogger.info(f"Vanillas {path} removed {removed}")
+            AppLogger.info(f"{self.source_name} {path} removed {removed}")
         except KeyError:
             pass
 
@@ -66,7 +67,7 @@ class ParadoxSource:
         try:
             removed = self.directories[path.parent]
             removed.delete_file(path.name)
-            AppLogger.info(f"Vanillas {path} removed")
+            AppLogger.info(f"{self.source_name} {path} removed")
         except KeyError:
             pass
 

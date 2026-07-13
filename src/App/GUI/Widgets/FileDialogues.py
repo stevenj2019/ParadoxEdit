@@ -1,21 +1,21 @@
 from PyQt5.QtWidgets import QFileDialog
 from pathlib import Path
 
-def select_hoi4_install_directory():
+def select_hoi4_install_directory(parent):
     options = QFileDialog.Options()
     options |= QFileDialog.ReadOnly
     return QFileDialog.getExistingDirectory(
-        None,
+        parent,
         "Select Paradox Game install directory",
         "",
         QFileDialog.ShowDirsOnly
     )
 
-def select_mod_directory():
+def select_mod_directory(parent):
     options = QFileDialog.Option()
     options |= QFileDialog.ReadOnly
     return QFileDialog.getExistingDirectory(
-        None,
+        parent,
         "Select Paradox game mod directory",
         "",
         QFileDialog.ShowDirsOnly

@@ -56,12 +56,12 @@ class SettingsForm(QDialog):
         self.button.accepted.connect(self.submit_form)
 
     def browse_game_install_path(self):
-        path = select_hoi4_install_directory()
+        path = select_hoi4_install_directory(self.app_controller.main)
         if path:
             self.game_install_path_element_text.setText(path)
 
     def browse_mod_install_path(self):
-        path = select_mod_directory()
+        path = select_mod_directory(self.app_controller.main)
         if path:
             self.mod_install_path_element_text.setText(path)
     

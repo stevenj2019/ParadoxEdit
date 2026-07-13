@@ -2,7 +2,7 @@ from ParadoxParser.ParadoxNodes import GenericBlock, GenericKeyValue
 
 from App.Contracts import BlockMutationRequest
 from App.Contexts.Base import (ParadoxContext, ParadoxFileContext, ParadoxNodeContext,
-                              LocalisationContext, GFXContext)
+                              LocalisationFieldContext, GFXFieldContext)
 from App.GUI.Actions import Action
 from App.PDXFactory.Blocks.Events import (add_namespace_keyval, country_event_block, news_event_block, 
                                           immediate_block, option_block)
@@ -26,9 +26,9 @@ class EventContext(ParadoxContext):
     def get_node_context(node):
         if isinstance(node, GenericKeyValue):
             if node.key in ("name", "title", "desc", "name"):
-                return LocalisationContext
+                return LocalisationFieldContext
             elif node.key == "picture":
-                return GFXContext
+                return GFXFieldContext
         return ParadoxNodeContext
             
 class EventFileContext(ParadoxFileContext):

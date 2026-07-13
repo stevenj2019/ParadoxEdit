@@ -54,7 +54,7 @@ class ParadoxLoadOrder:
 
     def _apply_override_traversal(self, source, source_dir, target_source):
         for file in source_dir.files.values():
-            path = Path(file.path)
+            path = Path(file.file.path)
             path = path.relative_to(source.file_path)
             target_source.apply_override(path)
         for directory in source_dir.directories.values():

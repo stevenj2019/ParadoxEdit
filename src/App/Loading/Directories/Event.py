@@ -14,6 +14,7 @@ class EventDirectory(GenericDirectory):
     def token_collection(self):
         tokens = set()
         for file in self.files.values():
+            file = file.file
             for block in file.nodes:
                 if isinstance(block, GenericBlock):
                     token = next((node.value.value for node in block.nodes 

@@ -55,8 +55,8 @@ class MainWindow(QMainWindow):
 
         self.splitter.setSizes([200, 600])
         self.showMaximized()
-        if not self.app_controller.configuration.initialised:
-            self.settings_window_requested()
+        # if not self.app_controller.configuration.initialised:
+        #     self.settings_window_requested()
 
         self.request_propagation.connect(self._propogate_mutations)
         self.request_icon_preview.connect(self._preview_icon)
@@ -115,7 +115,7 @@ class MainWindow(QMainWindow):
         self.contents_panel.load_block(file)
 
     def _preview_icon(self, icon):
-        CATEGORY = "GFXDirectory"
+        CATEGORY = "InterfaceDirectory"
         icon = icon.value
         mod = self.app_controller.registry.mod
         category_metadata = self.app_controller.registry.get_category_metadata(CATEGORY)

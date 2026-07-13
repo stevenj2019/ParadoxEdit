@@ -34,30 +34,29 @@ class LoadProcess(QObject):
         self.game_path = game_path
 
     def run(self):
-        # try:
-        load_order = ParadoxLoadOrder(True)
-        if self.workspace.vanilla_loaded:
-            self.progress.emit("Loading Vanilla Files")
-            load_order.load_vanilla(self.game_path)
+        try:
+            load_order = ParadoxLoadOrder(True)
+            if self.workspace.vanilla_loaded:
+                self.progress.emit("Loading Vanilla Files")
+                load_order.load_vanilla(self.game_path)
 
-        self.progress.emit("Loading Mod Files")
-        for mod in self.workspace.mods:
-            load_order.load_mod(mod)
-        
-        self.progress.emit("Resolving Load Order")
-        load_order.resolve()
-        
-        self.progress.emit("Parsing Files")
-        load_order.parse_files()
-        
-        self.progress.emit("Preparing Tokens")
-        tokens = load_order.token_collection()
+            self.progress.emit("Loading Mod Files")
+            for mod in self.workspace.mods:
+                load_order.load_mod(mod)
+            
+            self.progress.emit("Resolving Load Order")
+            load_order.resolve()
+            
+            self.progress.emit("Parsing Files")
+            load_order.parse_files()
+            
+            self.progress.emit("Preparing Tokens")
+            tokens = load_order.token_collection()
 
-        self.progress.emit("Preparing Metadata")
-        #TODO: 1. get metadata
+            self.progress.emit("Preparing Metadata")
+            #TODO: 1. get metadata
 
-        self.progress.emit("Finishing Up")
-        self.finished.emit(ModLoaderResult(self.workspace, load_order, tokens, {}))
-        # except Exception as e:
-        #     traceback.format_exc()
-        #     self.failed.emit(e)
+            self.progress.emit("Finishing Up")
+            self.finished.emit(ModLoaderResult(self.workspace, load_order, tokens, {}))
+        except Exception as e:
+            self.failed.emit(e)

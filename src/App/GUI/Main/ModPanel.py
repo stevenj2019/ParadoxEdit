@@ -41,7 +41,7 @@ class ModPanel(QWidget):
         self.tree.customContextMenuRequested.connect(self._request_context_menu)
 
     def set_file_state(self, file, status):
-        file_item = self.node_to_item[file]
+        file_item = self.node_to_item[file.file]
         file_item.setData(0, QtStorage.STATE, status)
         self._propagate_state(file_item.parent())
         self.tree.update()
@@ -103,14 +103,15 @@ class ModPanel(QWidget):
 
     def _add_file(self, parent_item, file, context, read_only):
         con_text = context.__name__ if context else None
-        text = f"{file.filename}, {con_text}"
+    
+        text = f"{file.file.filename}, {con_text}"
         item = QTreeWidgetItem([text])
-        self.node_to_item[file] = item
-        if isinstance(file, UnloadedFile):
+        self.node_to_item[file.file] = item
+        if isinstance(file.file, UnloadedFile):
             item.setIcon(0, QApplication.style().standardIcon(QStyle.SP_MessageBoxWarning))
-        item.setData(0, QtStorage.NODE, file)
+        item.setData(0, QtStorage.NODE, file.file)
         item.setData(0, QtStorage.STATE, None)
-        item.setData(0, QtStorage.CONTEXT, context)
+        item.setData(0, QtStorage.CONTEXT, file.context)
         item.setData(0, QtStorage.READ_ONLY, read_only)
         parent_item.addChild(item)
 

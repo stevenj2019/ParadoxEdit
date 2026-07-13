@@ -14,9 +14,9 @@ def could_not_load_mod_critical(exc: Exception):
 def settings_error_critical(game_dir_error:bool, mod_dir_error:bool):
     text = "The following Problems prevent saving:"
     if game_dir_error:
-        text += "Game install directory could not find pdx_launcher, is invalid"
+        text += "\nGame install directory could not find pdx_launcher, is invalid"
     if mod_dir_error:
-        text =+ "Mod folder does not contain any .mod files, is invalid"
+        text += "\nMod folder does not contain any .mod files, is invalid"
     return QMessageBox.critical(
         None, 
         "Error(s) in settings",
