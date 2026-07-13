@@ -16,6 +16,7 @@ class ParadoxLoadOrder:
         self._resolve_dependencies()
         self._resolve_file_overrides()
 
+    #TODO: This need to implement alphabetical load ordering for when dependencies arent avaiable
     def _resolve_dependencies(self):
         resolved = []
         remaining = self.sources.copy()
@@ -49,6 +50,7 @@ class ParadoxLoadOrder:
                 for path in source.replace_paths:
                     target.apply_replace_path(path)
                 self._apply_override_traversal(source, source.root, target)
+            loaded_sources.append(source)
 
     def _apply_override_traversal(self, source, source_dir, target_source):
         for file in source_dir.files.values():
