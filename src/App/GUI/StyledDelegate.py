@@ -80,6 +80,8 @@ class NodeStateDelegate(QStyledItemDelegate):
         if not (is_block or is_comparator):
             node = source_index.model().data(source_index, QtStorage.NODE)
             context = source_index.model().data(source_index, QtStorage.CONTEXT)
+            if not context:
+                return 
             error = context.errors(self.app_controller, node.value)
             if error:
                 icon = QApplication.style().standardIcon(QStyle.SP_MessageBoxWarning)
