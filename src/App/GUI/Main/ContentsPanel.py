@@ -1,5 +1,6 @@
 from PyQt5.QtWidgets import QWidget, QVBoxLayout, QTreeWidget, QTreeWidgetItem
 from PyQt5.QtCore import Qt, pyqtSignal
+from PyQt5.QtGui import QBrush
 
 from ParadoxParser import ParadoxScriptParser as PDXScript
 from ParadoxParser.ParadoxNodes import (GenericBlock, GenericKeyValue, GenericNode, 
@@ -19,6 +20,7 @@ class ContentsPanel(QWidget):
         self.parent = parent
         self.app_controller = app_controller
         self.node_to_item:dict = {}
+        self.read_only:bool = True
 
         layout = QVBoxLayout()
         self.setLayout(layout)
@@ -50,6 +52,7 @@ class ContentsPanel(QWidget):
         Load a GenericBlock into the tree for display.
         """
         block = file.file
+        self.read_only = file.read_only
         self.node_to_item.clear()
         self.tree.clear()
         self.tree.blockSignals(True)
@@ -115,6 +118,8 @@ class ContentsPanel(QWidget):
         item.setData(0, QtStorage.INDEX, parent_index)
         item.setData(0, QtStorage.IS_COMPARATOR, False)
 
+        item.setForeground(0, QBrush(Qt.gray))
+
         parent_item.addChild(item)
 
         self._add_nodes(parent_item=item, 
@@ -165,48 +170,55 @@ class ContentsPanel(QWidget):
         item.setData(0, QtStorage.INDEX, parent_index)
         item.setData(0, QtStorage.IS_COMPARATOR, isinstance(node, GenericComparator))
 
+
+        item.setForeground(0, QBrush(Qt.gray))
+        if self.read_only:
+            item.setForeground(1, QBrush(Qt.gray))
+
         parent_item.addChild(item)
 
     def _on_item_double_click(self, item, column):
-        if column == 1: #value was clicked.
-            if not item.data(0, QtStorage.IS_BLOCK):
-                node = item.data(0, QtStorage.NODE)
-                if node:
-                    self.edit_open_request.emit(self.tree, item, node)
+        if not item.data(0,QtStorage.READ_ONLY):
+            if column == 1: #value was clicked.
+                if not item.data(0, QtStorage.IS_BLOCK):
+                    node = item.data(0, QtStorage.NODE)
+                    if node:
+                        self.edit_open_request.emit(self.tree, item, node)
 
     def _request_context_menu(self, pos):
         pos = self.tree.viewport().mapFrom(self, pos)
-        selected = self.tree.itemAt(pos)
-        if selected:
-            node = selected.data(0, QtStorage.NODE)
-            node_context = NodeContext(
-                node=node,
-                node_context=selected.data(0, QtStorage.CONTEXT)
-            )
-            if isinstance(node, GenericBlock):
-                block_context = BlockContext(
-                    parent=node,
-                    parent_index=0,
-                    parent_context=selected.data(0, QtStorage.CONTEXT)
+        item = self.tree.itemAt(pos)
+        if not item.data(0,QtStorage.READ_ONLY):
+            if item:
+                node = item.data(0, QtStorage.NODE)
+                node_context = NodeContext(
+                    node=node,
+                    node_context=item.data(0, QtStorage.CONTEXT)
                 )
+                if isinstance(node, GenericBlock):
+                    block_context = BlockContext(
+                        parent=node,
+                        parent_index=0,
+                        parent_context=item.data(0, QtStorage.CONTEXT)
+                    )
+                else:
+                    block_context = BlockContext(
+                        parent = item.data(0, QtStorage.PARENT),
+                        parent_index= item.data(0, QtStorage.INDEX)+1,
+                        parent_context= item.data(0, QtStorage.PARENT_CONTEXT)
+                    )
             else:
+                open_file = self.app_controller.file_system.open_file
+
                 block_context = BlockContext(
-                    parent = selected.data(0, QtStorage.PARENT),
-                    parent_index= selected.data(0, QtStorage.INDEX)+1,
-                    parent_context= selected.data(0, QtStorage.PARENT_CONTEXT)
+                    parent=open_file.file,
+                    parent_index=len(open_file.file.nodes)+1,
+                    parent_context=open_file.context.get_block_context(None)
                 )
-        else:
-            open_file = self.app_controller.file_system.open_file
+                node_context = None
 
-            block_context = BlockContext(
-                parent=open_file.file,
-                parent_index=len(open_file.file.nodes)+1,
-                parent_context=open_file.context.get_block_context(None)
-            )
-            node_context = None
-
-        self.context_menu.call(block_context, node_context)
-        self.context_menu.exec_(self.tree.viewport().mapToGlobal(pos))
+            self.context_menu.call(block_context, node_context)
+            self.context_menu.exec_(self.tree.viewport().mapToGlobal(pos))
 
     def request_node_mutation(self, request):
         self.app_controller.request_block_mutation.emit(request)

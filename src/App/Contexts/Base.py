@@ -5,6 +5,7 @@ from pathlib import Path
 from ParadoxParser import ParadoxScriptParser as PDXScriptFile
 from ParadoxParser import ParadoxLocParser as PDXLocFile
 
+from App.Enums import PDXMetadata
 from App.Services import AppLogger
 from App.Contracts import BulkMutationRequest, BlockMutationRequest
 from App.GUI.Actions import Action
@@ -48,6 +49,9 @@ class ParadoxBlockContext:
     def get_actions(app_controller, block_context):
         return
     
+    def errors(app_controller, node_context):
+        return
+    
 class ParadoxNodeContext:
     @staticmethod
     def get_actions(app_controller, block_context):
@@ -59,6 +63,7 @@ class ParadoxNodeContext:
                    True
             )
         ]
+    
     def errors(app_controller, node_context):
         return
 
@@ -70,10 +75,9 @@ class LocalisationFieldContext:
                    lambda:LocaliseNodeForm(app_controller, node_context.node.value.value), 
                    True)
         ]
+    
     def errors(app_controller, node):
-        # from App.Contexts.Loc import LocDirectory
-        CATEGORY = "LocDirectory"
-        if not node.value in app_controller.registry.get_category_metadata(CATEGORY).keys():
+        if not node.value in app_controller.registry.get_metadata(PDXMetadata.LocKey).keys():
             return "Localisation does not exist"
     
 class GFXFieldContext:
@@ -84,10 +88,9 @@ class GFXFieldContext:
                    lambda:app_controller.main.request_icon_preview.emit(node_context.node.value),
                    True)
         ]
+    
     def errors(app_controller, node):
-        # from App.Contexts.GFX import InterfaceDirectory
-        CATEGORY = "InterfaceDirectory"
-        if not node.value in app_controller.registry.get_category_metadata(CATEGORY).keys():
+        if not node.value in app_controller.registry.get_metadata(PDXMetadata.GFXIcon).keys():
             return "Icon does not exist"
         else:
             return

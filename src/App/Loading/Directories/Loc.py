@@ -7,19 +7,25 @@ from App.Loading.Directories.Base import GenericDirectory
 from App.Contexts.Loc import LocalisationContext
 from App.Enums import PDXMetadata
 
+FILE_TYPES = {
+    ".yml": LocalisationContext
+}
 class LocDirectory(GenericDirectory):
-    def __init__(self, file_path:os.PathLike):
-        super().__init__(file_path, LocalisationContext, PDXLocFile, False)
+    def __init__(self, file_path:os.PathLike, read_only:bool):
+        super().__init__(file_path, FILE_TYPES, PDXLocFile, read_only)
 
     def token_collection(self):
         return super().token_collection()
     
-    def metadata_collection(self):
+    #TODO: it is fucked.
+    def metadata_collection(self, source):
         metadata = dict()
         for file in self.files.values():
-            for node in file.nodes:
-                if not isinstance(node, GenericComment):
-                    metadata[node.key] = {"file":file, "node":node}
+            file = file.file
+            if isinstance(file, PDXLocFile):
+                for node in file.nodes:
+                    if not isinstance(node, GenericComment):
+                        metadata[node.key] = {"file":file, "node":node}
         return {PDXMetadata.LocKey:metadata}
     
     def resolve_context(self, file):

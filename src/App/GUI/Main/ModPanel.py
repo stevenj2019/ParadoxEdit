@@ -1,7 +1,7 @@
 from PyQt5.QtWidgets import QApplication, QWidget, QVBoxLayout, QHeaderView, QTreeWidget, QTreeWidgetItem, QStyle
 from PyQt5.QtCore import Qt, pyqtSignal
 
-from App.Loading.ParadoxSource import ParadoxMod
+from App.Loading.ParadoxSource import ParadoxSource, ParadoxVanilla, ParadoxMod
 from App.Contexts import FileContext
 from App.Loading.Directories.Base import GenericDirectory
 from App.Loading.Models import UnloadedFile
@@ -13,7 +13,7 @@ from App.GUI.Menus.ContextMenus import GenericDirectoryMenu
 from App.GUI.StyledDelegate import ParadoxFileDelegate
 
 class ModPanel(QWidget):
-    request_load_block = pyqtSignal(object)
+    request_load_block = pyqtSignal(object, bool)
     load_file = pyqtSignal()
     def __init__(self, parent, app_controller):
         super().__init__()
@@ -41,7 +41,7 @@ class ModPanel(QWidget):
         self.tree.customContextMenuRequested.connect(self._request_context_menu)
 
     def set_file_state(self, file, status):
-        file_item = self.node_to_item[file.file]
+        file_item = self.node_to_item[file]
         file_item.setData(0, QtStorage.STATE, status)
         self._propagate_state(file_item.parent())
         self.tree.update()
@@ -79,57 +79,49 @@ class ModPanel(QWidget):
             self.node_to_item[source.descriptor_object] = descriptor_item
 
             root.addChild(descriptor_item)
-        for entry in source.root.directories.values():
-            self._add_directory(root, entry, None, None)
 
-    def _add_directory(self, parent_item, directory, context, read_only):
-        context = directory.context if not context else context
-        read_only = directory.read_only if not read_only else read_only
-        con_text = context.__name__ if directory.context else None
-        text = f"{directory.path.name}, {con_text}"
-        item = QTreeWidgetItem([text])
+        for entry in source.root.directories.values():
+            self._add_directory(root, entry, isinstance(source, ParadoxVanilla))
+
+    def _add_directory(self, parent_item, directory, read_only):
+        read_only = read_only or directory.read_only
+        item = QTreeWidgetItem([directory.path.name])
         self.node_to_item[directory] = item
         item.setData(0, QtStorage.NODE, directory)
-        item.setData(0, QtStorage.STATE, None) #i am unsure if this is needed here or not....
-        item.setData(0, QtStorage.CONTEXT, context)
         item.setData(0, QtStorage.READ_ONLY, read_only)
         parent_item.addChild(item)
 
         for child in directory.directories.values():
-            self._add_directory(item, child, context, read_only)
+            self._add_directory(item, child, read_only)
 
         for file in directory.files.values():
-            self._add_file(item, file, context, read_only)
+            self._add_file(item, file, read_only)
 
-    def _add_file(self, parent_item, file, context, read_only):
-        con_text = context.__name__ if context else None
+    def _add_file(self, parent_item, file, read_only):
+        con_text = file.context.__name__ if file.context else None
     
-        text = f"{file.file.filename}, {con_text}"
+        text = f"{file.file.filename}, {con_text}{'(ReadOnly)' if read_only else ''}"
         item = QTreeWidgetItem([text])
         self.node_to_item[file.file] = item
         if isinstance(file.file, UnloadedFile):
             item.setIcon(0, QApplication.style().standardIcon(QStyle.SP_MessageBoxWarning))
-        item.setData(0, QtStorage.NODE, file.file)
+        item.setData(0, QtStorage.NODE, file)
         item.setData(0, QtStorage.STATE, None)
-        item.setData(0, QtStorage.CONTEXT, file.context)
         item.setData(0, QtStorage.READ_ONLY, read_only)
         parent_item.addChild(item)
 
     def _on_element_click(self, item, column):
         file = item.data(0, QtStorage.NODE)
-        context = item.data(0, QtStorage.CONTEXT)
         if file:
-            if isinstance(file, GenericDirectory):
+            if isinstance(file, GenericDirectory) or isinstance(file, ParadoxSource):
                 return
-            self.request_load_block.emit(OpenFile(file, context))
+            self.request_load_block.emit(file, item.data(0, QtStorage.READ_ONLY))
 
     #TODO this is also shit housed lol
     def _request_context_menu(self, pos):
         selected = self.tree.itemAt(pos)
         if not selected:
             return
-        # is_category = selected.data(0, QtStorage.IS_CATEGORY)
-        # item = selected.data(0, QtStorage.CATEGORY) if is_category else selected.data(0, QtStorage.FILE)
         item = selected.data(0, QtStorage.NODE)
         if not item:
             return

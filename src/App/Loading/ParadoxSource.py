@@ -14,7 +14,7 @@ class ParadoxSource:
     def __init__(self, name, path):
         self.source_name = name
         self.file_path = path
-        self.root = GenericDirectory(self.file_path, ParadoxContext)
+        self.root = GenericDirectory(self.file_path)
         self.directories = {
             Path("."): self.root
         }
@@ -53,7 +53,7 @@ class ParadoxSource:
             GenericDirectory
         )
         print(path, category)
-        return category(path)
+        return category(file_path=path, read_only=isinstance(self, ParadoxVanilla))
     
     def apply_replace_path(self, path):
         try:
@@ -73,6 +73,9 @@ class ParadoxSource:
 
     def token_collection(self):
         return self.root.token_collection_traversal()
+
+    def metadata_collection(self):
+        return self.root.metadata_collection_traversal(self)
 
 class ParadoxVanilla(ParadoxSource):
     def __init__(self, path):

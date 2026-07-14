@@ -101,7 +101,7 @@ class AppController(QObject):
 
     def workspace_loaded(self, result):
         self.registry.load_tokens(result.tokens)
-        
+        self.registry.load_metadata(result.metadata)
         self.file_system.load_workspace(result.workspace)
         
         self.main.load_mod(result.load_order)

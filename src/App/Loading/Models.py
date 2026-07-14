@@ -26,3 +26,4 @@ class UnloadedFile:
 class FileReference:
     file:UnloadedFile|PDXScriptFile|PDXLocFile
     context:ParadoxContext
+    read_only:bool

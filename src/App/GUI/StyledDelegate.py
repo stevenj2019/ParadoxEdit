@@ -2,8 +2,8 @@ from PyQt5.QtWidgets import QApplication, QStyle, QStyledItemDelegate, QToolTip
 from PyQt5.QtCore import Qt, QRect, QEvent
 from PyQt5.QtGui import QColor as QColour, QBrush, QPen
 
-from ParadoxParser import ParadoxScriptParser as PDXScriptFile
-from ParadoxParser import ParadoxLocParser as PDxLocFile
+from App.Loading.ParadoxSource import ParadoxSource
+from App.Loading.Directories.Base import GenericDirectory
 
 from App.GUI.Enums import QtStorage
 from App.Contracts.Enums import ChangeState
@@ -25,7 +25,7 @@ class ParadoxFileDelegate(QStyledItemDelegate):
         y = option.rect.center().y()
 
         node = index.model().data(index, QtStorage.NODE)
-        if isinstance(node, PDXScriptFile) or isinstance(node, PDxLocFile):
+        if not isinstance(node, (ParadoxSource, GenericDirectory)):
             state = index.model().data(index, QtStorage.STATE)
             if state in (ChangeState.ADDED, ChangeState.MODIFIED, ChangeState.DELETED):
                 colour = self.app_controller.style_manager.get_node_state_colour(state)

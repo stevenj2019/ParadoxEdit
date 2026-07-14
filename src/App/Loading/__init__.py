@@ -54,9 +54,9 @@ class LoadProcess(QObject):
             tokens = load_order.token_collection()
 
             self.progress.emit("Preparing Metadata")
-            #TODO: 1. get metadata
+            metadata = load_order.metadata_collection()
 
             self.progress.emit("Finishing Up")
-            self.finished.emit(ModLoaderResult(self.workspace, load_order, tokens, {}))
+            self.finished.emit(ModLoaderResult(self.workspace, load_order, tokens, metadata))
         except Exception as e:
             self.failed.emit(e)

@@ -3,6 +3,7 @@ from PyQt5.QtCore import Qt, pyqtSignal
 
 from ParadoxParser.ParadoxNodes import GenericBlock
 
+from App.Enums import PDXMetadata
 from App.Services import AppLogger
 from App.Contracts import PropagationRequest
 from App.Contracts.Enums import PropagationType, ChangeState
@@ -115,14 +116,20 @@ class MainWindow(QMainWindow):
         self.contents_panel.load_block(file)
 
     def _preview_icon(self, icon):
-        CATEGORY = "InterfaceDirectory"
-        icon = icon.value
-        mod = self.app_controller.registry.mod
-        category_metadata = self.app_controller.registry.get_category_metadata(CATEGORY)
-        icon_relative_path = category_metadata[icon]
-        if not icon_relative_path:
+        icon_name = icon.value
+        icon_registry = self.app_controller.registry.get_metadata(PDXMetadata.GFXIcon)
+        if icon_name in icon_registry.keys():
+            full_path = icon_registry[icon_name]
+        else:
             no_icon_available_warning(f"{icon} does not exist in Mod Metadata")
             return
-        full_path = mod._resolve_path(icon_relative_path)
+        # if icon:
+        # mod = self.app_controller.registry.mod
+        # category_metadata = self.app_controller.registry.get_category_metadata(PDXMetadata.GFXIcon)
+        # icon_relative_path = category_metadata[icon]
+        # if not icon_relative_path:
+        #     no_icon_available_warning(f"{icon} does not exist in Mod Metadata")
+        #     return
+        # full_path = mod._resolve_path(icon_relative_path)
         dialog = IconPreviewDialog(icon, full_path)
         dialog.exec()

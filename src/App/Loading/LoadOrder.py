@@ -73,3 +73,13 @@ class ParadoxLoadOrder:
                 tokens.setdefault(key, set()).update(values)
 
         return tokens
+    
+    def metadata_collection(self):
+        metadata = {}
+        for source in self.sources:
+            source_metadata = source.metadata_collection()
+
+            for key, values in source_metadata.items():
+                metadata.setdefault(key, dict()).update(values)
+
+        return metadata

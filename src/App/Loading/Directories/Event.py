@@ -7,19 +7,26 @@ from App.Loading.Directories.Base import GenericDirectory
 from App.Contexts.Event import EventContext
 from App.Enums import PDXTokens
 
+FILE_TYPES = {
+    ".txt": EventContext
+}
 class EventDirectory(GenericDirectory):
-    def __init__(self, file_path:os.PathLike):
-        super().__init__(file_path, EventContext, PDXScriptFile, False)
+    def __init__(self, file_path:os.PathLike, read_only:bool):
+        super().__init__(file_path, FILE_TYPES, PDXScriptFile, read_only)
         
     def token_collection(self):
         tokens = set()
         for file in self.files.values():
             file = file.file
-            for block in file.nodes:
-                if isinstance(block, GenericBlock):
-                    token = next((node.value.value for node in block.nodes 
-                                  if isinstance(node, GenericKeyValue) 
-                                  and node.key.lower()=="id"), None)
-                    if token:
-                        tokens.add(token)
+            if isinstance(file, PDXScriptFile):
+                for block in file.nodes:
+                    if isinstance(block, GenericBlock):
+                        token = next((node.value.value for node in block.nodes 
+                                    if isinstance(node, GenericKeyValue) 
+                                    and node.key.lower()=="id"), None)
+                        if token:
+                            tokens.add(token)
         return {PDXTokens:tokens}
+    
+    def metadata_collection(self, source):
+        return super().metadata_collection(source)

@@ -125,7 +125,7 @@ class AppLogger:
 
     @staticmethod
     def _format(obj):
-        if isinstance(obj, PDXScriptFile|PDXLocFile):
+        if isinstance(obj, (PDXScriptFile, PDXLocFile)):
             return f"{obj.filename}"
         
         if isinstance(obj, GenericBlock):
@@ -291,11 +291,17 @@ class ParadoxRegistry:
     def load_tokens(self, tokens:dict):
         self.tokens = tokens
 
-    # def get_tokens():
-    # def add_tokens():
-    # def remove_tokens():
+    def get_tokens(self, key):
+        return self.tokens.get(key, set())
+    
+    # def add_tokens(self, key, tokens:set):
+    # def remove_tokens(self, key, tokens:set):
 
-    # def load_metadata(self, metadata:dict):
-    # def get_metadata():
+    def load_metadata(self, metadata:dict):
+        self.metadata = metadata
+
+    def get_metadata(self, key):
+        return self.metadata.get(key, dict())
+    
     # def add_metadata():
     # def remove_metadata():

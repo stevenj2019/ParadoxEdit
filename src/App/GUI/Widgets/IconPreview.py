@@ -31,7 +31,7 @@ class IconPreviewDialog(QDialog):
             min(width, 800),
             min(height, 800)
         )
-        layout.addWidget(QLabel(f"Icon Name:{icon}"))
+        layout.addWidget(QLabel(f"Icon Name:{icon.value}"))
         layout.addWidget(QLabel(f"File name:{path.name}"))
         layout.addWidget(QLabel(f"File size: {path.stat().st_size / 1024:.1f} KB"))
         layout.addWidget(QLabel(f"Size:{width}x{height}"))
