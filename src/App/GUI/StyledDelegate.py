@@ -105,10 +105,7 @@ class NodeStateDelegate(QStyledItemDelegate):
                 source_index = index.sibling(index.row(), 0)
                 node = source_index.model().data(source_index, QtStorage.NODE)
                 context = source_index.model().data(source_index, QtStorage.CONTEXT)
-                #debug block
-                if isinstance(context, EventOptionContext):
-                    print()
-                #end of debug block
+
                 error = context.errors(self.app_controller, node.value)
                 if error:
                     QToolTip.showText(
