@@ -80,6 +80,6 @@ class ParadoxLoadOrder:
             source_metadata = source.metadata_collection()
 
             for key, values in source_metadata.items():
-                metadata.setdefault(key, dict()).update(values)
+                metadata.setdefault(key, type(values)()).update(values)
 
         return metadata

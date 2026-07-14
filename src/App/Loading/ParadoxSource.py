@@ -4,6 +4,7 @@ import os
 from App.Services import AppLogger
 from App.Loading.Directories.Base import GenericDirectory
 from App.Loading.Directories import DIRECTORY_REGISTRY
+from App.Loading.Models import FileReference
 from App.Contexts.Base import ParadoxContext
 from ParadoxParser import ParadoxScriptParser
 from ParadoxParser.ParadoxNodes import GenericBlock, GenericKeyValue
@@ -46,15 +47,26 @@ class ParadoxSource:
                 if file_path.suffix != ".bak":
                     parent.add_file(file_path, file_name)
 
-    def _create_directory(self, path):
-        rel_path = path.relative_to(self.file_path)
-        category = DIRECTORY_REGISTRY.get(
-            str(rel_path),
-            GenericDirectory
-        )
-        print(path, category)
-        return category(file_path=path, read_only=isinstance(self, ParadoxVanilla))
     
+    def _create_directory(self, path):
+        matches = []
+        rel_path = path.relative_to(self.file_path)
+
+        for registered_path, directory_type in DIRECTORY_REGISTRY.items():
+            registered_path = Path(registered_path)
+            try:
+                rel_path.relative_to(registered_path)
+                matches.append((len(registered_path.parts), directory_type))
+            except ValueError:
+                pass
+
+        directory = max(matches, default=(0, GenericDirectory))[1]
+
+        return directory(
+            file_path=path,
+            read_only=isinstance(self, ParadoxVanilla)
+        )
+
     def apply_replace_path(self, path):
         try:
             removed = self.directories[Path(path)]
@@ -97,24 +109,25 @@ class ParadoxMod(ParadoxSource):
     def __init__(self, path):
         path = Path(path)
         self.descriptor_file = path.name
-        self.descriptor_object = ParadoxScriptParser(path)
+        self.descriptor_object = FileReference(ParadoxScriptParser(path), ParadoxContext, False)
         self._collect_mod_info()
         super().__init__(self.mod_name, self.file_path)
 
     def _collect_mod_info(self):
+        descriptor_file = self.descriptor_object.file
         self.mod_name = next(
-            (node.value.value for node in self.descriptor_object.nodes
+            (node.value.value for node in descriptor_file.nodes
             if isinstance(node, GenericKeyValue) and node.key == "name"), None
         )
         self.file_path = next(
-            (Path(node.value.value.strip('"')) for node in self.descriptor_object.nodes
+            (Path(node.value.value.strip('"')) for node in descriptor_file.nodes
             if isinstance(node, GenericKeyValue) and node.key == "path"), None
         )
-        self.replace_paths = [node.value.value for node in self.descriptor_object.nodes 
+        self.replace_paths = [node.value.value for node in descriptor_file.nodes 
                               if isinstance(node, GenericKeyValue) 
                               and node.key.lower() == "replace_path"]
         self.dependencies = []
-        for node in self.descriptor_object.nodes:
+        for node in descriptor_file.nodes:
             if isinstance(node, GenericBlock) and node.key == "dependencies":
                 self.dependencies = [node.value for node in node.nodes]
 

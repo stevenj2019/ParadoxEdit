@@ -76,7 +76,7 @@ class ModPanel(QWidget):
             descriptor_item.setData(0, QtStorage.STATE, None)
             descriptor_item.setData(0, QtStorage.CONTEXT, ParadoxContext)
             descriptor_item.setData(0, QtStorage.READ_ONLY, False)
-            self.node_to_item[source.descriptor_object] = descriptor_item
+            self.node_to_item[source.descriptor_object.file] = descriptor_item
 
             root.addChild(descriptor_item)
 

@@ -10,6 +10,7 @@ from App.Services import AppLogger
 from App.Contracts import NodeMutationRequest
 from App.GUI.Widgets.PopupModels import change_rejected_warning
 
+#TODO: needs fixed
 class InLineEditManager(QObject):
     def __init__(self, mutate_callback):
         super().__init__()
@@ -52,7 +53,6 @@ class InLineEditManager(QObject):
                 parent:QTreeWidget, 
                 source:QTreeWidgetItem, 
                 node:GenericNode):
-
         self.parent = parent
         self.source = source
         self.node = node

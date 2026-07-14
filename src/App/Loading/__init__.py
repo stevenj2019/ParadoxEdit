@@ -1,3 +1,5 @@
+import traceback
+
 from PyQt5.QtWidgets import QDialog, QLabel, QVBoxLayout
 from PyQt5.QtCore import Qt, QObject, pyqtSignal
 
@@ -26,7 +28,7 @@ class LoadingDialog(QDialog):
 class LoadProcess(QObject):
     progress = pyqtSignal(str)
     finished = pyqtSignal(object)
-    failed = pyqtSignal(Exception)
+    failed = pyqtSignal(Exception, str)
 
     def __init__(self, workspace, game_path):
         super().__init__()
@@ -59,4 +61,4 @@ class LoadProcess(QObject):
             self.progress.emit("Finishing Up")
             self.finished.emit(ModLoaderResult(self.workspace, load_order, tokens, metadata))
         except Exception as e:
-            self.failed.emit(e)
+            self.failed.emit(e, traceback.format_exc())

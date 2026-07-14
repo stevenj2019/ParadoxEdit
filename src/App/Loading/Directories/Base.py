@@ -10,7 +10,7 @@ from App.Loading.Models import FileReference, UnloadedFile
 
 from App.Contexts.Base import ParadoxContext
 
-ACCEPTED_TYPES = [".txt", ".gui", ".gfx"]
+ACCEPTED_TYPES = [".txt", ".gui", ".gfx", ".yml"]
 FILE_TYPES = {".txt": ParadoxContext}
 class GenericDirectory:
     def __init__(self, file_path:os.PathLike, context:dict=FILE_TYPES, parser:PDXScriptFile|PDXLocFile=PDXScriptFile, read_only:bool=True):
@@ -70,7 +70,7 @@ class GenericDirectory:
         for directory in self.directories.values():
             child_metadata = directory.metadata_collection(source)
             for key, values in child_metadata.items():
-                metadata.setdefault(key, dict()).update(values)
+                metadata.setdefault(key, type(values)()).update(values)
         return metadata
 
     def metadata_collection(self, source):

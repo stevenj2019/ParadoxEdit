@@ -1,8 +1,7 @@
 from __future__ import annotations
 from typing import TYPE_CHECKING
 if TYPE_CHECKING:
-    from App.Loading.ParadoxSource import ParadoxMod
-    from App.Loading.Directories.Base import GenericDirectory
+    from App.Loading.LoadOrder import ParadoxLoadOrder
 
 import sys
 import json
@@ -59,8 +58,6 @@ class ConfigurationManager:
     def create_file(self):
         self.safe_mode = True
         self.dark_mode = False
-        print(repr(self.file_path.parent))
-        print(self.file_path.parent.is_absolute())
         self.file_path.parent.mkdir(exist_ok=True, parents=True)
         self.file_path.touch()
 
@@ -234,15 +231,16 @@ class Workspace:
 class FilesystemMananger:
     def __init__(self, configuration):
         self.workspace:Workspace = Workspace()
-        self.load_order:list = []
+        self.load_order:ParadoxLoadOrder = None
 
         self.configuration = configuration
         self.change_tracker = ChangeTracker()
 
         self.open_file:OpenFile = None
 
-    def load_workspace(self, workspace:Workspace):
+    def load_workspace(self, workspace:Workspace, load_order:ParadoxLoadOrder):
         self.workspace = workspace
+        self.load_order = load_order
 
     def load_file(self, file:OpenFile):
         self.open_file = file
@@ -273,12 +271,12 @@ class FilesystemMananger:
             parent.nodes.pop(index)
 
     def save_file(self, file=None):
-        self.cleanup_deletion_nodes(file)
-        if self.change_tracker.file_is_dirty(file):
-            self.change_tracker.clear_file_state(file)
+        self.cleanup_deletion_nodes(file.file)
+        if self.change_tracker.file_is_dirty(file.file) and not file.read_only:
+            self.change_tracker.clear_file_state(file.file)
             if self.configuration.safe_mode:
-                file.backup_file()
-            file.to_pdx_file()
+                file.file.backup_file()
+            file.file.to_pdx_file()
             return True
         else:
             return False

@@ -1,15 +1,15 @@
 from App.Services import AppLogger
 from PyQt5.QtWidgets import QMessageBox
-import traceback
-def could_not_load_mod_critical(exc: Exception):
+
+def could_not_load_mod_critical(exc: Exception, traceback:str):
     msg = QMessageBox()
     msg.setIcon(QMessageBox.Critical)
     msg.setWindowTitle("Mod Could not be loaded")
     msg.setText("PDXEdit was unable to load your mod")
 
-    msg.setDetailedText(traceback.format_exc())
+    msg.setDetailedText(traceback)
     msg.exec_()
-    AppLogger.exception(exc)
+    AppLogger.exception(traceback)
 
 def settings_error_critical(game_dir_error:bool, mod_dir_error:bool):
     text = "The following Problems prevent saving:"

@@ -64,7 +64,7 @@ class MainWindow(QMainWindow):
 
     def _propogate_mutations(self, request:PropagationRequest):
         type = request.type
-        file = request.file
+        file = request.file.file
         node = request.node
         state = request.state
         def recurse(node):
@@ -99,8 +99,8 @@ class MainWindow(QMainWindow):
         self.mod_panel.populate_tree(mod)
         self.topbar._enable_actions()
 
-    def load_workspace_failed(self, exc):
-        could_not_load_mod_critical(exc)
+    def load_workspace_failed(self, exc, tb):
+        could_not_load_mod_critical(exc, tb)
 
     def save_workspace_as_file(self):
         file_path = workspace_save_selector(self)

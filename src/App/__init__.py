@@ -8,6 +8,7 @@ from PyQt5.QtCore import QObject, pyqtSignal, QThread
 from PyQt5.QtWidgets import QApplication
 
 from App.Loading import LoadingDialog, LoadProcess
+from App.Loading.ParadoxSource import ParadoxMod
 from App.Loading.Directories.Base import GenericDirectory
 from App.Services import ConfigurationManager, AppLogger, StyleManager, FilesystemMananger, ParadoxRegistry, Workspace
 from App.GUI.Main import MainWindow
@@ -102,7 +103,7 @@ class AppController(QObject):
     def workspace_loaded(self, result):
         self.registry.load_tokens(result.tokens)
         self.registry.load_metadata(result.metadata)
-        self.file_system.load_workspace(result.workspace)
+        self.file_system.load_workspace(result.workspace, result.load_order)
         
         self.main.load_mod(result.load_order)
         
@@ -110,10 +111,9 @@ class AppController(QObject):
         self.thread.quit()
         self.thread.wait()
 
-    def workspace_load_failed(self, error):
-        print(traceback.format_exc())
+    def workspace_load_failed(self, error, traceback):
         self.loading_screen.close()
-        self.main.load_workspace_failed(error)
+        self.main.load_workspace_failed(error, traceback)
         self.thread.quit()
         self.thread.wait()
 
@@ -137,13 +137,13 @@ class AppController(QObject):
                 self._refresh_file()
 
     def _request_node_mutation(self, request:NodeMutationRequest):
-        file = request.file if request.file else self.file_system.open_file.file
+        file = request.file if request.file else self.file_system.open_file
         node = request.node
         node_value = request.node_value
         value = request.value
         if node_value.value != value:
             node_value.value = value
-            self.file_system.changed_file(file, node, ChangeState.MODIFIED)
+            self.file_system.changed_file(file.file, node, ChangeState.MODIFIED)
             self.main.request_propagation.emit(PropagationRequest(type=PropagationType.NODE,
                                                                   file=file,
                                                                   node=node,
@@ -200,10 +200,11 @@ class AppController(QObject):
                                                                       ))
 
         if target is SaveTarget.ALL:
-            save_routine(self.file_system.mod.descriptor_object)
-            for category in self.file_system.mod.categories.values():
-                for file in category.files.values():
-                    save_routine(file)
+            for source in self.file_system.load_order.sources:
+                if isinstance(source, ParadoxMod):
+                    save_routine(source.descriptor_object)
+                    for file in source.root.iter_files():
+                        save_routine(file)
         else:
-            save_routine(self.file_system.open_file.file)
+            save_routine(self.file_system.open_file)
         self.main.load_file(self.file_system.open_file)
