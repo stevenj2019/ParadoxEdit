@@ -16,3 +16,4 @@ class PDXTokens(Enum):
 class PDXMetadata(Enum):
     GFXIcon = auto()
     LocKey = auto()
+    LanguageKey = auto()

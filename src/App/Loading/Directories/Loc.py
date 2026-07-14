@@ -1,7 +1,7 @@
 import os
 
 from ParadoxParser import ParadoxLocParser as PDXLocFile
-from ParadoxParser.ParadoxNodes import GenericComment
+from ParadoxParser.ParadoxNodes import GenericComment, GenericLegacyLocKey, GenericLocKey
 
 from App.Loading.Directories.Base import GenericDirectory
 from App.Contexts.Loc import LocalisationContext
@@ -17,16 +17,22 @@ class LocDirectory(GenericDirectory):
     def token_collection(self):
         return super().token_collection()
     
-    #TODO: it is fucked.
     def metadata_collection(self, source):
         metadata = dict()
-        for file in self.files.values():
-            file = file.file
-            if isinstance(file, PDXLocFile):
+        metadata[PDXMetadata.LanguageKey] = set()
+        metadata[PDXMetadata.LocKey] = dict()
+        for directory in self.directories.values():
+            language_key = directory.path.parts[-1]
+            metadata[PDXMetadata.LanguageKey].add(language_key)
+            for file in directory.files.values():
+                file = file.file
                 for node in file.nodes:
-                    if not isinstance(node, GenericComment):
-                        metadata[node.key] = {"file":file, "node":node}
-        return {PDXMetadata.LocKey:metadata}
+                    if isinstance(node, (GenericLocKey, GenericLegacyLocKey)):
+                        metadata[PDXMetadata.LocKey].setdefault(node.key, dict())
+                        metadata[PDXMetadata.LocKey][node.key][language_key] = {
+                            "file":file, "node":node
+                        }
+        return metadata
     
     def resolve_context(self, file):
         if file.endswith("gfx"):

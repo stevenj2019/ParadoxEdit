@@ -23,7 +23,6 @@ class InterfaceDirectory(GenericDirectory):
     def metadata_collection(self, source):
         metadata = dict()
         for file in self.files.values():
-            print(file.context)
             if file.context is GFXContext:
                 file = file.file
                 if isinstance(file, PDXFile):
@@ -39,8 +38,6 @@ class InterfaceDirectory(GenericDirectory):
                                                     and node.key.lower() == "texturefile"), None)
                                     if name and texture:
                                         metadata[name] = Path(os.path.join(source.file_path, texture))
-                                        print(name, metadata[name])
-                                        print()
         return {PDXMetadata.GFXIcon:metadata}
     
     def resolve_context(self, file):
