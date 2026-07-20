@@ -1,7 +1,12 @@
+from __future__ import annotations
+from typing import TYPE_CHECKING
+if TYPE_CHECKING:
+    from App.Loading.ParadoxSource import ParadoxSource
+
 import os
 
 from ParadoxParser import ParadoxLocParser as PDXLocFile
-from ParadoxParser.ParadoxNodes import GenericComment, GenericLegacyLocKey, GenericLocKey
+from ParadoxParser.ParadoxNodes import GenericLegacyLocKey, GenericLocKey
 
 from App.Loading.Directories.Base import GenericDirectory
 from App.Contexts.Loc import LocalisationContext
@@ -11,8 +16,8 @@ FILE_TYPES = {
     ".yml": LocalisationContext
 }
 class LocDirectory(GenericDirectory):
-    def __init__(self, file_path:os.PathLike, read_only:bool):
-        super().__init__(file_path, FILE_TYPES, PDXLocFile, read_only)
+    def __init__(self, source:ParadoxSource,file_path:os.PathLike, read_only:bool):
+        super().__init__(source, file_path, FILE_TYPES, PDXLocFile, read_only)
 
     def token_collection(self):
         return super().token_collection()

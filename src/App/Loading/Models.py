@@ -1,3 +1,8 @@
+from __future__ import annotations
+from typing import TYPE_CHECKING
+if TYPE_CHECKING:
+    from App.Loading.Directories.Base import GenericDirectory
+
 from dataclasses import dataclass
 from typing import Optional, Callable
 import os
@@ -24,6 +29,7 @@ class UnloadedFile:
 
 @dataclass
 class FileReference:
+    directory:GenericDirectory
     file:UnloadedFile|PDXScriptFile|PDXLocFile
     context:ParadoxContext
     read_only:bool

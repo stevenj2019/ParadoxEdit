@@ -1,3 +1,8 @@
+from __future__ import annotations
+from typing import TYPE_CHECKING
+if TYPE_CHECKING:
+    from App.Loading.ParadoxSource import ParadoxSource
+
 import os 
 
 from ParadoxParser import ParadoxScriptParser as PDXScriptFile
@@ -11,8 +16,8 @@ FILE_TYPES = {
     ".txt": EventContext
 }
 class EventDirectory(GenericDirectory):
-    def __init__(self, file_path:os.PathLike, read_only:bool):
-        super().__init__(file_path, FILE_TYPES, PDXScriptFile, read_only)
+    def __init__(self, source:ParadoxSource, file_path:os.PathLike, read_only:bool):
+        super().__init__(source, file_path, FILE_TYPES, PDXScriptFile, read_only)
         
     def token_collection(self):
         tokens = set()

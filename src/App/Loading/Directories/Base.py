@@ -1,4 +1,8 @@
 from __future__ import annotations
+from typing import TYPE_CHECKING
+if TYPE_CHECKING:
+    from App.Loading.ParadoxSource import ParadoxSource
+
 import os
 from pathlib import Path
 
@@ -13,21 +17,27 @@ from App.Contexts.Base import ParadoxContext
 ACCEPTED_TYPES = [".txt", ".gui", ".gfx", ".yml"]
 FILE_TYPES = {".txt": ParadoxContext}
 class GenericDirectory:
-    def __init__(self, file_path:os.PathLike, context:dict=FILE_TYPES, parser:PDXScriptFile|PDXLocFile=PDXScriptFile, read_only:bool=True):
+    def __init__(self, source:ParadoxSource, file_path:os.PathLike, context:dict=FILE_TYPES, parser:PDXScriptFile|PDXLocFile=PDXScriptFile, read_only:bool=True):
+        self.source = source
         self.path = Path(file_path)
-        self.context = context
+        self.context_resolver = context
+        if len(self.context_resolver.keys()) == 1:
+            self.context = next(iter(self.context_resolver.values()))
+        else:
+            self.context = ParadoxContext
         self.parser = parser
         self.read_only = read_only
         self.directories:dict[str, GenericDirectory] = {}
         self.files:dict[str:FileReference] = {}
 
     def add_file(self, path, name):
-        if not path.suffix in self.context.keys():
+        if not path.suffix in self.context_resolver.keys():
             AppLogger.warning(f"{path.absolute()} ignored: lacks context.")
             return
         self.files[name] = FileReference(
+            self,
             UnloadedFile(path, name, self.parser),
-            self.context[path.suffix],
+            self.context_resolver[path.suffix],
             self.read_only
         )
 

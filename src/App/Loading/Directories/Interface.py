@@ -1,3 +1,8 @@
+from __future__ import annotations
+from typing import TYPE_CHECKING
+if TYPE_CHECKING:
+    from App.Loading.ParadoxSource import ParadoxSource
+
 import os
 from pathlib import Path
 
@@ -14,8 +19,8 @@ FILE_TYPES = {
     '.gui': ParadoxContext
 }
 class InterfaceDirectory(GenericDirectory):
-    def __init__(self, file_path:os.PathLike, read_only:bool):
-        super().__init__(file_path, FILE_TYPES, PDXFile, read_only)
+    def __init__(self, source:ParadoxSource, file_path:os.PathLike, read_only:bool):
+        super().__init__(source, file_path, FILE_TYPES, PDXFile, read_only)
     
     def token_collection(self):
         return super().token_collection()

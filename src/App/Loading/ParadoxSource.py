@@ -15,10 +15,11 @@ class ParadoxSource:
     def __init__(self, name, path):
         self.source_name = name
         self.file_path = path
-        self.root = GenericDirectory(self.file_path)
+        self.root = GenericDirectory(self, self.file_path)
         self.directories = {
             Path("."): self.root
         }
+        self.context = ParadoxContext
         self._build_tree()
 
     def parse_files(self):
@@ -63,6 +64,7 @@ class ParadoxSource:
         directory = max(matches, default=(0, GenericDirectory))[1]
 
         return directory(
+            source=self,
             file_path=path,
             read_only=isinstance(self, ParadoxVanilla)
         )
@@ -109,7 +111,7 @@ class ParadoxMod(ParadoxSource):
     def __init__(self, path):
         path = Path(path)
         self.descriptor_file = path.name
-        self.descriptor_object = FileReference(ParadoxScriptParser(path), ParadoxContext, False)
+        self.descriptor_object = FileReference(None, ParadoxScriptParser(path), ParadoxContext, False)
         self._collect_mod_info()
         super().__init__(self.mod_name, self.file_path)
 
