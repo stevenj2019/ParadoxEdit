@@ -19,9 +19,9 @@ class IconPreviewDialog(QDialog):
             width, height = img.size
 
             qimage = QImage(
-                img.tobytes(), 
-                width, 
-                height, 
+                img.tobytes(),
+                width,
+                height,
                 QImage.Format_RGBA8888
             )
             pixmap = QPixmap.fromImage(qimage)
