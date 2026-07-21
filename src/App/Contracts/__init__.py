@@ -4,6 +4,7 @@ from typing import TYPE_CHECKING
 if TYPE_CHECKING:
     from App.Loading.LoadOrder import ParadoxLoadOrder
     from App.Loading.Directories.Base import GenericDirectory, ParadoxFileContext, ParadoxBlockContext, ParadoxNodeContext
+    from App.Loading.Models import FileReference
     from App.Services import Workspace
 
 from dataclasses import dataclass
@@ -60,5 +61,5 @@ class BlockMutationRequest:
 
 @dataclass
 class BulkMutationRequest:
-    target:GenericDirectory|PDXScriptFile
+    target:GenericDirectory|FileReference
     action:Callable

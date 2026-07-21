@@ -1,18 +1,19 @@
-from PyQt5.QtWidgets import QDialog, QFormLayout, QLabel, QLineEdit, QTextEdit, QComboBox, QPushButton
+from pathlib import Path
+from PyQt5.QtWidgets import QDialog, QFormLayout, QLabel, QTextEdit, QComboBox, QPushButton
 
-from ParadoxParser.ParadoxNodes import GenericBlock, GenericLocKey
+from ParadoxParser.ParadoxNodes import GenericLocKey
 
-# from App.Contexts.Loc import LocDirectory
+from App.Enums import PDXMetadata
 from App.Contracts import NodeMutationRequest, BlockMutationRequest
 
-CATEGORY = "LocDirectory"
 class BaseLocaliseForm(QDialog):
     def __init__(self, app_controller, name):
         super().__init__()
         self.setWindowTitle(name)
         self.app_controller = app_controller
-        self.category = app_controller.registry.get_category(CATEGORY)
-        self.category_meta = app_controller.registry.get_category_metadata(CATEGORY)
+        self.source = self.app_controller.file_system.open_file.directory.source
+        self.localisation_directory = self.source.directories[Path("localisation/english")]
+        self.localisation_meta = self.app_controller.registry.get_metadata(PDXMetadata.LocKey)
         
         self.setLayout(QFormLayout())
         self.form = self.layout()
@@ -31,15 +32,15 @@ class BaseLocaliseForm(QDialog):
     def _lower_form_body(self):
         self.save_to_file_label = QLabel("Localisation File:")
         self.file_dropdown = QComboBox()
-        for index, _file in enumerate(self.category.files.values()):
-            self.file_dropdown.addItem(_file.filename)
+        for index, _file in enumerate(self.localisation_directory.files.values()):
+            self.file_dropdown.addItem(_file.file.filename)
             if _file is self.save_file:
                 self.file_dropdown.setCurrentIndex(index)
                 self.file_dropdown.setEnabled(False)
-                self.save_file = self.category.files[self.file_dropdown.itemText(index)]
+                self.save_file = self.localisation_directory.files[self.file_dropdown.itemText(index)]
         if not self.save_file:
             text = self.file_dropdown.currentText()
-            self.save_file = self.category.files[text]
+            self.save_file = self.localisation_directory.files[text]
 
         self.save_to_file_label.setBuddy(self.file_dropdown)
         self.file_dropdown.currentIndexChanged.connect(self._change_save_file)
@@ -51,7 +52,7 @@ class BaseLocaliseForm(QDialog):
     
     def _change_save_file(self, index):
         file = self.file_dropdown.itemText(index)
-        self.save_file = self.category.files[file]
+        self.save_file = self.localisation_directory.files[file]
     
     def _handle_localisation_field(self, text_edit):
         text = text_edit.toPlainText()
@@ -76,10 +77,10 @@ class LocaliseNodeForm(BaseLocaliseForm):
     def __init__(self, app_controller, key:str=None):
         super().__init__(app_controller, "Localise Key")
         self.loc_key = key
-        if key in self.category_meta.keys():
-            self.node_selected = self.category_meta[key]["node"]
+        if key in self.localisation_meta.keys():
+            self.node_selected = self.localisation_meta[key]["english"]["node"]
             text = self.node_selected.value
-            self.save_file = self.category_meta[key]["file"]
+            self.save_file = self.localisation_meta[key]["english"]["file"]
         else:
             self.node_selected = None
             text = None

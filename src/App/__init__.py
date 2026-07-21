@@ -8,7 +8,7 @@ from PyQt5.QtCore import QObject, pyqtSignal, QThread
 from PyQt5.QtWidgets import QApplication
 
 from App.Loading import LoadingDialog, LoadProcess
-from App.Loading.ParadoxSource import ParadoxMod
+from App.Loading.ParadoxSource import ParadoxSource, ParadoxMod
 from App.Loading.Directories.Base import GenericDirectory
 from App.Services import ConfigurationManager, AppLogger, StyleManager, FilesystemMananger, ParadoxRegistry, Workspace
 from App.GUI.Main import MainWindow
@@ -167,7 +167,6 @@ class AppController(QObject):
                                                        file=file,
                                                        node=node,
                                                        state=state))
-        #refreshes file when batch is complete
         self._batch_file.add(file)
         if self._batch_depth ==0:
             self._refresh_file()
@@ -175,7 +174,7 @@ class AppController(QObject):
     def _request_bulk_mutation(self, request:BulkMutationRequest):
         target = request.target
         action = request.action
-        if isinstance(target, GenericDirectory):
+        if isinstance(target, (ParadoxSource, GenericDirectory)):
             files = target.iter_files()
         else:
             files = [target]
