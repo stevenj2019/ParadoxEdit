@@ -25,7 +25,7 @@ class EventContext(ParadoxContext):
     @staticmethod
     def get_node_context(node):
         if isinstance(node, GenericKeyValue):
-            if node.key in ("name", "title", "desc", "name"):
+            if node.key in ("name", "title", "desc", "text"):
                 return LocalisationFieldContext
             elif node.key == "picture":
                 return GFXFieldContext
