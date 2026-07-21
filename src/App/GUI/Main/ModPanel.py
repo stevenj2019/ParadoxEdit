@@ -2,6 +2,7 @@ from PyQt5.QtWidgets import QApplication, QWidget, QVBoxLayout, QHeaderView, QTr
 from PyQt5.QtCore import Qt, pyqtSignal
 
 from App.Loading.ParadoxSource import ParadoxSource, ParadoxVanilla, ParadoxMod
+from App.Loading.Models import FileReference
 from App.Contexts import FileContext
 from App.Loading.Directories.Base import GenericDirectory
 from App.Loading.Models import UnloadedFile
@@ -45,6 +46,10 @@ class ModPanel(QWidget):
         self._propagate_state(file_item.parent())
         self.tree.update()
 
+    def add_file(self, directory:GenericDirectory, file:FileReference):
+        item = self.node_to_item[directory]
+        self._build_file_item(item, file, file.read_only)
+
     def _propagate_state(self, item):
         if item is None:
             return 
@@ -80,9 +85,9 @@ class ModPanel(QWidget):
             root.addChild(descriptor_item)
 
         for entry in source.root.directories.values():
-            self._add_directory(root, entry, isinstance(source, ParadoxVanilla))
+            self._build_directory_item(root, entry, isinstance(source, ParadoxVanilla))
 
-    def _add_directory(self, parent_item, directory, read_only):
+    def _build_directory_item(self, parent_item, directory, read_only):
         read_only = read_only or directory.read_only
         item = QTreeWidgetItem([directory.path.name])
         self.node_to_item[directory] = item
@@ -91,17 +96,17 @@ class ModPanel(QWidget):
         parent_item.addChild(item)
 
         for child in directory.directories.values():
-            self._add_directory(item, child, read_only)
+            self._build_directory_item(item, child, read_only)
 
         for file in directory.files.values():
-            self._add_file(item, file, read_only)
+            self._build_file_item(item, file, read_only)
 
-    def _add_file(self, parent_item, file, read_only):
+    def _build_file_item(self, parent_item, file, read_only):
         con_text = file.context.__name__ if file.context else None
     
         text = f"{file.file.filename}, {con_text}{'(ReadOnly)' if read_only else ''}"
         item = QTreeWidgetItem([text])
-        self.node_to_item[file.file] = item
+        self.node_to_item[file] = item
         if isinstance(file.file, UnloadedFile):
             item.setIcon(0, QApplication.style().standardIcon(QStyle.SP_MessageBoxWarning))
         item.setData(0, QtStorage.NODE, file)
@@ -116,7 +121,6 @@ class ModPanel(QWidget):
                 return
             self.request_load_block.emit(file, item.data(0, QtStorage.READ_ONLY))
 
-    #TODO this is also shit housed lol
     def _request_context_menu(self, pos):
         selected = self.tree.itemAt(pos)
         if not selected:

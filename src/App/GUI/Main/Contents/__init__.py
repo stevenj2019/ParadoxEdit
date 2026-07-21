@@ -22,7 +22,6 @@ class ContentsPanel(QWidget):
         self.setLayout(layout)
 
     def load_file(self, file):
-        print(file.file)
         if isinstance(file.file, (PDXScript, PDXLoc)):
             self.show_script(file)
         elif isinstance(file.file, IconFile):

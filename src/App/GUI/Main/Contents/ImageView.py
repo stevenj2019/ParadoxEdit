@@ -14,7 +14,8 @@ class IconView(QWidget):
                          alignment=Qt.AlignTop | Qt.AlignLeft )
 
     def load_image(self, file):
-        with Image.open(file.file.filepath) as img:
+        file_path = file.file.get_path()
+        with Image.open(file_path) as img:
             img.load()
             mode = img.mode
             img = img.convert("RGBA")

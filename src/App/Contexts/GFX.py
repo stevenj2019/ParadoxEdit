@@ -32,7 +32,7 @@ class GFXFileContext(ParadoxFileContext):
             *ParadoxFileContext.get_actions(app_controller, file),
             Action("Bulk-Upload Sprites",
                    lambda:AddNewGFXForm(app_controller, file),
-                   isinstance(file, PDXFile))
+                   True)
         ]
 
 class GFXRootContext(ParadoxFileContext):

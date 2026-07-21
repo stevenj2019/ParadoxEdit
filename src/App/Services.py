@@ -192,8 +192,11 @@ class ChangeTracker:
                     recurse(_node)
         self.file_changes.pop(file, None)
         if file:
-            for node in file.nodes:
-                recurse(node)
+            try:
+                for node in file.nodes:
+                    recurse(node)
+            except AttributeError:
+                pass
 
 class Workspace:
     def __init__(self):
@@ -259,24 +262,26 @@ class FilesystemMananger:
             if isinstance(node, GenericBlock):
                 for child in node.nodes:
                     recurse(node, child)
-        for node in file.nodes:
-            recurse(file, node)
-        return deletions
-    
+        try:
+            for node in file.nodes:
+                recurse(file, node)
+        except AttributeError:
+            return deletions
+
     def cleanup_deletion_nodes(self, file):
         deletions = self.collect_deletion_nodes(file)
-
-        for parent, index, node in sorted(deletions, key=lambda x: x[1], reverse=True):
-            self.change_tracker.clear_node_state(node)
-            parent.nodes.pop(index)
-
+        try:
+            for parent, index, node in sorted(deletions, key=lambda x: x[1], reverse=True):
+                self.change_tracker.clear_node_state(node)
+                parent.nodes.pop(index)
+        except TypeError:
+            return 
+        
     def save_file(self, file=None):
         self.cleanup_deletion_nodes(file.file)
-        if self.change_tracker.file_is_dirty(file.file) and not file.read_only:
-            self.change_tracker.clear_file_state(file.file)
-            if self.configuration.safe_mode:
-                file.file.backup_file()
-            file.file.to_pdx_file()
+        if self.change_tracker.file_is_dirty(file) and not file.read_only:
+            self.change_tracker.clear_file_state(file)
+            file.commit(self.configuration.safe_mode)
             return True
         else:
             return False

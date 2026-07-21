@@ -62,11 +62,11 @@ class MainWindow(QMainWindow):
 
     def _propogate_mutations(self, request:PropagationRequest):
         type = request.type
-        file = request.file.file
+        file = request.file
         node = request.node
         state = request.state
         def recurse(node):
-            self.contents_panel.set_node_state(node, state)
+            self.contents_panel.script_view.set_node_state(node, state)
             if isinstance(node, GenericBlock):
                 for child in node.nodes:
                     recurse(child)
@@ -77,9 +77,12 @@ class MainWindow(QMainWindow):
             case PropagationType.FILE:
                 self.mod_panel.set_file_state(file, state)
                 if file is self.app_controller.file_system.open_file:
-                    for node in file.nodes:
-                        recurse(node)
-
+                    try:
+                        for node in file.file.nodes:
+                            recurse(node)
+                    except AttributeError:
+                        pass
+                    
     def settings_window_requested(self):
         title = "PDXEdit Setup" if self.app_controller.configuration.initialised else "PDXEdit Settings"
         settings = SettingsForm(title, self.app_controller)

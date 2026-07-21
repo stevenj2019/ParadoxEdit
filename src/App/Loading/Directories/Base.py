@@ -20,25 +20,26 @@ class GenericDirectory:
         self.source = source
         self.path = Path(file_path)
         self.context_resolver = context
-        if len(self.context_resolver.keys()) == 1:
-            self.context = next(iter(self.context_resolver.values()))
-        else:
-            self.context = ParadoxContext
+        self.resolve_context("")
+
         self.parser = parser
         self.read_only = read_only
         self.directories:dict[str, GenericDirectory] = {}
         self.files:dict[str:FileReference] = {}
 
-    def add_file(self, path, name):
+    def add_file(self, path, name, file_ref:FileReference=None):
         if not path.suffix in self.context_resolver.keys():
             AppLogger.warning(f"{path.absolute()} ignored: lacks context.")
             return
-        self.files[name] = FileReference(
-            self,
-            UnloadedFile(path, name, self.parser),
-            self.context_resolver[path.suffix],
-            self.read_only
-        )
+        if file_ref:
+            self.files[name] = file_ref
+        else:
+            self.files[name] = FileReference(
+                self,
+                UnloadedFile(path, name, self.parser),
+                self.context_resolver[path.suffix],
+                self.read_only
+            )
 
     def delete_file(self, file):
         self.files.pop(file, None)
@@ -85,4 +86,7 @@ class GenericDirectory:
         return {}
     
     def resolve_context(self, file):
-        return None
+        if len(self.context_resolver.keys()) == 1:
+            self.context = next(iter(self.context_resolver.values()))
+        else:
+            self.context = ParadoxContext

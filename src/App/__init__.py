@@ -12,13 +12,14 @@ from App.Loading.ParadoxSource import ParadoxSource, ParadoxMod
 from App.Loading.Directories.Base import GenericDirectory
 from App.Services import ConfigurationManager, AppLogger, StyleManager, FilesystemMananger, ParadoxRegistry, Workspace
 from App.GUI.Main import MainWindow
-from App.Contracts import PropagationRequest, NodeMutationRequest, BlockMutationRequest, BulkMutationRequest
+from App.Contracts import PropagationRequest, NodeMutationRequest, BlockMutationRequest, BulkMutationRequest, FileMutationRequest
 from App.Contracts.Enums import SaveTarget, PropagationType, ChangeState
 
 class AppController(QObject):
     request_node_mutation = pyqtSignal(object)
     request_block_mutation = pyqtSignal(object)
     request_bulk_mutation = pyqtSignal(object)
+    request_file_change = pyqtSignal(object)
     request_save = pyqtSignal(object)
 
     def __init__(self):
@@ -63,6 +64,7 @@ class AppController(QObject):
         self.request_node_mutation.connect(self._request_node_mutation)
         self.request_block_mutation.connect(self._request_block_mutation)
         self.request_bulk_mutation.connect(self._request_bulk_mutation)
+        self.request_file_change.connect(self._request_file_change)
         self.request_save.connect(self._save_target)
         self.main.show()
 
@@ -122,7 +124,7 @@ class AppController(QObject):
 
     def _refresh_file(self):
         for file in self._batch_file:
-            if file is self.file_system.open_file.file:
+            if file is self.file_system.open_file:
                 self.main.load_file(self.file_system.open_file)
         self._batch_file.clear()
 
@@ -188,6 +190,15 @@ class AppController(QObject):
         if self.file_system.open_file.file in files:
             self.main.load_file(self.file_system.open_file)
 
+    def _request_file_change(self, request:FileMutationRequest):
+        file = request.file
+        if request.state == ChangeState.ADDED:
+            request.directory.add_file(file.file.filepath, file.file.filename, file)
+        self.file_system.change_tracker.set_file_state(request.file, request.state)
+        self.main.mod_panel.add_file(request.directory, request.file)
+        self.main.mod_panel.set_file_state(request.file, request.state)
+
+
     def _save_target(self, target):
         def save_routine(file):
             saved = self.file_system.save_file(file)
@@ -206,4 +217,5 @@ class AppController(QObject):
                         save_routine(file)
         else:
             save_routine(self.file_system.open_file)
-        self.main.load_file(self.file_system.open_file)
+        if self.file_system.open_file is not None:
+            self.main.load_file(self.file_system.open_file)

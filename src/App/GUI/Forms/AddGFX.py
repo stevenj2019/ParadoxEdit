@@ -1,5 +1,4 @@
 import os
-import shutil
 from pathlib import Path
 
 from ParadoxParser import ParadoxScriptParser as PDXFile
@@ -8,20 +7,22 @@ from ParadoxParser.ParadoxNodes import GenericBlock, GenericComment
 from PyQt5.QtWidgets import (QDialog, QFormLayout, QHBoxLayout, QTreeWidget, QTreeWidgetItem, 
                              QPushButton, QLabel, QLineEdit, QCheckBox, QComboBox)
 
-# from App.Contexts.GFX import InterfaceDirectory
-from App.Contracts import BlockMutationRequest
+from App.Loading.Models import FileReference, IconFile
+from App.Contexts.Base import ParadoxContext
+from App.Contracts import BlockMutationRequest, FileMutationRequest
+from App.Contracts.Enums import ChangeState
 from App.PDXFactory.Blocks.Sprites import GFX_icon, GFX_shine_icon
 from App.GUI.Widgets.FileDialogues import (gfx_files_folder_selector, gfx_files_file_selector, 
                                            gfx_save_folder_selector)
-from App.GUI.Widgets.PopupModels import GFX_file_copying_warn, form_missing_value
+from App.GUI.Widgets.PopupModels import form_missing_value
 
 CATEGORY = "InterfaceDirectory"
 class AddNewGFXForm(QDialog):
     def __init__(self, app_controller, file):
         super().__init__()
         self.app_controller = app_controller
-        self.mod = app_controller.registry.mod
-        self.category = app_controller.registry.get_category(CATEGORY)
+        self.source = file.directory.source
+        self.interface_directory = self.source.directories[Path("interface")]
         self.file_list:list = []
         self.save_location:Path = None
         self.save_file:PDXFile = file
@@ -50,11 +51,15 @@ class AddNewGFXForm(QDialog):
 
         self.save_to_file_label = QLabel("GFX Definition:")
         self.file_dropdown = QComboBox()
-        # for index, _file in enumerate(self.category.files.values()):
-        for index, file in enumerate(self.category.files.values()):
-            self.file_dropdown.addItem(file.filename)
+        for file in self.interface_directory.iter_files():
+            self.file_dropdown.addItem(
+                file.file.filename,
+                userData=file
+            )
             if file is self.save_file:
-                self.file_dropdown.setCurrentIndex(index)
+                self.file_dropdown.setCurrentIndex(
+                    self.file_dropdown.count()-1
+                )
         self.save_to_file_label.setBuddy(self.file_dropdown)
         self.file_dropdown.currentIndexChanged.connect(self._change_save_file)
         self.form.addRow(self.save_to_file_label, self.file_dropdown)
@@ -102,11 +107,10 @@ class AddNewGFXForm(QDialog):
         self.file_list_item.takeTopLevelItem(index)
 
     def _change_save_file(self, index):
-        file = self.file_dropdown.itemText(index)
-        self.save_file = self.category.files[file]
+        self.save_file = self.file_dropdown.itemData(index)
 
     def _select_save_folder(self):
-        path, _ = gfx_save_folder_selector(self, str(self.mod.file_path / "gfx"))
+        path, _ = gfx_save_folder_selector(self, str(self.source.file_path / "gfx"))
         if path:
             self.storage_folder_path_element_text.setText(path)
         return 
@@ -127,48 +131,62 @@ class AddNewGFXForm(QDialog):
                     sprites.append(Path(path))
             return sprites
         
-        def copy_file_to_new_directory(save_to, sprites):
-            sprite_paths = list()
+        def generate_icon_files(save_to, sprites):
+            icons = list()
             for sprite in sprites:
                 new_name = sprite.name if sprite.name.startswith("GFX_") else f"GFX_{sprite.name}"
-                new_sprite = Path(os.path.join(save_to, new_name))
+                new_path = Path(os.path.join(save_to, new_name))
+                directory = new_path.relative_to(self.source.file_path).parent
+                directory = self.source.directories[directory]
 
-                shutil.copyfile(sprite, new_sprite)
-                sprite_paths.append(new_sprite)
-            return sprite_paths
-        
+                new_file = FileReference(
+                    directory, 
+                    IconFile.add(new_path, sprite), 
+                    ParadoxContext, 
+                    False
+                )
+                icons.append(new_file)
+            return icons
+
         def generate_blocks(get_shines, sprite, file_path):
-            sprite_name = sprite.stem
-            sprite_path = sprite.relative_to(file_path)
+            icon_file = sprite.file
+            sprite_name = icon_file.filepath.stem
+            sprite_path = icon_file.filepath.relative_to(file_path)
             if get_shines:
-                return [GenericComment(f"Focus Icon for: {sprite.stem}"),
+                return [GenericComment(f"Focus Icon for: {icon_file.filepath.stem}"),
                                         GFX_icon(sprite_name, sprite_path), 
                                         GFX_shine_icon(sprite_name, sprite_path)]
             else:
                 return [GFX_icon(sprite_name, sprite_path)]
 
         try:
-            sprite_block = next(node for node in self.save_file.nodes
+            sprite_block = next(node for node in self.save_file.file.nodes
                                 if (isinstance(node, GenericBlock) 
                                     and node.key.lower() == "spritetypes"))
         except StopIteration:
             #warning
             return
-        if GFX_file_copying_warn(self):
-            if not self.storage_folder_path_element_text.text().strip() or not self.file_list:
-                form_missing_value(self)
-                return
-            for path in self.file_list:
-                image_collection_loop(sprites, path)
-            sprites = copy_file_to_new_directory(self.storage_folder_path_element_text.text(), sprites)
-            base_dir = self.app_controller.registry.mod.file_path
-            generate_shines = self.is_focus_type_check.isChecked()
+    
+        if not self.storage_folder_path_element_text.text().strip() or not self.file_list:
+            form_missing_value(self)
+            return
+        for path in self.file_list:
+            image_collection_loop(sprites, path)
+        icons = generate_icon_files(self.storage_folder_path_element_text.text(), sprites)
+        base_dir = self.source.file_path
+        generate_shines = self.is_focus_type_check.isChecked()
 
-            with self.app_controller.batch_manager():
-                for sprite in sprites:
-                    blocks = generate_blocks(generate_shines, sprite, base_dir)
-                    for block in blocks:
-                        self.app_controller.request_block_mutation.emit(
-                            BlockMutationRequest.add(sprite_block, len(sprite_block.nodes)+1, block, self.save_file)
-                        )
-            self.accept()
+
+        with self.app_controller.batch_manager():
+            for icon in icons:
+                blocks = generate_blocks(generate_shines, icon, base_dir)
+                for block in blocks:
+                    self.app_controller.request_block_mutation.emit(
+                        BlockMutationRequest.add(sprite_block, len(sprite_block.nodes)+1, block, self.save_file)
+                    )
+                self.app_controller.request_file_change.emit(
+                    FileMutationRequest(
+                        icon.directory, icon, ChangeState.ADDED
+                    )
+                )
+        self.accept()

@@ -63,3 +63,9 @@ class BlockMutationRequest:
 class BulkMutationRequest:
     target:GenericDirectory|FileReference
     action:Callable
+
+@dataclass
+class FileMutationRequest:
+    directory:GenericDirectory
+    file:FileReference
+    state:ChangeState
