@@ -5,7 +5,6 @@ from App.Loading.ParadoxSource import ParadoxSource, ParadoxVanilla, ParadoxMod
 from App.Contexts import FileContext
 from App.Loading.Directories.Base import GenericDirectory
 from App.Loading.Models import UnloadedFile
-from App.Contracts import OpenFile
 from App.Contracts.Enums import ChangeState
 from App.GUI.Enums import QtStorage
 from App.Contexts.Base import ParadoxContext
@@ -125,10 +124,7 @@ class ModPanel(QWidget):
         item = selected.data(0, QtStorage.NODE)
         if not item:
             return
-        context = selected.data(0, QtStorage.CONTEXT)
-        if not context:
-            return 
-        context = context.get_file_context()
+        context = item.context.get_file_context()
         
         self.context_menu.call(FileContext(target=item, context=context))
         self.context_menu.exec_(self.tree.viewport().mapToGlobal(pos))

@@ -27,9 +27,14 @@ class UnloadedFile:
                 pass
         return self
 
+class IconFile:
+    def __init__(self, path:Path):
+        self.filepath = path
+        self.filename = self.filepath.name
+
 @dataclass
 class FileReference:
     directory:GenericDirectory
-    file:UnloadedFile|PDXScriptFile|PDXLocFile
+    file:UnloadedFile|PDXScriptFile|PDXLocFile|IconFile
     context:ParadoxContext
     read_only:bool

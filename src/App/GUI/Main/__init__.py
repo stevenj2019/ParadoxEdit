@@ -10,7 +10,7 @@ from App.Contracts.Enums import PropagationType, ChangeState
 from App.GUI.Menus.Topbar import Topbar
 from App.GUI.Main.InlineEdit import InLineEditManager
 from App.GUI.Main.ModPanel import ModPanel
-from App.GUI.Main.ContentsPanel import ContentsPanel
+from App.GUI.Main.Contents import ContentsPanel
 
 from App.GUI.Widgets.IconPreview import IconPreviewDialog
 from App.GUI.Widgets.FileDialogues import select_mod_file, workspace_selector, workspace_save_selector
@@ -49,15 +49,13 @@ class MainWindow(QMainWindow):
         self.mod_panel.request_load_block.connect(self.load_file)
 
         #ContentsPanel
-        self.contents_panel = ContentsPanel(self, app)
+        self.contents_panel = ContentsPanel(app)
         self.contents_panel.setMinimumWidth(300)
         self.splitter.addWidget(self.contents_panel)
-        self.contents_panel.edit_open_request.connect(self.editor_session.open_request)
+        self.contents_panel.script_view.edit_open_request.connect(self.editor_session.open_request)
 
         self.splitter.setSizes([200, 600])
         self.showMaximized()
-        # if not self.app_controller.configuration.initialised:
-        #     self.settings_window_requested()
 
         self.request_propagation.connect(self._propogate_mutations)
         self.request_icon_preview.connect(self._preview_icon)
@@ -111,9 +109,10 @@ class MainWindow(QMainWindow):
             file_is_unsupported()
             AppLogger.warning(f"attemped to open {file.file.path}/{file.file.filename}, is unsupported.")
             return
-        self.editor_session.cancel_request(reason="file switch")
-        self.app_controller.file_system.load_file(file)
-        self.contents_panel.load_block(file)
+        else:
+            self.editor_session.cancel_request(reason="file switch")
+            self.app_controller.file_system.load_file(file)
+            self.contents_panel.load_file(file)
 
     def _preview_icon(self, icon):
         icon_name = icon.value

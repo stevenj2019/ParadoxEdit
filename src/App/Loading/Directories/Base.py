@@ -14,7 +14,6 @@ from App.Loading.Models import FileReference, UnloadedFile
 
 from App.Contexts.Base import ParadoxContext
 
-ACCEPTED_TYPES = [".txt", ".gui", ".gfx", ".yml"]
 FILE_TYPES = {".txt": ParadoxContext}
 class GenericDirectory:
     def __init__(self, source:ParadoxSource, file_path:os.PathLike, context:dict=FILE_TYPES, parser:PDXScriptFile|PDXLocFile=PDXScriptFile, read_only:bool=True):
@@ -53,8 +52,7 @@ class GenericDirectory:
 
     def parse_files(self):
         for key, file in self.files.items():
-            if file.file.path.suffix in ACCEPTED_TYPES:
-                self.files[key].file = file.file.load()
+            self.files[key].file = file.file.load()
         for directory in self.directories.values():
             directory.parse_files()
 

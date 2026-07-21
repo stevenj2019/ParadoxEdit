@@ -13,11 +13,10 @@ from App.Contexts.Base import ParadoxContext
 from App.GUI.Menus.ContextMenus import ParadoxNodesContextMenu
 from App.GUI.StyledDelegate import NodeStateDelegate
 
-class ContentsPanel(QWidget):
+class ScriptView(QWidget):
     edit_open_request = pyqtSignal(object, object, object)
-    def __init__(self, parent, app_controller):
+    def __init__(self, app_controller):
         super().__init__()
-        self.parent = parent
         self.app_controller = app_controller
         self.node_to_item:dict = {}
         self.read_only:bool = True
@@ -211,7 +210,7 @@ class ContentsPanel(QWidget):
                 open_file = self.app_controller.file_system.open_file
 
                 block_context = BlockContext(
-                    parent=open_file.file,
+                    parent=open_file,
                     parent_index=len(open_file.file.nodes)+1,
                     parent_context=open_file.context.get_block_context(None)
                 )
