@@ -63,6 +63,13 @@ class GenericDirectory:
         for directory in self.directories.values():
             yield from directory.iter_files()
 
+    def prune(self):
+        for name, directory in list(self.directories.items()):
+            if directory.prune():
+                self.directories.pop(name)
+
+        return not self.directories and not self.files
+
     def token_collection_traversal(self):
         tokens = self.token_collection()
         for directory in self.directories.values():

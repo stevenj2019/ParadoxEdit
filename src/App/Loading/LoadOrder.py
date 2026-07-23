@@ -15,6 +15,7 @@ class ParadoxLoadOrder:
     def resolve(self):
         self._resolve_dependencies()
         self._resolve_file_overrides()
+        self._clear_empty_directories()
 
     #TODO: This need to implement alphabetical load ordering for when dependencies arent avaiable
     def _resolve_dependencies(self):
@@ -59,6 +60,10 @@ class ParadoxLoadOrder:
             target_source.apply_override(path)
         for directory in source_dir.directories.values():
             self._apply_override_traversal(source, directory, target_source)
+
+    def _clear_empty_directories(self):
+        for source in self.sources:
+            source.root.prune()
 
     def parse_files(self):
         for source in self.sources:
