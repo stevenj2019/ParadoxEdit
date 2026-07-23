@@ -1,13 +1,10 @@
 from __future__ import annotations
-import os
-from pathlib import Path
 
-from ParadoxParser import ParadoxScriptParser as PDXScriptFile
-from ParadoxParser import ParadoxLocParser as PDXLocFile
 
 from App.Enums import PDXMetadata
 from App.Services import AppLogger
 from App.Contracts import BulkMutationRequest, BlockMutationRequest
+# from App.Loading.ParadoxSource import ParadoxVanilla
 from App.GUI.Actions import Action
 from App.GUI.Forms.LocaliseKey import LocaliseNodeForm
 from App.PDXFactory.Blocks.Generic import comment_node
@@ -25,7 +22,20 @@ class ParadoxContext:
     @staticmethod
     def get_node_context(node):
         return ParadoxNodeContext
-            
+
+class NotImplementedContext(ParadoxContext):
+    @staticmethod
+    def get_file_context():
+        return ParadoxFileContext
+    
+    @staticmethod
+    def get_block_context(node):
+        return ParadoxBlockContext
+
+    @staticmethod
+    def get_node_context(node):
+        return ParadoxNodeContext
+
 class ParadoxFileContext:
     @staticmethod
     def get_actions(app_controller, file):
@@ -35,12 +45,14 @@ class ParadoxFileContext:
                        BulkMutationRequest(target=file, action=clear_comments)
                    ),
                    True
+                #    not isinstance(file, ParadoxVanilla)
             ),
             Action("Remove Whitespace", 
                    lambda:app_controller.request_bulk_mutation.emit(
                        BulkMutationRequest(target=file, action=clear_whitespace)
                    ),
                    True
+                #    not isinstance(file, ParadoxVanilla)
             )
         ]
 
