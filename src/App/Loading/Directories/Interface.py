@@ -22,9 +22,6 @@ class InterfaceDirectory(GenericDirectory):
     def __init__(self, source:ParadoxSource, file_path:os.PathLike, read_only:bool):
         super().__init__(source, file_path, FILE_TYPES, PDXFile, read_only)
     
-    def token_collection(self):
-        return super().token_collection()
-    
     def metadata_collection(self, source):
         metadata = dict()
         for file in self.files.values():
