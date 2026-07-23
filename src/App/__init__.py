@@ -5,13 +5,15 @@ import copy
 import sys
 
 from PyQt5.QtCore import QObject, pyqtSignal, QThread
-from PyQt5.QtWidgets import QApplication
+from PyQt5.QtWidgets import QApplication, QDialog
 
 from App.Loading import LoadingDialog, LoadProcess
 from App.Loading.ParadoxSource import ParadoxSource, ParadoxMod
 from App.Loading.Directories.Base import GenericDirectory
 from App.Services import ConfigurationManager, AppLogger, StyleManager, FilesystemMananger, ParadoxRegistry, Workspace
 from App.GUI.Main import MainWindow
+from App.GUI.Forms.Settings import SettingsForm
+from App.GUI.Widgets.PopupModels import setup_process_cancelled
 from App.Contracts import PropagationRequest, NodeMutationRequest, BlockMutationRequest, BulkMutationRequest, FileMutationRequest
 from App.Contracts.Enums import SaveTarget, PropagationType, ChangeState
 
@@ -36,7 +38,12 @@ class AppController(QObject):
         self.main = MainWindow(self)
 
         if not self.configuration.initialised:
-            self.main.settings_window_requested()
+            settings = SettingsForm("PDXEdit Setup", self)
+            result = settings.exec_()
+            if result != QDialog.Accepted:
+                AppLogger.error("Setup workflow cancelled.")
+                setup_process_cancelled()
+                sys.exit()
 
         self._batch_depth = 0
         self._batch_file = set()

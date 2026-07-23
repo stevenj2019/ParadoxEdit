@@ -8,3 +8,8 @@
 * Added Legacy->modern loc converstion (removing :0 stuff)
 * Added Error-checking for missing loc keys
 * Added form to localise selected key
+* Removed category system, in lieu of (significantly better) Directory Walk system.
+* Fixed Settings form on first launch being skip-able (will cause error only fixable with file deletion, and leave you unable to load mods)
+
+## TODO:
+* add search functionality in Mod and Contents views

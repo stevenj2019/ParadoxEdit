@@ -11,6 +11,10 @@ def could_not_load_mod_critical(exc: Exception, traceback:str):
     msg.exec_()
     AppLogger.exception(traceback)
 
+
+def setup_process_cancelled():
+    return QMessageBox.critical(None, "Startup Wizard Failed", "Startup Settings was aborted", QMessageBox.Ok)
+    
 def settings_error_critical(game_dir_error:bool, mod_dir_error:bool):
     text = "The following Problems prevent saving:"
     if game_dir_error:

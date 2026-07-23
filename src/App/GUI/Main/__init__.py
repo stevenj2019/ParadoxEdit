@@ -84,8 +84,7 @@ class MainWindow(QMainWindow):
                         pass
                     
     def settings_window_requested(self):
-        title = "PDXEdit Setup" if self.app_controller.configuration.initialised else "PDXEdit Settings"
-        settings = SettingsForm(title, self.app_controller)
+        settings = SettingsForm("PDXEdit Settings", self.app_controller)
         settings.exec_()
 
     def load_mod_requested(self):

@@ -26,13 +26,11 @@ class ConfigurationManager:
         self.mod_file_path:Path = ""
         self.safe_mode:bool = True
         self.dark_mode:bool = False
+        self.initialised = False
 
         if self.file_path.exists():
             self.initialised = True
             self.read_file()
-        else:
-            self.initialised = False
-            self.create_file()
     
     def change_setting(self, **kwargs):
         for k, v in kwargs.items():
@@ -49,7 +47,13 @@ class ConfigurationManager:
         }
     
     def read_file(self):
-        settings = json.load(self.file_path.open())
+        try:
+            settings = json.load(self.file_path.open())
+        except json.decoder.JSONDecodeError as e:
+            AppLogger.error(f"Invalid file at {str(self.file_path)}")
+            AppLogger.exception(e)
+            sys.exit()
+
         self.safe_mode = settings['safe_mode']
         self.game_install_path = Path(settings['game_install_path'])
         self.mod_file_path = Path(settings['mod_file_path'])

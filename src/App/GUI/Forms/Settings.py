@@ -6,6 +6,7 @@ from PyQt5.QtWidgets import QDialog, QFormLayout, QHBoxLayout, QLabel, QCheckBox
 from App.GUI.Widgets.FileDialogues import select_hoi4_install_directory, select_mod_directory
 from App.GUI.Widgets.PopupModels import settings_error_critical
 
+#TODO: this should not allow an exit, or if it does, it should bring the app down on first run
 class SettingsForm(QDialog):
     def __init__(self, title:str, app_controller):
         super().__init__()
@@ -14,6 +15,9 @@ class SettingsForm(QDialog):
         self.resize(550,150)
         self.setLayout(QFormLayout())
         self.form = self.layout()
+
+        safe_mode_checked = self.app_controller.configuration.safe_mode if self.app_controller.configuration.initialised else True
+        dark_mode_checked = self.app_controller.configuration.dark_mode if self.app_controller.configuration.initialised else False
 
         self.config_file_label = QLabel(f"Configuration will be stored at: {self.app_controller.configuration.file_path.absolute()}")
         self.form.addRow(self.config_file_label)
@@ -40,13 +44,13 @@ class SettingsForm(QDialog):
 
         self.safe_mode_label = QLabel("Safe Mode:")
         self.safe_mode_check = QCheckBox()
-        self.safe_mode_check.setChecked(self.app_controller.configuration.safe_mode)
+        self.safe_mode_check.setChecked(safe_mode_checked)
         self.safe_mode_label.setBuddy(self.safe_mode_check)
         self.form.addRow(self.safe_mode_label, self.safe_mode_check)
 
         self.dark_mode_label = QLabel("Use Dark Mode?:")
         self.dark_mode_check = QCheckBox()
-        self.dark_mode_check.setChecked(self.app_controller.configuration.dark_mode)
+        self.dark_mode_check.setChecked(dark_mode_checked)
         self.dark_mode_label.setBuddy(self.dark_mode_check)
         self.form.addRow(self.dark_mode_label, self.dark_mode_check)
         self.dark_mode_check.toggled.connect(self.toggle_dark_mode)
@@ -81,6 +85,7 @@ class SettingsForm(QDialog):
             mod_dir_error = True
         
         if not (game_dir_error or mod_dir_error):
+            self.app_controller.configuration.create_file()
             self.app_controller.configuration.change_setting(safe_mode = self.safe_mode_check.isChecked() )
             self.app_controller.configuration.change_setting(dark_mode = self.dark_mode_check.isChecked() )
             self.app_controller.configuration.change_setting(game_install_path = game_folder)
