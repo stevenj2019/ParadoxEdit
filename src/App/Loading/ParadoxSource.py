@@ -15,7 +15,7 @@ class ParadoxSource:
     def __init__(self, name, path):
         self.source_name = name
         self.file_path = path
-        self.root = GenericDirectory(self, self.file_path)
+        self.root = GenericDirectory(self, self.file_path, {})
         self.directories = {
             Path("."): self.root
         }
