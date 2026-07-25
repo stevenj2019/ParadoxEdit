@@ -10,7 +10,8 @@ from PyQt5.QtWidgets import QApplication, QDialog
 from App.Loading import LoadingDialog, LoadProcess
 from App.Loading.ParadoxSource import ParadoxSource, ParadoxMod
 from App.Loading.Directories.Base import GenericDirectory
-from App.Services import ConfigurationManager, AppLogger, StyleManager, FilesystemMananger, ParadoxRegistry, Workspace
+from App.Services import ConfigurationManager, AppLogger, FilesystemMananger, ParadoxRegistry, Workspace
+from App.GUI.StyleManager import StyleManager
 from App.GUI.Main import MainWindow
 from App.GUI.Forms.Settings import SettingsForm
 from App.GUI.Widgets.PopupModels import setup_process_cancelled

@@ -9,7 +9,6 @@ import logging
 from pathlib import Path
 from platformdirs import user_config_dir, user_log_dir
 from datetime import datetime
-from PyQt5.QtGui import QColor as QColour
 
 from ParadoxParser import ParadoxScriptParser as PDXScriptFile
 from ParadoxParser import ParadoxLocParser as PDXLocFile
@@ -139,26 +138,6 @@ class AppLogger:
             return str(obj.value)
 
         return str(obj)
-    
-class StyleManager:
-    def __init__(self, configuration):
-        self.configuration = configuration
-        self.dark_mode_palette = {
-            ChangeState.MODIFIED: QColour("#545703"),
-            ChangeState.ADDED: QColour("#04450c"),
-            ChangeState.DELETED: QColour("#400308"),
-        }
-        self.light_mode_palette = {
-            ChangeState.MODIFIED: QColour("yellow"),
-            ChangeState.ADDED: QColour("green"),
-            ChangeState.DELETED: QColour("red"),
-        }
-
-    def get_node_state_colour(self, state):
-        if self.configuration.dark_mode:
-            return self.dark_mode_palette.get(state)
-        else:
-            return self.light_mode_palette.get(state)
 
 class ChangeTracker:
     def __init__(self):

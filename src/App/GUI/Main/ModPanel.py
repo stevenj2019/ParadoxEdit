@@ -93,6 +93,7 @@ class ModPanel(QWidget):
         self.node_to_item[directory] = item
         item.setData(0, QtStorage.NODE, directory)
         item.setData(0, QtStorage.READ_ONLY, read_only)
+        item.setIcon(0, self.app_controller.style_manager.get_icon(GenericDirectory))
         parent_item.addChild(item)
 
         for child in directory.directories.values():
@@ -112,6 +113,7 @@ class ModPanel(QWidget):
         item.setData(0, QtStorage.NODE, file)
         item.setData(0, QtStorage.STATE, None)
         item.setData(0, QtStorage.READ_ONLY, read_only)
+        item.setIcon(0, self.app_controller.style_manager.get_icon(type(file.file)))
         parent_item.addChild(item)
 
     def _on_element_click(self, item, column):
