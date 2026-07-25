@@ -28,7 +28,7 @@ class AppController(QObject):
     def __init__(self):
         super().__init__()
         AppLogger.initialise()
-        self.excepthook = self.global_exception_handler
+        sys.excepthook = self.global_exception_handler
         self.app           = QApplication(sys.argv)
 
         self.configuration = ConfigurationManager()
