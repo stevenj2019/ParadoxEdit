@@ -12,8 +12,7 @@ from App.Contexts.Base import ParadoxContext
 from App.Contracts import BlockMutationRequest, FileMutationRequest
 from App.Contracts.Enums import ChangeState
 from App.PDXFactory.Blocks.Sprites import GFX_icon, GFX_shine_icon
-from App.GUI.Widgets.FileDialogues import (gfx_files_folder_selector, gfx_files_file_selector, 
-                                           gfx_save_folder_selector)
+from App.GUI.Widgets.FileDialogues import gfx_save_folder_selector
 from App.GUI.Widgets.PopupModels import form_missing_value
 from App.GUI.Widgets.CustomWidgets import FileFolderSelectorWidget
 
@@ -73,10 +72,10 @@ class AddNewGFXForm(QDialog):
         self.save_file = self.file_dropdown.itemData(index)
 
     def _select_save_folder(self):
-        path, _ = gfx_save_folder_selector(self, str(self.source.file_path / "gfx"))
-        if path:
+        path, exists = gfx_save_folder_selector(self, str(self.source.file_path / "gfx"))
+        if exists:
             self.storage_folder_path_element_text.setText(path)
-        return 
+        #TODO handle error
     
     def _submit(self):
         self.file_list = self.file_selector.file_list

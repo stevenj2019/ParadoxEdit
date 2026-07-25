@@ -98,9 +98,11 @@ class MainWindow(QMainWindow):
         self.app_controller.add_mod_to_workspace(path)
      
     def load_workspace(self):
-        path = workspace_selector(self)
-        self.app_controller.load_workspace(path)
-    
+        path, exists = workspace_selector(self)
+        if exists:
+            self.app_controller.load_workspace(path)
+        #TODO handle error
+
     def load_mod(self, mod):
         self.mod_panel.populate_tree(mod)
         self.topbar._enable_actions()

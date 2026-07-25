@@ -76,7 +76,7 @@ def workspace_selector(parent):
         "PDXEdit Workspace Files(*.json);;All Files (*)",
         options=options
     )
-    return filepath
+    return filepath, Path(filepath).exists()
 
 def workspace_save_selector(parent):
     filepath, _ = QFileDialog.getSaveFileName(

@@ -35,17 +35,20 @@ class FileFolderSelectorWidget(QWidget):
         return self._file_list
 
     def _add_folder_to_input_list(self):
-        path, _ = gfx_files_folder_selector(self)
-        self._file_list.append(path)
-        item = QTreeWidgetItem([path])
-        self.file_list_item.invisibleRootItem().addChild(item)
-
-    def _add_file_to_input_list(self):
-        path, _ = gfx_files_file_selector(self)
-        if path:
+        path, exists = gfx_files_folder_selector(self)
+        if exists:
             self._file_list.append(path)
             item = QTreeWidgetItem([path])
             self.file_list_item.invisibleRootItem().addChild(item)
+        #TODO handle error
+
+    def _add_file_to_input_list(self):
+        path, exists = gfx_files_file_selector(self)
+        if exists:
+            self._file_list.append(path)
+            item = QTreeWidgetItem([path])
+            self.file_list_item.invisibleRootItem().addChild(item)
+        #TODO handle error
     
     def _remove_selected_from_input_list(self):
         item = self.file_list_item.currentItem()
