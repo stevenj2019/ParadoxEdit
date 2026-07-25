@@ -1,6 +1,9 @@
-from PyQt5.QtWidgets import QWidget, QVBoxLayout, QHBoxLayout, QTreeWidget, QTreeWidgetItem, QPushButton
-
+from PyQt5.QtWidgets import (QWidget, QVBoxLayout, QHBoxLayout, QTreeWidget, QTreeWidgetItem, QPushButton, 
+                             QComboBox, QStyledItemDelegate, QLineEdit, QLabel)
+from PyQt5.QtCore import Qt, QEvent
 from App.GUI.Widgets.FileDialogues import gfx_files_folder_selector, gfx_files_file_selector
+from PyQt5.QtGui import QFontMetrics, QStandardItem
+from PyQt5.QtCore import pyqtSignal
 
 class FileFolderSelectorWidget(QWidget):
     def __init__(self):
@@ -53,3 +56,157 @@ class FileFolderSelectorWidget(QWidget):
             return
         self._file_list.pop(index)
         self.file_list_item.takeTopLevelItem(index)
+
+class CheckableComboBox(QComboBox):
+
+    # Subclass Delegate to increase item height
+    class Delegate(QStyledItemDelegate):
+        def sizeHint(self, option, index):
+            size = super().sizeHint(option, index)
+            size.setHeight(20)
+            return size
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+        # Make the combo editable to set a custom text, but readonly
+        self.setEditable(True)
+        self.lineEdit().setReadOnly(True)
+
+        # Use custom delegate
+        self.setItemDelegate(CheckableComboBox.Delegate())
+
+        # Update the text when an item is toggled
+        self.model().dataChanged.connect(self.updateText)
+
+        # Hide and show popup when clicking the line edit
+        self.lineEdit().installEventFilter(self)
+        self.closeOnLineEditClick = False
+
+        # Prevent popup from closing when clicking on an item
+        self.view().viewport().installEventFilter(self)
+
+    def resizeEvent(self, event):
+        # Recompute text to elide as needed
+        self.updateText()
+        super().resizeEvent(event)
+
+    def eventFilter(self, object, event):
+        if object == self.lineEdit():
+            if event.type() == QEvent.MouseButtonRelease:
+                if self.closeOnLineEditClick:
+                    self.hidePopup()
+                else:
+                    self.showPopup()
+                return True
+            return False
+
+        if object == self.view().viewport():
+            if event.type() == QEvent.MouseButtonRelease:
+                index = self.view().indexAt(event.pos())
+                item = self.model().item(index.row())
+
+                if item.checkState() == Qt.Checked:
+                    item.setCheckState(Qt.Unchecked)
+                else:
+                    item.setCheckState(Qt.Checked)
+                return True
+        return False
+
+    def showPopup(self):
+        super().showPopup()
+        # When the popup is displayed, a click on the lineedit should close it
+        self.closeOnLineEditClick = True
+
+    def hidePopup(self):
+        super().hidePopup()
+        # Used to prevent immediate reopening when clicking on the lineEdit
+        self.startTimer(100)
+        # Refresh the display text when closing
+        self.updateText()
+
+    def timerEvent(self, event):
+        # After timeout, kill timer, and reenable click on line edit
+        self.killTimer(event.timerId())
+        self.closeOnLineEditClick = False
+
+    def updateText(self):
+        texts = []
+        for i in range(self.model().rowCount()):
+            if self.model().item(i).checkState() == Qt.Checked:
+                texts.append(self.model().item(i).text())
+        text = ", ".join(texts)
+
+        # Compute elided text (with "...")
+        metrics = QFontMetrics(self.lineEdit().font())
+        elidedText = metrics.elidedText(text, Qt.ElideRight, self.lineEdit().width())
+        self.lineEdit().setText(elidedText)
+
+    def addItem(self, text, data=None):
+        item = QStandardItem()
+        item.setText(text)
+        if data is None:
+            item.setData(text)
+        else:
+            item.setData(data)
+        item.setFlags(Qt.ItemIsEnabled | Qt.ItemIsUserCheckable)
+        item.setData(Qt.Unchecked, Qt.CheckStateRole)
+        self.model().appendRow(item)
+
+    def addItems(self, texts, datalist=None):
+        for i, text in enumerate(texts):
+            try:
+                data = datalist[i]
+            except (TypeError, IndexError):
+                data = None
+            self.addItem(text, data)
+
+    def currentData(self):
+        # Return the list of selected items data
+        res = []
+        for i in range(self.model().rowCount()):
+            if self.model().item(i).checkState() == Qt.Checked:
+                res.append(self.model().item(i).data())
+        return res
+
+class SearchLineEdit(QLineEdit):
+    caseChanged = pyqtSignal(bool)
+    regexChanged = pyqtSignal(bool)
+    def __init__(self):
+        super().__init__()
+        self.buttons = list()
+
+        self.case_button = QPushButton("Aa", self)
+        self.case_button.setCheckable(True)
+        self.case_button.setToolTip("Case-Sensitive")
+        self.case_button.toggled.connect(self.caseChanged.emit)
+        self.buttons.append(self.case_button)
+
+        self.regex_button = QPushButton(".*", self)
+        self.regex_button.setCheckable(True)
+        self.regex_button.setToolTip("Regex")
+        self.regex_button.toggled.connect(self.regexChanged.emit)
+        self.buttons.append(self.regex_button)
+
+    def resizeEvent(self, event):
+        super().resizeEvent(event)
+        button_width = 32
+        margin = 2
+        spacing = 2
+        x = self.width() - margin
+        for button in self.buttons:
+            x -= button_width
+            button.setGeometry(
+                x,
+                margin,
+                button_width,
+                self.height() - (margin*2)
+            )
+            x -= spacing
+            button.raise_()
+        button_space = (
+            len(self.buttons)*button_width
+            + max(0, len(self.buttons) - 1) * spacing
+            + margin
+        )
+        self.setTextMargins(0, 0, button_space, 0)

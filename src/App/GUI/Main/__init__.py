@@ -16,6 +16,7 @@ from App.GUI.Widgets.IconPreview import IconPreviewDialog
 from App.GUI.Widgets.FileDialogues import select_mod_file, workspace_selector, workspace_save_selector
 from App.GUI.Widgets.PopupModels import could_not_load_mod_critical, no_icon_available_warning, file_is_unsupported
 from App.GUI.Forms.Settings import SettingsForm
+from App.GUI.Forms.Search import SearchForm
 
 from App.Loading.Models import UnloadedFile
 class MainWindow(QMainWindow):
@@ -38,6 +39,7 @@ class MainWindow(QMainWindow):
         self.topbar.request_load_workspace.connect(self.load_workspace)
         self.topbar.request_workspace_save.connect(self.save_workspace_as_file)
         self.topbar.request_settings_window.connect(self.settings_window_requested)
+        self.topbar.request_in_file_search.connect(self.search_window_requested)
         #Splitter
         self.splitter = QSplitter(Qt.Horizontal)
         self.setCentralWidget(self.splitter)
@@ -86,6 +88,10 @@ class MainWindow(QMainWindow):
     def settings_window_requested(self):
         settings = SettingsForm("PDXEdit Settings", self.app_controller)
         settings.exec_()
+
+    def search_window_requested(self):
+        self.search = SearchForm(self.app_controller)
+        self.search.show()
 
     def load_mod_requested(self):
         path = select_mod_file(self)

@@ -69,3 +69,8 @@ class FileMutationRequest:
     directory:GenericDirectory
     file:FileReference
     state:ChangeState
+
+@dataclass
+class SearchResult:
+    file:FileReference
+    results:list

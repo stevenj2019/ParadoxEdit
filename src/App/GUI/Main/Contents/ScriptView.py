@@ -245,3 +245,23 @@ class ScriptView(QWidget):
         self.tree.setUpdatesEnabled(True)
         self.tree.resizeColumnToContents(0)
 
+    def reveal_item(self, item):
+        self.tree.setUpdatesEnabled(False)
+
+        while item is not None:
+            item.setExpanded(True)
+            item = item.parent()
+
+        self.tree.setUpdatesEnabled(True)
+
+    def reveal_node(self, node):
+        item = self.node_to_item.get(node)
+        if item:
+            self.reveal_item(node)
+
+    def jump_to_node(self, node):
+        item = self.node_to_item[node]
+        if item:
+            self.reveal_item(item)
+            self.tree.setCurrentItem(item)
+            self.tree.scrollToItem(item)
