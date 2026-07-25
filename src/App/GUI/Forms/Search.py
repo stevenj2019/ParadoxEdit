@@ -91,6 +91,7 @@ class SearchForm(QDialog):
                     if matches(search_text, node.value):
                         result.results.append(node)
 
+        self.search_results = list()
         for source in selected_sources:
             for file in source.root.iter_files():
                 if isinstance(file.file, (PDXScriptFile, PDXLocFile)):
@@ -105,6 +106,7 @@ class SearchForm(QDialog):
         self.results_tree.clear()
         for result in self.search_results:
             file_item = QTreeWidgetItem([f"{result.file.file.filename} - {len(result.results)} instance(s)"])
+            file_item.setToolTip(0, str(result.file.file.filepath))
             file_item.setData(0, QtStorage.FILE, result.file)
             self.results_tree.addTopLevelItem(file_item)
             for instance in result.results:
@@ -123,6 +125,7 @@ class SearchForm(QDialog):
                 item.setData(0, QtStorage.NODE, instance)
                 file_item.addChild(item)
         self.results_tree.setVisible(True)
+        self.results_tree.resizeColumnToContents(0)
         self.adjustSize()
 
     def _result_double_clicked(self, item, column):
