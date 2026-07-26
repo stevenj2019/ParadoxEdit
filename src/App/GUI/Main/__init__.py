@@ -131,13 +131,5 @@ class MainWindow(QMainWindow):
         else:
             no_icon_available_warning(f"{icon} does not exist in Mod Metadata")
             return
-        # if icon:
-        # mod = self.app_controller.registry.mod
-        # category_metadata = self.app_controller.registry.get_category_metadata(PDXMetadata.GFXIcon)
-        # icon_relative_path = category_metadata[icon]
-        # if not icon_relative_path:
-        #     no_icon_available_warning(f"{icon} does not exist in Mod Metadata")
-        #     return
-        # full_path = mod._resolve_path(icon_relative_path)
         dialog = IconPreviewDialog(icon, full_path)
         dialog.exec()
