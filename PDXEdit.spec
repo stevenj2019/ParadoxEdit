@@ -5,7 +5,7 @@ a = Analysis(
     ['src/PDXEdit.py'],
     pathex=[],
     binaries=[],
-    datas=[("src/App/GUI/Icons/", "Icons/"), "src/App/GUI/Help/HTML/", "HTML"],
+    datas=[("src/App/GUI/Icons/", "Icons/"), ("src/App/GUI/Help/HTML/", "HTML")],
     hiddenimports=[],
     hookspath=[],
     hooksconfig={},
