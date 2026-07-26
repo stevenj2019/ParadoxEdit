@@ -27,11 +27,9 @@ class MainWindow(QMainWindow):
         self.app_controller = app
         self.editor_session = InLineEditManager(mutate_callback=self.app_controller.request_node_mutation)
 
-        #MainWindow
         self.setWindowTitle("ParadoxEdit")
         self.showMaximized()
 
-        #TopBar
         self.topbar = Topbar(self, app)
         self.addToolBar(self.topbar)
         self.topbar.request_load_mod.connect(self.load_mod_requested)
@@ -40,17 +38,15 @@ class MainWindow(QMainWindow):
         self.topbar.request_workspace_save.connect(self.save_workspace_as_file)
         self.topbar.request_settings_window.connect(self.settings_window_requested)
         self.topbar.request_in_file_search.connect(self.search_window_requested)
-        #Splitter
+
         self.splitter = QSplitter(Qt.Horizontal)
         self.setCentralWidget(self.splitter)
 
-        #ModPanel(left)
         self.mod_panel = ModPanel(self, app)
         self.mod_panel.setMinimumWidth(150)
         self.splitter.addWidget(self.mod_panel)
         self.mod_panel.request_load_block.connect(self.load_file)
 
-        #ContentsPanel
         self.contents_panel = ContentsPanel(app)
         self.contents_panel.setMinimumWidth(300)
         self.splitter.addWidget(self.contents_panel)

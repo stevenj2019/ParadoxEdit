@@ -126,7 +126,7 @@ class AddNewGFXForm(QDialog):
                                 if (isinstance(node, GenericBlock) 
                                     and node.key.lower() == "spritetypes"))
         except StopIteration:
-            #warning
+            #TODO: warning
             return
     
         if not self.storage_folder_path_element_text.text().strip() or not self.file_list:
