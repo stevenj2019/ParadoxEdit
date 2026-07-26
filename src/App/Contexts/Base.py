@@ -1,15 +1,11 @@
-from __future__ import annotations
-
-
 from App.Enums import PDXMetadata
-from App.Services import AppLogger
 from App.Contracts import BulkMutationRequest, BlockMutationRequest
-# from App.Loading.ParadoxSource import ParadoxVanilla
 from App.GUI.Actions import Action
 from App.GUI.Forms.LocaliseKey import LocaliseNodeForm
 from App.PDXFactory.Blocks.Generic import comment_node
 from App.Scripts.Generic import clear_comments, clear_whitespace
 
+#TODO need to make sure Vanilla files cannot be modified by ANY contexts.
 def dummy(): return
 
 class ParadoxContext:
@@ -47,14 +43,12 @@ class ParadoxFileContext:
                        BulkMutationRequest(target=file, action=clear_comments)
                    ),
                    True
-                #    not isinstance(file, ParadoxVanilla)
             ),
             Action("Remove Whitespace", 
                    lambda:app_controller.request_bulk_mutation.emit(
                        BulkMutationRequest(target=file, action=clear_whitespace)
                    ),
                    True
-                #    not isinstance(file, ParadoxVanilla)
             )
         ]
 

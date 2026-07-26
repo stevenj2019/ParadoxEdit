@@ -2,7 +2,7 @@ from ParadoxParser.ParadoxNodes import GenericBlock, GenericKeyValue
 
 from App.Contracts import BlockMutationRequest
 from App.Contexts.Base import (ParadoxContext, ParadoxFileContext, ParadoxNodeContext,
-                              LocalisationFieldContext, GFXFieldContext)
+                              LocalisationFieldContext, GFXFieldContext, dummy)
 from App.GUI.Actions import Action
 from App.PDXFactory.Blocks.Events import (add_namespace_keyval, country_event_block, news_event_block, 
                                           immediate_block, option_block)
@@ -35,8 +35,8 @@ class EventFileContext(ParadoxFileContext):
     @staticmethod
     def get_actions(app_controller, file):
         return [
-            *ParadoxFileContext.get_actions(app_controller, file)
-            # Action("Inject Event Logs", dummy(), False),
+            *ParadoxFileContext.get_actions(app_controller, file),
+            Action("Inject Event Logs", dummy(), False),
             
         ]
 

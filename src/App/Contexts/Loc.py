@@ -9,12 +9,10 @@ class LocalisationContext(ParadoxContext):
     def get_file_context():
         return LocalisationFileContext
     
-    #this has no blocks, this should provide compatibility despite it
     @staticmethod
     def get_block_context(node):
         return ParadoxNodeContext
     
-    #and due to inlineedit limits, also has no node actions
     @staticmethod
     def get_node_context(node):
         return ParadoxNodeContext
