@@ -1,6 +1,6 @@
-from PyQt5.QtWidgets import QWidget, QVBoxLayout, QTreeWidget, QTreeWidgetItem
+from PyQt5.QtWidgets import QApplication, QWidget, QVBoxLayout, QTreeWidget, QTreeWidgetItem, QShortcut
 from PyQt5.QtCore import Qt, pyqtSignal
-from PyQt5.QtGui import QBrush
+from PyQt5.QtGui import QBrush, QKeySequence
 
 from ParadoxParser import ParadoxScriptParser as PDXScript
 from ParadoxParser.ParadoxNodes import (GenericBlock, GenericKeyValue, GenericNode, 
@@ -38,6 +38,9 @@ class ScriptView(QWidget):
         self.setContextMenuPolicy(Qt.CustomContextMenu)
         self.customContextMenuRequested.connect(self._request_context_menu)
         layout.addWidget(self.tree)
+
+        self.copy_shortcut = QShortcut(QKeySequence("Ctrl+C"), self)
+        self.copy_shortcut.activated.connect(self.copy_selected_item)
 
     def set_node_state(self, node, state):
         try:
@@ -265,3 +268,17 @@ class ScriptView(QWidget):
             self.reveal_item(item)
             self.tree.setCurrentItem(item)
             self.tree.scrollToItem(item)
+
+    def copy_selected_item(self):
+        item = self.tree.currentItem()
+        if item is None:
+            return
+
+        node = item.data(0, QtStorage.NODE)
+        if node is None:
+            return
+        clipboard = QApplication.clipboard()
+        if isinstance(node, GenericBlock):
+            clipboard.setText(node.key)
+        else:
+            clipboard.setText(node._to_string_literal().strip())

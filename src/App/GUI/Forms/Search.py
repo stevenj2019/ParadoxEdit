@@ -77,19 +77,14 @@ class SearchForm(QDialog):
             return value in node_value
 
         def recurse(result, node):
-            match node:
-                case GenericBlock():
-                    for node in node.nodes:
-                        recurse(result, node)
-                case GenericKeyValue():
-                    if matches(search_text, node.key) or matches(search_text, node.value.value):
-                        result.results.append(node)
-                case GenericComparator():
-                    if matches(search_text, node.left) or matches(search_text, node.right):
-                        result.results.append(node)
-                case GenericNode():
-                    if matches(search_text, node.value):
-                        result.results.append(node)
+            if isinstance(node, GenericBlock):
+                if matches(search_text, node.key):
+                    result.results.append(node)
+                for child in node.nodes:
+                    recurse(result, child)
+            else:
+                if matches(search_text, node._to_string_literal().strip()):
+                    result.results.append(node)
 
         self.search_results = list()
         for source in selected_sources:
@@ -110,15 +105,19 @@ class SearchForm(QDialog):
             file_item.setData(0, QtStorage.FILE, result.file)
             self.results_tree.addTopLevelItem(file_item)
             for instance in result.results:
-                match instance:
-                    case GenericBlock():
-                        text = f"{instance.key} = {{"
-                    case GenericKeyValue():
-                        text = f"{instance.key} = {instance.value.value}"
-                    case GenericComparator():
-                        text = f"{instance.left} {instance.operator} {instance.right}"
-                    case GenericNode():
-                        text = f"{instance.value}"
+                if isinstance(instance, GenericBlock):
+                    text = f"{instance.key} = {{"
+                else:
+                    text = instance._to_string_literal().strip()
+                # match instance:
+                #     case GenericBlock():
+                #         text = f"{instance.key} = {{"
+                #     case GenericKeyValue():
+                #         text = f"{instance.key} = {instance.value.value}"
+                #     case GenericComparator():
+                #         text = f"{instance.left} {instance.operator} {instance.right}"
+                #     case GenericNode():
+                #         text = f"{instance.value}"
 
                 item = QTreeWidgetItem([text])
                 item.setData(0, QtStorage.FILE, result.file)

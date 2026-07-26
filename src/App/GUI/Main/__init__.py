@@ -1,5 +1,6 @@
-from PyQt5.QtWidgets import QMainWindow, QSplitter
+from PyQt5.QtWidgets import QApplication, QMainWindow, QSplitter, QShortcut
 from PyQt5.QtCore import Qt, pyqtSignal
+from PyQt5.QtGui import QKeySequence
 
 from ParadoxParser.ParadoxNodes import GenericBlock
 
@@ -37,7 +38,6 @@ class MainWindow(QMainWindow):
         self.topbar.request_load_workspace.connect(self.load_workspace)
         self.topbar.request_workspace_save.connect(self.save_workspace_as_file)
         self.topbar.request_settings_window.connect(self.settings_window_requested)
-        self.topbar.request_in_file_search.connect(self.search_window_requested)
 
         self.splitter = QSplitter(Qt.Horizontal)
         self.setCentralWidget(self.splitter)
@@ -57,6 +57,9 @@ class MainWindow(QMainWindow):
 
         self.request_propagation.connect(self._propogate_mutations)
         self.request_icon_preview.connect(self._preview_icon)
+
+        self.search_shortcut = QShortcut(QKeySequence("Ctrl+F"), self)
+        self.search_shortcut.activated.connect(self.handle_search)
 
     def _propogate_mutations(self, request:PropagationRequest):
         type = request.type
@@ -80,7 +83,17 @@ class MainWindow(QMainWindow):
                             recurse(node)
                     except AttributeError:
                         pass
-                    
+
+    def handle_search(self):
+        if self.app_controller.file_system.load_order.sources:
+            widget = QApplication.focusWidget()
+            while widget and widget is not self:
+                if hasattr(widget, "search_window_requested"):
+                    widget.search_window_requested()
+                    return
+                widget = widget.parent()
+            self.search_window_requested()
+    
     def settings_window_requested(self):
         settings = SettingsForm("PDXEdit Settings", self.app_controller)
         settings.exec_()

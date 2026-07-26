@@ -17,7 +17,6 @@ class ModPanel(QWidget):
     load_file = pyqtSignal()
     def __init__(self, parent, app_controller):
         super().__init__()
-        self.parent = parent
         self.app_controller = app_controller
         self.node_to_item:dict = {}
 
