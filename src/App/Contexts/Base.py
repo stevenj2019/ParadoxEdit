@@ -44,7 +44,7 @@ class ParadoxFileContext:
                    ),
                    True
             ),
-            Action("Remove Whitespace", 
+            Action("Reformat File", 
                    lambda:app_controller.request_bulk_mutation.emit(
                        BulkMutationRequest(target=file, action=clear_whitespace)
                    ),
