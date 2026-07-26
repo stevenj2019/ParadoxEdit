@@ -19,13 +19,13 @@ class CountryTagDirectory(GenericDirectory):
     def __init__(self, source:ParadoxSource, file_path:os.PathLike, read_only:bool):
         super().__init__(source, file_path, FILE_TYPES, PDXScriptFile, read_only)
 
-    def token_collection(self):
+    def token_collection(self, source, file):
         tokens = set()
-        for file in self.files.values():
-            file = file.file
-            for node in file.nodes:
-                if isinstance(node, GenericKeyValue):
-                    value_node = node.value
-                    if isinstance(value_node, GenericString):
-                        tokens.add(node.key)
+        # for file in self.files.values():
+        file = file.file
+        for node in file.nodes:
+            if isinstance(node, GenericKeyValue):
+                value_node = node.value
+                if isinstance(value_node, GenericString):
+                    tokens.add(node.key)
         return {PDXTokens.COUNTRY:tokens}

@@ -22,8 +22,8 @@ class ParadoxSource:
         self.context = ParadoxContext
         self._build_tree()
 
-    def parse_files(self):
-        self.root.parse_files()
+    # def parse_files(self):
+    #     self.root.parse_files()
 
     def _build_tree(self):
         for root, dirs, files in os.walk(self.file_path):
@@ -85,8 +85,8 @@ class ParadoxSource:
         except KeyError:
             pass
 
-    def token_collection(self):
-        return self.root.token_collection_traversal()
+    # def token_collection(self):
+    #     return self.root.token_collection_traversal()
 
     def metadata_collection(self):
         return self.root.metadata_collection_traversal(self)

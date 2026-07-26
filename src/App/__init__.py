@@ -104,7 +104,10 @@ class AppController(QObject):
         
         self.loading_process.moveToThread(self.thread)
         self.thread.started.connect(self.loading_process.run)
-        self.loading_process.progress.connect(self.loading_screen.update_message)
+        self.loading_process.progress_message.connect(self.loading_screen.update_message)
+        self.loading_process.progress_bar_start.connect(self.loading_screen.start_progress_bar)
+        self.loading_process.progress_bar_update.connect(self.loading_screen.update_progress_bar)
+        self.loading_process.progress_bar_end.connect(self.loading_screen.end_progress_bar)
         self.loading_process.finished.connect(self.workspace_loaded)
         self.loading_process.failed.connect(self.workspace_load_failed)
         self.loading_screen.show()

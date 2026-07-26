@@ -23,7 +23,7 @@ class UnloadedFile:
         if self.loader:
             try:
                 return self.loader(self.path)
-            except UnicodeDecodeError:
+            except UnicodeDecodeError as e:
                 pass
         return self
 

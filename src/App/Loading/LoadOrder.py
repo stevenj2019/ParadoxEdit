@@ -65,19 +65,19 @@ class ParadoxLoadOrder:
         for source in self.sources:
             source.root.prune()
 
-    def parse_files(self):
-        for source in self.sources:
-            source.parse_files()
+    # def parse_files(self):
+    #     for source in self.sources:
+    #         source.parse_files()
 
-    def token_collection(self):
-        tokens = {}
-        for source in self.sources:
-            source_tokens = source.token_collection()
+    # def token_collection(self):
+    #     tokens = {}
+    #     for source in self.sources:
+    #         source_tokens = source.token_collection()
 
-            for key, values in source_tokens.items():
-                tokens.setdefault(key, set()).update(values)
+    #         for key, values in source_tokens.items():
+    #             tokens.setdefault(key, set()).update(values)
 
-        return tokens
+    #     return tokens
     
     def metadata_collection(self):
         metadata = {}

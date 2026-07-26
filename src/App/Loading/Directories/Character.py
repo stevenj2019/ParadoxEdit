@@ -19,13 +19,13 @@ class CharacterDirectory(GenericDirectory):
     def __init__(self, source:ParadoxSource, file_path:os.PathLike, read_only:bool):
         super().__init__(source, file_path, FILE_TYPES, PDXScriptFile, read_only)
 
-    def token_collection(self):
+    def token_collection(self, source, file):
         tokens = set()
-        for file in self.files.values():
-            file = file.file
-            characters_blocks = [block for block in file.nodes if isinstance(block, GenericBlock) and block.key.lower()=="characters"]
-            for block in characters_blocks:
-                for node in block.nodes:
-                    if isinstance(node, GenericBlock):
-                        tokens.add(node.key)
+        # for file in self.files.values():
+        file = file.file
+        characters_blocks = [block for block in file.nodes if isinstance(block, GenericBlock) and block.key.lower()=="characters"]
+        for block in characters_blocks:
+            for node in block.nodes:
+                if isinstance(node, GenericBlock):
+                    tokens.add(node.key)
         return {PDXTokens.CHARACTER:tokens}

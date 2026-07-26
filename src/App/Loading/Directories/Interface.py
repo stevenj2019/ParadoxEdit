@@ -22,7 +22,7 @@ class InterfaceDirectory(GenericDirectory):
     def __init__(self, source:ParadoxSource, file_path:os.PathLike, read_only:bool):
         super().__init__(source, file_path, FILE_TYPES, PDXFile, read_only)
     
-    def metadata_collection(self, source):
+    def metadata_collection(self, source, file):
         metadata = dict()
         for file in self.files.values():
             if file.context is GFXContext:
@@ -42,7 +42,7 @@ class InterfaceDirectory(GenericDirectory):
                                         metadata[name] = Path(os.path.join(source.file_path, texture))
         return {PDXMetadata.GFXIcon:metadata}
     
-    def resolve_context(self, file):
+    def resolve_context(self, source, file):
         if file.endswith("gfx"):
             return self.context
         else:
