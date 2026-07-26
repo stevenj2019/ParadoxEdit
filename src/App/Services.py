@@ -190,7 +190,6 @@ class Workspace:
         self.vanilla_loaded = enabled
 
     def add_mod_to_workspace(self, descriptor_path:str):
-        #TODO add error handling
         if descriptor_path not in self.mods:
             self.mods.append(descriptor_path)
 
@@ -201,7 +200,6 @@ class Workspace:
         }
 
     def read_file(self, file_path):
-        #TODO add error handling
         with open(str(file_path)) as FILE:
             file_path = json.load(FILE)
     

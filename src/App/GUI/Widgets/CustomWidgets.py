@@ -40,7 +40,6 @@ class FileFolderSelectorWidget(QWidget):
             self._file_list.append(path)
             item = QTreeWidgetItem([path])
             self.file_list_item.invisibleRootItem().addChild(item)
-        #TODO handle error
 
     def _add_file_to_input_list(self):
         path, exists = gfx_files_file_selector(self)
@@ -48,7 +47,6 @@ class FileFolderSelectorWidget(QWidget):
             self._file_list.append(path)
             item = QTreeWidgetItem([path])
             self.file_list_item.invisibleRootItem().addChild(item)
-        #TODO handle error
     
     def _remove_selected_from_input_list(self):
         item = self.file_list_item.currentItem()
@@ -61,7 +59,6 @@ class FileFolderSelectorWidget(QWidget):
         self.file_list_item.takeTopLevelItem(index)
 
 class CheckableComboBox(QComboBox):
-
     # Subclass Delegate to increase item height
     class Delegate(QStyledItemDelegate):
         def sizeHint(self, option, index):

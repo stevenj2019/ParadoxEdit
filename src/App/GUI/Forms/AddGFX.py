@@ -75,7 +75,6 @@ class AddNewGFXForm(QDialog):
         path, exists = gfx_save_folder_selector(self, str(self.source.file_path / "gfx"))
         if exists:
             self.storage_folder_path_element_text.setText(path)
-        #TODO handle error
     
     def _submit(self):
         self.file_list = self.file_selector.file_list

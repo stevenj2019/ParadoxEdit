@@ -101,7 +101,6 @@ class MainWindow(QMainWindow):
         path, exists = workspace_selector(self)
         if exists:
             self.app_controller.load_workspace(path)
-        #TODO handle error
 
     def load_mod(self, mod):
         self.mod_panel.populate_tree(mod)

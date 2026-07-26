@@ -6,7 +6,6 @@ from PyQt5.QtWidgets import QDialog, QFormLayout, QHBoxLayout, QLabel, QCheckBox
 from App.GUI.Widgets.FileDialogues import select_hoi4_install_directory, select_mod_directory
 from App.GUI.Widgets.PopupModels import settings_error_critical
 
-#TODO: this should not allow an exit, or if it does, it should bring the app down on first run
 class SettingsForm(QDialog):
     def __init__(self, title:str, app_controller):
         super().__init__()
