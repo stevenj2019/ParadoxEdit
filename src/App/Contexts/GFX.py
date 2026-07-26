@@ -22,7 +22,7 @@ class GFXContext(ParadoxContext):
     
     @staticmethod
     def get_node_context(node):
-        return
+        return ParadoxNodeContext
     
 class GFXFileContext(ParadoxFileContext):
     @staticmethod

@@ -1,4 +1,4 @@
-from PyQt5.QtWidgets import QTreeWidget, QTreeWidgetItem, QMenu, QLabel, QWidgetAction, QAction
+from PyQt5.QtWidgets import QApplication, QTreeWidget, QTreeWidgetItem, QMenu, QLabel, QWidgetAction, QAction
 from PyQt5.QtCore import pyqtSignal
 
 from ParadoxParser import ParadoxScriptParser as PDXScriptFile
@@ -94,17 +94,18 @@ class ParadoxNodesContextMenu(GenericContextMenu):
                 Action("Expand All", lambda:self.parent.set_expansion_rule(ExpansionMode.ALL), True),
                 Action("Collapse All", lambda:self.parent.set_expansion_rule(ExpansionMode.DEPTH, depth_limit=1), True),
                 Action("Expand This", lambda:self.parent.set_expansion_rule(ExpansionMode.FROM_NODE, root_item=block_context.parent), (block_context.parent_index == 0 and isinstance(block_context.parent, GenericBlock))),
+                Action("Copy", lambda:QApplication.clipboard().setText(node_context.node_value), True)
             ]),
             ActionGroup("Block Options", [
-                ActionSubMenu("Add", [
-                    *block_context.parent_context.get_actions(self.app_controller, block_context),
-                ]),
+                # ActionSubMenu("Add", [
+                #     *block_context.parent_context.get_actions(self.app_controller, block_context),
+                # ]),
                 Action("Delete", 
                        lambda:self.app_controller.request_block_mutation.emit(
                            BlockMutationRequest(file=None,
                                                 parent=block_context.parent,
                                                 index=block_context.parent_index, 
-                                                value=None,
+                                                payload=None,
                                                 state=ChangeState.DELETED)), 
                     (not isinstance(block_context.parent, PDXScriptFile))
                 )

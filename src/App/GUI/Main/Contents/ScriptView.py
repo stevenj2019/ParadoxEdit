@@ -197,38 +197,27 @@ class ScriptView(QWidget):
 
     def _request_context_menu(self, pos):
         pos = self.tree.viewport().mapFrom(self, pos)
+        column = self.tree.columnAt(pos.x())
         item = self.tree.itemAt(pos)
-        if not item.data(0,QtStorage.READ_ONLY):
-            if item:
-                node = item.data(0, QtStorage.NODE)
-                node_context = NodeContext(
-                    node=node,
-                    node_context=item.data(0, QtStorage.CONTEXT)
-                )
-                if isinstance(node, GenericBlock):
-                    block_context = BlockContext(
-                        parent=node,
-                        parent_index=0,
-                        parent_context=item.data(0, QtStorage.CONTEXT)
-                    )
-                else:
-                    block_context = BlockContext(
-                        parent = item.data(0, QtStorage.PARENT),
-                        parent_index= item.data(0, QtStorage.INDEX)+1,
-                        parent_context= item.data(0, QtStorage.PARENT_CONTEXT)
-                    )
-            else:
-                open_file = self.app_controller.file_system.open_file
+        if not item:
+            return
+        if item.data(0, QtStorage.READ_ONLY):
+            return
 
-                block_context = BlockContext(
-                    parent=open_file,
-                    parent_index=len(open_file.file.nodes)+1,
-                    parent_context=open_file.context.get_block_context(None)
-                )
-                node_context = None
-
-            self.context_menu.call(block_context, node_context)
-            self.context_menu.exec_(self.tree.viewport().mapToGlobal(pos))
+        node = item.data(column, QtStorage.NODE)
+        print(item.data(0, QtStorage.CONTEXT))
+        node_context = NodeContext(
+            node=node, 
+            node_context=item.data(0, QtStorage.CONTEXT), 
+            node_value=node.key if column == 0 else node.value)
+        is_block = isinstance(node, GenericBlock)
+        block_context = BlockContext(
+            parent=item.data(0, QtStorage.PARENT),
+            parent_index=item.data(0, QtStorage.INDEX),
+            parent_context=item.data(0, QtStorage.CONTEXT) if is_block else item.data(0, QtStorage.PARENT_CONTEXT)
+        )
+        self.context_menu.call(block_context, node_context)
+        self.context_menu.exec_(self.tree.viewport().mapToGlobal(pos))
 
     def request_node_mutation(self, request):
         self.app_controller.request_block_mutation.emit(request)

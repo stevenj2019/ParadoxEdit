@@ -176,7 +176,7 @@ class AppController(QObject):
                                                                   state=ChangeState.MODIFIED))
 
     def _request_block_mutation(self, request:BlockMutationRequest):
-        file   = request.file if request.file else self.file_system.open_file.file
+        file   = request.file if request.file else self.file_system.open_file
         parent = request.parent
         index  = request.index
         payload  = request.payload

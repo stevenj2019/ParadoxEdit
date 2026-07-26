@@ -25,3 +25,4 @@ class BlockContext:
 class NodeContext:
     node:GenericBlock|GenericKeyValue|GenericNode
     node_context:ParadoxNodeContext
+    node_value:str
