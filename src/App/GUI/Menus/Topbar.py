@@ -3,14 +3,13 @@ from PyQt5.QtCore import pyqtSignal
 
 from App.Contracts.Enums import SaveTarget
 from App.GUI.Actions import ActionGroup, Action
-
+from App.GUI.Help import HelpDialog
 class Topbar(QToolBar):
     request_load_mod = pyqtSignal()
     request_load_vanilla = pyqtSignal()
     request_load_workspace = pyqtSignal()
     request_workspace_save = pyqtSignal()
     request_settings_window = pyqtSignal()
-    request_in_file_search = pyqtSignal()
     def __init__(self, parent, app_controller):
         super().__init__(parent)
         self.parent:QMainWindow = parent
@@ -33,8 +32,8 @@ class Topbar(QToolBar):
                 Action("Load Workspace", self.request_load_workspace.emit, True), 
                 Action("Save Workspace as File", self.request_workspace_save.emit, True)
             ]),
-            Action("Settings", self.request_settings_window.emit, True),
-            Action("Search", self.request_in_file_search.emit, False)
+            Action("Settings", self.request_settings_window.emit, True), 
+            Action("Help", HelpDialog, True)
         ]
     def _build_toolbar(self):
         for item in self.menu_def:
@@ -59,4 +58,3 @@ class Topbar(QToolBar):
     def _enable_actions(self):
         self.actions["Save Open"].setEnabled(True)
         self.actions["Save All"].setEnabled(True)
-        self.actions["Search"].setEnabled(True)
