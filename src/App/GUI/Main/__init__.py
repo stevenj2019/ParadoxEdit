@@ -106,8 +106,9 @@ class MainWindow(QMainWindow):
         could_not_load_mod_critical(exc, tb)
 
     def save_workspace_as_file(self):
-        file_path = workspace_save_selector(self)
-        self.app_controller.save_workspace(file_path)
+        file_path, exists = workspace_save_selector(self)
+        if exists:
+            self.app_controller.save_workspace(file_path)
 
     def load_file(self, file):
         if isinstance(file.file, UnloadedFile):
