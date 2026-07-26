@@ -8,8 +8,6 @@ from App.Loading.Directories.Base import GenericDirectory
 from App.GUI.Enums import QtStorage
 from App.Contracts.Enums import ChangeState
 
-from App.Contexts.Event import EventOptionContext #added for debug purposes
-
 class ParadoxFileDelegate(QStyledItemDelegate):
     def __init__(self, app_controller, parent=None):
         super().__init__(parent)
