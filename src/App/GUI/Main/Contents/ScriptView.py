@@ -7,14 +7,15 @@ from ParadoxParser.ParadoxNodes import (GenericBlock, GenericKeyValue, GenericNo
                                         GenericLocKey, GenericLegacyLocKey, GenericComparator)
 
 from App.Contexts import BlockContext, NodeContext
-from App.Contracts.Enums import ChangeState
+from App.Contracts import InLineEditRequest
+from App.Contracts.Enums import ChangeState, TargetProperty
 from App.GUI.Enums import QtStorage, ExpansionMode
 from App.Contexts.Base import ParadoxContext
 from App.GUI.Menus.ContextMenus import ParadoxNodesContextMenu
 from App.GUI.StyledDelegate import NodeStateDelegate
 
 class ScriptView(QWidget):
-    edit_open_request = pyqtSignal(object, object, object)
+    edit_open_request = pyqtSignal(object)
     def __init__(self, app_controller):
         super().__init__()
         self.app_controller = app_controller
@@ -109,6 +110,8 @@ class ScriptView(QWidget):
         effective_state = inherited_state or self.app_controller.file_system.change_tracker.get_node_state(node)
         context = open_file_context.get_block_context(node)
 
+        item.setData(0, QtStorage.EDITABLE, True)
+        item.setData(1, QtStorage.EDITABLE, False)
         item.setData(0, QtStorage.NODE, node)
         item.setData(0, QtStorage.IS_BLOCK, True)
         item.setData(0, QtStorage.STATE, effective_state)
@@ -137,15 +140,19 @@ class ScriptView(QWidget):
     ):
         match node:
             case GenericKeyValue():
+                key_editable = True
                 value_label = node.key
                 value_node = node.value
             case GenericLocKey():
+                key_editable = True
                 value_label = node.key
                 value_node = node
             case GenericLegacyLocKey():
+                key_editable = True
                 value_label = f"{node.key}:{node.num}"
                 value_node = node
             case _:
+                key_editable = False
                 value_label = ""
                 value_node = node
 
@@ -160,7 +167,13 @@ class ScriptView(QWidget):
 
         node_context = open_file_context.get_node_context(node)
         block_context = open_file_context.get_block_context(parent_node)
+        
+        item.setData(0, QtStorage.EDITABLE, key_editable)
+        item.setData(1, QtStorage.EDITABLE, True)
+
         item.setData(0, QtStorage.NODE, node)
+        item.setData(1, QtStorage.NODE, value_node)
+
         item.setData(0, QtStorage.IS_BLOCK, False)
         item.setData(0, QtStorage.STATE, effective_state)
         item.setData(0, QtStorage.CONTEXT, node_context)
@@ -169,20 +182,23 @@ class ScriptView(QWidget):
         item.setData(0, QtStorage.INDEX, parent_index)
         item.setData(0, QtStorage.IS_COMPARATOR, isinstance(node, GenericComparator))
 
-
-        item.setForeground(0, QBrush(Qt.gray))
+        if not key_editable:
+            item.setForeground(0, QBrush(Qt.gray))
         if self.read_only:
             item.setForeground(1, QBrush(Qt.gray))
 
         parent_item.addChild(item)
 
     def _on_item_double_click(self, item, column):
-        if not item.data(0,QtStorage.READ_ONLY):
-            if column == 1: #value was clicked.
-                if not item.data(0, QtStorage.IS_BLOCK):
-                    node = item.data(0, QtStorage.NODE)
-                    if node:
-                        self.edit_open_request.emit(self.tree, item, node)
+        if not item.data(0,QtStorage.READ_ONLY) and item.data(column, QtStorage.EDITABLE):
+            target = TargetProperty.KEY if column is 0 else TargetProperty.VALUE
+            node = item.data(column, QtStorage.NODE)
+            self.edit_open_request.emit(InLineEditRequest(self.tree, item, node, target))
+            # if column == 1: #value was clicked.
+            #     if not item.data(0, QtStorage.IS_BLOCK):
+            #         node = item.data(0, QtStorage.NODE)
+            #         if node:
+            #             self.edit_open_request.emit(self.tree, item, node)
 
     def _request_context_menu(self, pos):
         pos = self.tree.viewport().mapFrom(self, pos)

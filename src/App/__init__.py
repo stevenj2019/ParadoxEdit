@@ -16,7 +16,7 @@ from App.GUI.Main import MainWindow
 from App.GUI.Forms.Settings import SettingsForm
 from App.GUI.Widgets.PopupModels import setup_process_cancelled
 from App.Contracts import PropagationRequest, NodeMutationRequest, BlockMutationRequest, BulkMutationRequest, FileMutationRequest
-from App.Contracts.Enums import SaveTarget, PropagationType, ChangeState
+from App.Contracts.Enums import SaveTarget, PropagationType, ChangeState, TargetProperty
 
 class AppController(QObject):
     request_node_mutation = pyqtSignal(object)
@@ -149,10 +149,23 @@ class AppController(QObject):
     def _request_node_mutation(self, request:NodeMutationRequest):
         file = request.file if request.file else self.file_system.open_file
         node = request.node
-        node_value = request.node_value
+        target = request.target
         value = request.value
-        if node_value.value != value:
-            node_value.value = value
+        changed = False
+        if target is TargetProperty.KEY:
+            if node.key != value:
+                old_value = node.key
+                node.key = value
+                changed = True
+
+        elif target is TargetProperty.VALUE:
+            if node.value != value:
+                old_value = node.value
+                node.value = value
+                changed = True
+
+        if changed:
+            AppLogger.info(f"{old_value} to {value}")
             self.file_system.changed_file(file.file, node, ChangeState.MODIFIED)
             self.main.request_propagation.emit(PropagationRequest(type=PropagationType.NODE,
                                                                   file=file,

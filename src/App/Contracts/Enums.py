@@ -13,3 +13,7 @@ class ChangeState(Enum):
     MODIFIED = auto()
     ADDED = auto()
     DELETED = auto()
+
+class TargetProperty(Enum):
+    KEY = auto()
+    VALUE = auto()

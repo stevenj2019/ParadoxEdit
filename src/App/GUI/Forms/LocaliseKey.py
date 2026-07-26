@@ -5,6 +5,7 @@ from ParadoxParser.ParadoxNodes import GenericLocKey
 
 from App.Enums import PDXMetadata
 from App.Contracts import NodeMutationRequest, BlockMutationRequest
+from App.Contracts.Enums import TargetProperty
 
 class BaseLocaliseForm(QDialog):
     def __init__(self, app_controller, name):
@@ -89,13 +90,12 @@ class LocaliseNodeForm(BaseLocaliseForm):
         self._lower_form_body()
         self.exec_()
 
-    #Generalise
     def _submit(self):
         self._handle_localisation_field(self.loc_text)
         new_value = self.loc_text.toPlainText().replace("\n", "\\n")
         if self.node_selected is not None:
             self.app_controller.request_node_mutation.emit(
-                NodeMutationRequest(file=self.save_file, node=self.node_selected, node_value=self.node_selected, value=new_value)
+                NodeMutationRequest(file=self.save_file, node=self.node_selected, target=TargetProperty.VALUE, value=new_value)
             )
         else:
             node = GenericLocKey(self.loc_key, new_value)

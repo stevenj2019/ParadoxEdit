@@ -16,6 +16,7 @@ class QtStorage(IntEnum):
     PARENT = auto()
     PARENT_CONTEXT = auto()
     INDEX = auto()
+    EDITABLE = auto()
 
 class ExpansionMode(Enum):
     ALL = auto()

@@ -10,11 +10,13 @@ if TYPE_CHECKING:
 from dataclasses import dataclass
 from typing import Optional, Callable
 
+from PyQt5.QtWidgets import QTreeWidget, QTreeWidgetItem
+
 from ParadoxParser import ParadoxScriptParser as PDXScriptFile
 from ParadoxParser import ParadoxLocParser as PDXLocFile
 from ParadoxParser import GenericBlock, GenericKeyValue, GenericNode
 
-from App.Contracts.Enums import PropagationType, ChangeState
+from App.Contracts.Enums import PropagationType, ChangeState, TargetProperty
 @dataclass
 class ModLoaderResult:
     workspace:Workspace
@@ -38,7 +40,7 @@ class PropagationRequest:
 class NodeMutationRequest:
     file:Optional[PDXScriptFile]
     node:GenericBlock|GenericKeyValue
-    node_value:GenericNode
+    target:TargetProperty
     value:str|int|float
 
 @dataclass
@@ -69,6 +71,13 @@ class FileMutationRequest:
     directory:GenericDirectory
     file:FileReference
     state:ChangeState
+
+@dataclass
+class InLineEditRequest:
+    tree:QTreeWidget
+    item:QTreeWidgetItem
+    node:GenericBlock|GenericKeyValue|GenericNode
+    target:TargetProperty
 
 @dataclass
 class SearchResult:

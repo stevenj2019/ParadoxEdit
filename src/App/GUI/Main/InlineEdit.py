@@ -7,14 +7,15 @@ from ParadoxParser.ParadoxNodes import (GenericNode, GenericKeyValue, GenericNod
                                         GenericInt, GenericFloat, GenericBool)
 
 from App.Services import AppLogger
-from App.Contracts import NodeMutationRequest
+from App.Contracts import NodeMutationRequest, InLineEditRequest
+from App.Contracts.Enums import TargetProperty
 from App.GUI.Widgets.PopupModels import change_rejected_warning
 
-#TODO: needs fixed
 class InLineEditManager(QObject):
     def __init__(self, mutate_callback):
         super().__init__()
         self.cell_editors = {
+            GenericKeyValue: text_editor,
             GenericComment: text_editor,
             GenericString:  text_editor,
             GenericToken:   text_editor,
@@ -23,8 +24,8 @@ class InLineEditManager(QObject):
             GenericBool:    bool_dropdown
         }
         self.mutate_callback = mutate_callback
-        self.parent:QTreeWidget = None
-        self.source:QTreeWidgetItem = None
+        self.tree:QTreeWidget = None
+        self.item:QTreeWidgetItem = None
         self.node:GenericNode = None
         self.editor:QWidget = None
 
@@ -49,60 +50,66 @@ class InLineEditManager(QObject):
     @property
     def active(self): return self.editor is not None
 
-    def open_request(self,
-                parent:QTreeWidget, 
-                source:QTreeWidgetItem, 
-                node:GenericNode):
-        self.parent = parent
-        self.source = source
-        self.node = node
-        self.node_value = node.value if isinstance(node, GenericKeyValue) else node
+    def open_request(self, request:InLineEditRequest):
+        self.tree = request.tree
+        self.item = request.item
+        self.node = request.node
+        self.target = request.target
+
+        self.column = 0 if self.target is TargetProperty.KEY else 1
         self.editor = self._get_widget()
-        AppLogger.info(f"{self.editor} created")
         self._create()
 
     def complete_request(self, new_value):
-        AppLogger.info(f"{self.node_value}, {self.node_value.value} to {new_value}")
-        if self.node_value.value != new_value:
-            self.mutate_callback.emit(NodeMutationRequest(file=None, node=self.node, node_value=self.node_value, value=new_value))
+        self.mutate_callback.emit(
+            NodeMutationRequest(
+                None,
+                self.node,
+                self.target,
+                new_value
+            )
+        )
         self._destroy(new_value)
         self._clear()
 
     def cancel_request(self, reason):
         if self.active:
-            AppLogger.info(f"{self.editor} cancelled due to {reason}, value: {self.node.value}")
-            self._destroy(self.node_value.value)
+            value = self.node.key if self.target is TargetProperty.KEY else self.node.value
+            AppLogger.info(f"{self.editor} cancelled due to {reason}, value: {value}")
+            self._destroy(value)
         self._clear()
 
     def _get_widget(self):
         def emit(value):
             self.complete_request(value)
         try:
-            editor_fn = self.cell_editors.get(type(self.node_value))
+            editor_fn = self.cell_editors.get(type(self.node))
         except Exception as e:
             AppLogger.exception(e)
             return None
-        return editor_fn(self.node_value, emit)
+        value = self.node.value if self.target is TargetProperty.VALUE else self.node.key
+        return editor_fn(self.node, emit, value)
 
     def _create(self):
-        self.parent.setItemWidget(self.source, 1, self.editor)
+        self.tree.setItemWidget(self.item, self.column, self.editor)
         self.editor.setFocus()
 
         self.editor.installEventFilter(self)
+        AppLogger.info(f"{self.editor} created")
 
-    def _destroy(self, value):
-        self.parent.removeItemWidget(self.source, 1)
-        self.source.setText(1, value)
+    def _destroy(self, value=None):
+        self.tree.removeItemWidget(self.item, self.column)
+        self.item.setText(self.column, value)
         self.editor.deleteLater()
 
     def _clear(self):
-        self.parent = None
-        self.source = None
+        self.tree = None
+        self.item = None
         self.node = None
         self.editor = None
 
-def text_editor(node, emit):
-    widget = QLineEdit(str(node.value))
+def text_editor(node, emit, value):
+    widget = QLineEdit(str(value))
     width = QFontMetrics(widget.font()).horizontalAdvance(widget.text())+20
     widget.setFixedWidth(max(60, min(width, 500)))
 
@@ -112,10 +119,10 @@ def text_editor(node, emit):
     widget.editingFinished.connect(on_change)
     return widget
 
-def bool_dropdown(node, emit):
+def bool_dropdown(node, emit, value):
     widget = QComboBox()
     widget.addItems(["yes", "no"])
-    widget.setCurrentIndex(0 if node.value else 1)
+    widget.setCurrentIndex(0 if value else 1)
     widget.setFixedWidth(70)
     
     def on_change(index):
@@ -124,8 +131,8 @@ def bool_dropdown(node, emit):
     widget.currentIndexChanged.connect(on_change)
     return widget
 
-def int_editor(node, emit):
-    widget = QLineEdit(str(node.value))
+def int_editor(node, emit, value):
+    widget = QLineEdit(str(value))
     width = QFontMetrics(widget.font()).horizontalAdvance(widget.text())+20
     widget.setFixedWidth(max(60, min(width, 500)))
 
@@ -140,8 +147,8 @@ def int_editor(node, emit):
     widget.editingFinished.connect(on_change)
     return widget
 
-def float_editor(node, emit):
-    widget = QLineEdit(str(node.value))
+def float_editor(node, emit, value):
+    widget = QLineEdit(str(value))
     width = QFontMetrics(widget.font()).horizontalAdvance(widget.text())+20
     widget.setFixedWidth(max(60, min(width, 500)))
 
