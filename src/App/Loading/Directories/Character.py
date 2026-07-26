@@ -21,7 +21,6 @@ class CharacterDirectory(GenericDirectory):
 
     def token_collection(self, source, file):
         tokens = set()
-        # for file in self.files.values():
         file = file.file
         characters_blocks = [block for block in file.nodes if isinstance(block, GenericBlock) and block.key.lower()=="characters"]
         for block in characters_blocks:

@@ -53,12 +53,6 @@ class GenericDirectory:
         self.directories = {}
         self.files = {}
 
-    # def parse_files(self):
-    #     for key, file in self.files.items():
-    #         self.files[key].file = file.file.load()
-    #     for directory in self.directories.values():
-    #         directory.parse_files()
-
     def iter_files(self):
         yield from self.files.values()
 
@@ -71,25 +65,9 @@ class GenericDirectory:
                 self.directories.pop(name)
 
         return not self.directories and not self.files
-
-    # def token_collection_traversal(self):
-    #     tokens = self.token_collection()
-    #     for directory in self.directories.values():
-    #         child_tokens = directory.token_collection()
-    #         for key, values in child_tokens.items():
-    #             tokens.setdefault(key, set()).update(values)
-    #     return tokens
     
     def token_collection(self, source, file):
         return {}    
-    
-    # def metadata_collection_traversal(self, source):
-    #     metadata = self.metadata_collection(source)
-    #     for directory in self.directories.values():
-    #         child_metadata = directory.metadata_collection(source)
-    #         for key, values in child_metadata.items():
-    #             metadata.setdefault(key, type(values)()).update(values)
-    #     return metadata
 
     def metadata_collection(self, source, file):
         return {}

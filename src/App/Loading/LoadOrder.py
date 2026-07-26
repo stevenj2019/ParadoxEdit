@@ -64,27 +64,3 @@ class ParadoxLoadOrder:
     def _clear_empty_directories(self):
         for source in self.sources:
             source.root.prune()
-
-    # def parse_files(self):
-    #     for source in self.sources:
-    #         source.parse_files()
-
-    # def token_collection(self):
-    #     tokens = {}
-    #     for source in self.sources:
-    #         source_tokens = source.token_collection()
-
-    #         for key, values in source_tokens.items():
-    #             tokens.setdefault(key, set()).update(values)
-
-    #     return tokens
-    
-    def metadata_collection(self):
-        metadata = {}
-        for source in self.sources:
-            source_metadata = source.metadata_collection()
-
-            for key, values in source_metadata.items():
-                metadata.setdefault(key, type(values)()).update(values)
-
-        return metadata

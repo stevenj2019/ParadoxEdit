@@ -21,7 +21,6 @@ class CountryTagDirectory(GenericDirectory):
 
     def token_collection(self, source, file):
         tokens = set()
-        # for file in self.files.values():
         file = file.file
         for node in file.nodes:
             if isinstance(node, GenericKeyValue):

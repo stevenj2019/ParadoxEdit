@@ -85,9 +85,6 @@ class ParadoxSource:
         except KeyError:
             pass
 
-    # def token_collection(self):
-    #     return self.root.token_collection_traversal()
-
     def metadata_collection(self):
         return self.root.metadata_collection_traversal(self)
 

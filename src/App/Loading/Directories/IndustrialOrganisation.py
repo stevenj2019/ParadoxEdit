@@ -21,7 +21,6 @@ class MIODirectory(GenericDirectory):
 
     def token_collection(self, source, file):
         tokens = set()
-        # for file in self.files.values():
         file = file.file        
         # for file in self.files:
         for block in file.nodes:

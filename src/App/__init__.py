@@ -182,7 +182,6 @@ class AppController(QObject):
         payload  = request.payload
         state  = request.state
 
-        #ADDED - mutate (DELETE just marks item for deletion)
         if state == ChangeState.ADDED:
             node = payload() if callable(payload) else payload
             parent.nodes.insert(index, node)

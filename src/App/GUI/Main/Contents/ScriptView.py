@@ -194,11 +194,6 @@ class ScriptView(QWidget):
             target = TargetProperty.KEY if column is 0 else TargetProperty.VALUE
             node = item.data(column, QtStorage.NODE)
             self.edit_open_request.emit(InLineEditRequest(self.tree, item, node, target))
-            # if column == 1: #value was clicked.
-            #     if not item.data(0, QtStorage.IS_BLOCK):
-            #         node = item.data(0, QtStorage.NODE)
-            #         if node:
-            #             self.edit_open_request.emit(self.tree, item, node)
 
     def _request_context_menu(self, pos):
         pos = self.tree.viewport().mapFrom(self, pos)

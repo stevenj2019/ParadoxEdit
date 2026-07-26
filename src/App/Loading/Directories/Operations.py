@@ -21,7 +21,6 @@ class IntelligenceOperationDirectory(GenericDirectory):
 
     def token_collection(self, source, file):
         tokens = set()
-        # for file in self.files.values():
         file = file.file
         for block in file.nodes:
             if isinstance(block, GenericBlock):

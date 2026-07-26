@@ -21,7 +21,6 @@ class RaidsDirectory(GenericDirectory):
 
     def token_collection(self, source, file):
         tokens = set()
-        # for file in self.files.values():
         file = file.file
         types_blocks = [block for block in file.nodes if isinstance(block, GenericBlock) and block.key.lower()=="types"]
         for block in types_blocks:

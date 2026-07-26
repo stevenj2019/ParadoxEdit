@@ -22,7 +22,6 @@ class EventDirectory(GenericDirectory):
         
     def token_collection(self, source, file):
         tokens = set()
-        # for file in self.files.values():
         file = file.file
         if isinstance(file, PDXScriptFile):
             for block in file.nodes:
