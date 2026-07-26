@@ -9,11 +9,11 @@ from ParadoxParser import ParadoxScriptParser as PDXScriptFile
 from ParadoxParser.ParadoxNodes import GenericString, GenericKeyValue
 
 from App.Loading.Directories.Base import GenericDirectory
-from App.Contexts.Base import NotImplementedContext
+from App.Contexts.Base import ParadoxContext
 from App.Enums import PDXTokens
 
 FILE_TYPES = {
-    ".txt": NotImplementedContext
+    '.txt': ParadoxContext
 }
 class CountryTagDirectory(GenericDirectory):
     def __init__(self, source:ParadoxSource, file_path:os.PathLike, read_only:bool):

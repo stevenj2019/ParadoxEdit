@@ -13,7 +13,8 @@ from App.Contexts.Event import EventContext
 from App.Enums import PDXTokens
 
 FILE_TYPES = {
-    ".txt": EventContext
+    'dir': EventContext,
+    '.txt': EventContext
 }
 class EventDirectory(GenericDirectory):
     def __init__(self, source:ParadoxSource, file_path:os.PathLike, read_only:bool):

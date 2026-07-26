@@ -7,11 +7,12 @@ import os
 
 from App.Loading.Models import IconFile
 from App.Loading.Directories.Base import GenericDirectory
-from App.Contexts.Base import ParadoxContext
+from App.Contexts.Base import NotImplementedContext
 
 FILE_TYPES = {
-    '.dds': ParadoxContext,
-    '.png': ParadoxContext
+    'dir': NotImplementedContext,
+    '.dds': NotImplementedContext,
+    '.png': NotImplementedContext
 }
 class IconDirectory(GenericDirectory):
     def __init__(self, source:ParadoxSource, file_path:os.PathLike, read_only:bool):

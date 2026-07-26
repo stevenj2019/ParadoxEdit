@@ -9,11 +9,11 @@ from ParadoxParser import ParadoxLocParser as PDXLocFile
 from ParadoxParser.ParadoxNodes import GenericLegacyLocKey, GenericLocKey
 
 from App.Loading.Directories.Base import GenericDirectory
-from App.Contexts.Loc import LocalisationContext
+from App.Contexts.Loc import ParadoxContext, LocalisationContext
 from App.Enums import PDXMetadata
 
 FILE_TYPES = {
-    ".yml": LocalisationContext
+    '.yml': LocalisationContext
 }
 class LocDirectory(GenericDirectory):
     def __init__(self, source:ParadoxSource,file_path:os.PathLike, read_only:bool):

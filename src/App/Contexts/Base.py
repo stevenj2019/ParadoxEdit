@@ -10,6 +10,8 @@ from App.GUI.Forms.LocaliseKey import LocaliseNodeForm
 from App.PDXFactory.Blocks.Generic import comment_node
 from App.Scripts.Generic import clear_comments, clear_whitespace
 
+def dummy(): return
+
 class ParadoxContext:
     @staticmethod
     def get_file_context():
@@ -26,15 +28,15 @@ class ParadoxContext:
 class NotImplementedContext(ParadoxContext):
     @staticmethod
     def get_file_context():
-        return ParadoxFileContext
+        return NullContext
     
     @staticmethod
     def get_block_context(node):
-        return ParadoxBlockContext
+        return NullContext
 
     @staticmethod
     def get_node_context(node):
-        return ParadoxNodeContext
+        return NullContext
 
 class ParadoxFileContext:
     @staticmethod
@@ -79,6 +81,16 @@ class ParadoxNodeContext:
     def errors(app_controller, node_context):
         return
 
+class NullContext:
+    @staticmethod
+    def get_actions(app_controller, block_context):
+        return [
+            Action("No Actions Available", dummy, False)
+        ]
+    
+    def errors(app_controller, node_context):
+        return
+    
 class LocalisationFieldContext:
     @staticmethod
     def get_actions(app_controller, node_context):

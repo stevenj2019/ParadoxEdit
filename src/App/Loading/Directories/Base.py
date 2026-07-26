@@ -14,13 +14,15 @@ from App.Loading.Models import FileReference, UnloadedFile
 
 from App.Contexts.Base import ParadoxContext
 
-FILE_TYPES = {".txt": ParadoxContext}
+FILE_TYPES = {
+    '.txt': ParadoxContext
+}
 class GenericDirectory:
     def __init__(self, source:ParadoxSource, file_path:os.PathLike, context:dict=FILE_TYPES, parser:PDXScriptFile|PDXLocFile=PDXScriptFile, read_only:bool=True):
         self.source = source
         self.path = Path(file_path)
         self.context_resolver = context
-        self.resolve_context("")
+        self.context = context.get('dir', ParadoxContext)
 
         self.parser = parser
         self.read_only = read_only
@@ -91,9 +93,3 @@ class GenericDirectory:
 
     def metadata_collection(self, source):
         return {}
-    
-    def resolve_context(self, file):
-        if len(self.context_resolver.keys()) == 1:
-            self.context = next(iter(self.context_resolver.values()))
-        else:
-            self.context = ParadoxContext
