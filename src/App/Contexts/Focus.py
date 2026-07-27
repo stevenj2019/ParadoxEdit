@@ -20,7 +20,7 @@ class FocusTreeContext(ParadoxContext):
     @staticmethod
     def get_node_context(parent_node, node):
         if isinstance(node, GenericKeyValue):
-            if parent_node.key != "focus_tree" and node.key == "id":
+            if parent_node.key == "focus" and node.key == "id":
                 return LocalisationFieldContext
             elif node.key == "icon":
                 return GFXFieldContext
