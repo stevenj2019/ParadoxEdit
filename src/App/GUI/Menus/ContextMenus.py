@@ -94,7 +94,7 @@ class ParadoxNodesContextMenu(GenericContextMenu):
                 Action("Expand All", lambda:self.parent.set_expansion_rule(ExpansionMode.ALL), True),
                 Action("Collapse All", lambda:self.parent.set_expansion_rule(ExpansionMode.DEPTH, depth_limit=1), True),
                 Action("Expand This", lambda:self.parent.set_expansion_rule(ExpansionMode.FROM_NODE, root_item=block_context.parent), (block_context.parent_index == 0 and isinstance(block_context.parent, GenericBlock))),
-                Action("Copy", lambda:QApplication.clipboard().setText(node_context.node_value), True)
+                Action("Copy", lambda:QApplication.clipboard().setText(node_context.selected_node.value), True)
             ]),
             ActionGroup("Block Options", [
                 # ActionSubMenu("Add", [

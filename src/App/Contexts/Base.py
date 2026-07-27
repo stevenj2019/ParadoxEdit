@@ -5,7 +5,6 @@ from App.GUI.Forms.LocaliseKey import LocaliseNodeForm
 from App.PDXFactory.Blocks.Generic import comment_node
 from App.Scripts.Generic import clear_comments, clear_whitespace
 
-#TODO need to make sure Vanilla files cannot be modified by ANY contexts.
 def dummy(): return
 
 class ParadoxContext:
@@ -90,7 +89,7 @@ class LocalisationFieldContext:
     def get_actions(app_controller, node_context):
         return [
             Action("Localise", 
-                   lambda:LocaliseNodeForm(app_controller, node_context.node.value.value), 
+                   lambda:LocaliseNodeForm(app_controller, node_context.key_node), 
                    True)
         ]
     
@@ -103,12 +102,12 @@ class GFXFieldContext:
     def get_actions(app_controller, node_context):
         return [
             Action("Preview Icon", 
-                   lambda:app_controller.main.request_icon_preview.emit(node_context.node.value),
+                   lambda:app_controller.main.request_icon_preview.emit(node_context.key_node.value),
                    True)
         ]
     
     def errors(app_controller, node):
-        if not node.value in app_controller.registry.get_metadata(PDXMetadata.GFXIcon).keys():
+        if node.value not in app_controller.registry.get_metadata(PDXMetadata.GFXIcon).keys():
             return "Icon does not exist"
         else:
             return

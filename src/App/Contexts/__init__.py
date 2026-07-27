@@ -23,6 +23,6 @@ class BlockContext:
 
 @dataclass
 class NodeContext:
-    node:GenericBlock|GenericKeyValue|GenericNode
+    key_node:GenericBlock|GenericKeyValue
+    selected_node:GenericNode
     node_context:ParadoxNodeContext
-    node_value:str

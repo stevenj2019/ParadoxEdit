@@ -207,12 +207,11 @@ class ScriptView(QWidget):
         if item.data(0, QtStorage.READ_ONLY):
             return
 
-        node = item.data(column, QtStorage.NODE)
-        print(item.data(0, QtStorage.CONTEXT))
+        node = item.data(0, QtStorage.NODE)
         node_context = NodeContext(
-            node=node, 
-            node_context=item.data(0, QtStorage.CONTEXT), 
-            node_value=node.key if column == 0 else node.value)
+            key_node=item.data(0, QtStorage.NODE), 
+            selected_node=item.data(column, QtStorage.NODE),
+            node_context=item.data(0, QtStorage.CONTEXT))
         is_block = isinstance(node, GenericBlock)
         block_context = BlockContext(
             parent=item.data(0, QtStorage.PARENT),
