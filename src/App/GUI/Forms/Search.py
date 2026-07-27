@@ -1,5 +1,6 @@
 import re
-from PyQt5.QtWidgets import QDialog, QFormLayout, QPushButton, QTreeWidget, QTreeWidgetItem
+from PyQt5.QtWidgets import QDialog, QFormLayout, QHBoxLayout, QWidget, QToolButton, QPushButton, QStackedWidget, QTreeWidget, QTreeWidgetItem, QLabel
+from PyQt5.QtCore import Qt
 
 from ParadoxParser import ParadoxScriptParser as PDXScriptFile
 from ParadoxParser import ParadoxLocParser as PDXLocFile
@@ -21,32 +22,65 @@ class SearchForm(QDialog):
         self.search_results = list()
 
         self.setWindowTitle("Search")
-        self.resize(200, 100)
+        self.resize(250, 100)
         self.setLayout(QFormLayout())
         self.form = self.layout()
 
-        self.source_selector_widget = CheckableComboBox()
-        for source in self.load_order.sources:
-            self.source_selector_widget.addItem(source.source_name, source)
-        self.form.addRow("", self.source_selector_widget)
+        self.control_layout = QHBoxLayout()
 
         self.search_control_widget = SearchLineEdit()
         self.search_control_widget.caseChanged.connect(self._set_case_sensitivity)
         self.search_control_widget.regexChanged.connect(self._set_regex)
-        self.form.addRow("🔍︎", self.search_control_widget)
+        self.control_layout.addWidget(self.search_control_widget)
+
+        self.toggle_advanced_search = QToolButton()
+        self.toggle_advanced_search.setFixedWidth(24)
+        self.toggle_advanced_search.setArrowType(Qt.DownArrow)
+        self.toggle_advanced_search.clicked.connect(self.toggle_options)
+        self.control_layout.addWidget(self.toggle_advanced_search)
+
+        self.form.addRow("🔍︎", self.control_layout)
+
+        self.advanced_control_container = QWidget()
+        self.advanced_control_container.setVisible(False)
+        self.advanced_control_container_layout = QFormLayout()
+        self.advanced_control_container_layout.setContentsMargins(0, 0, 0, 0)
+
+        self.advanced_control_container.setLayout(self.advanced_control_container_layout)
+
+        self.source_selector_widget = CheckableComboBox()
+        for source in self.load_order.sources:
+            self.source_selector_widget.addItem(source.source_name, source)
+        self.advanced_control_container_layout.addRow("📦", self.source_selector_widget)
+
+        self.form.addRow(self.advanced_control_container)
 
         self.search_button = QPushButton("Search 🔍︎")
         self.search_button.clicked.connect(self._get_search_results)
         self.form.addRow(self.search_button)
 
+        self.result = QStackedWidget()
+        self.result.setVisible(False)
+
         self.results_tree = QTreeWidget()
         self.results_tree.setColumnCount(1)
         self.results_tree.setHeaderLabel("Result(s)")
-        self.results_tree.setVisible(False)
         self.results_tree.setMaximumHeight(400)
         self.results_tree.itemDoubleClicked.connect(self._result_double_clicked)
         self.results_tree.setExpandsOnDoubleClick(False)
-        self.form.addRow(self.results_tree)
+        self.result.addWidget(self.results_tree)
+
+        self.no_results_label = QLabel("No Results Found")
+        self.no_results_label.setAlignment(Qt.AlignCenter)
+        self.no_results_label.setMaximumHeight(50)
+        self.result.addWidget(self.no_results_label)
+
+        self.form.addRow(self.result)
+
+    def toggle_options(self):
+        self.toggle_advanced_search.setArrowType(Qt.DownArrow if self.advanced_control_container.isVisible() else Qt.UpArrow)
+        self.advanced_control_container.setVisible(not self.advanced_control_container.isVisible())
+        self.adjustSize()
 
     def _set_case_sensitivity(self, case_sensitive:bool):
         self.case_sensitive = case_sensitive
@@ -87,7 +121,8 @@ class SearchForm(QDialog):
                     result.results.append(node)
 
         self.search_results = list()
-        for source in selected_sources:
+        search_sources = selected_sources if selected_sources else self.load_order.sources
+        for source in search_sources:
             for file in source.root.iter_files():
                 if isinstance(file.file, (PDXScriptFile, PDXLocFile)):
                     result = SearchResult(file, [])
@@ -99,32 +134,27 @@ class SearchForm(QDialog):
 
     def _build_results_tree(self):
         self.results_tree.clear()
-        for result in self.search_results:
-            file_item = QTreeWidgetItem([f"{result.file.file.filename} - {len(result.results)} instance(s)"])
-            file_item.setToolTip(0, str(result.file.file.filepath))
-            file_item.setData(0, QtStorage.FILE, result.file)
-            self.results_tree.addTopLevelItem(file_item)
-            for instance in result.results:
-                if isinstance(instance, GenericBlock):
-                    text = f"{instance.key} = {{"
-                else:
-                    text = instance._to_string_literal().strip()
-                # match instance:
-                #     case GenericBlock():
-                #         text = f"{instance.key} = {{"
-                #     case GenericKeyValue():
-                #         text = f"{instance.key} = {instance.value.value}"
-                #     case GenericComparator():
-                #         text = f"{instance.left} {instance.operator} {instance.right}"
-                #     case GenericNode():
-                #         text = f"{instance.value}"
+        if self.search_results:
+            for result in self.search_results:
+                file_item = QTreeWidgetItem([f"{result.file.file.filename} - {len(result.results)} instance(s)"])
+                file_item.setToolTip(0, str(result.file.file.filepath))
+                file_item.setData(0, QtStorage.FILE, result.file)
+                self.results_tree.addTopLevelItem(file_item)
+                for instance in result.results:
+                    if isinstance(instance, GenericBlock):
+                        text = f"{instance.key} = {{"
+                    else:
+                        text = instance._to_string_literal().strip()
 
-                item = QTreeWidgetItem([text])
-                item.setData(0, QtStorage.FILE, result.file)
-                item.setData(0, QtStorage.NODE, instance)
-                file_item.addChild(item)
-        self.results_tree.setVisible(True)
-        self.results_tree.resizeColumnToContents(0)
+                    item = QTreeWidgetItem([text])
+                    item.setData(0, QtStorage.FILE, result.file)
+                    item.setData(0, QtStorage.NODE, instance)
+                    file_item.addChild(item)
+            self.results_tree.resizeColumnToContents(0)
+            self.result.setCurrentWidget(self.results_tree)
+        else:
+            self.result.setCurrentWidget(self.no_results_label)
+        self.result.setVisible(True)
         self.adjustSize()
 
     def _result_double_clicked(self, item, column):
