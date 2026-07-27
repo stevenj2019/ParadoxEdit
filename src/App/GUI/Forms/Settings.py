@@ -77,10 +77,15 @@ class SettingsForm(QDialog):
         mod_dir_error = False
         
         game_folder = Path(self.game_install_path_element_text.text().strip())
-        if not (game_folder.is_dir() and (game_folder / "pdx_launcher")):
+        if not (game_folder.is_dir() and (game_folder / "pdx_launcher").is_dir()):
            game_dir_error = True
         mod_folder = Path(self.mod_install_path_element_text.text().strip())
-        if not (mod_folder.is_dir() and any(mod_folder.glob("*.mod"))):
+        if not (mod_folder.is_dir() 
+                and any(
+                    mod_file.name != "descriptor.mod"
+                    for mod_file in mod_folder.glob("*.mod")
+                )
+            ):
             mod_dir_error = True
         
         if not (game_dir_error or mod_dir_error):
