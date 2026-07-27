@@ -5,25 +5,25 @@ from App.Services import AppLogger
 from App.Loading.Directories.Base import GenericDirectory
 from App.Loading.Directories import DIRECTORY_REGISTRY
 from App.Loading.Models import FileReference
-from App.Contexts.Base import ParadoxContext
+from App.Contexts.Base import ParadoxContext, ReadOnlyContext
 from ParadoxParser import ParadoxScriptParser
 from ParadoxParser.ParadoxNodes import GenericBlock, GenericKeyValue
 
 PARADOX_ROOT_DIRECTORIES = ["common", "events", "gfx", "history", "interface", "localisation", "map", "music", "portraits", "sound"]
 EXCLUDE_FILES = [""]
 class ParadoxSource:
-    def __init__(self, name, path):
+    def __init__(self, name, path, context_override:ParadoxContext=None, read_only_override:bool=None):
         self.source_name = name
         self.file_path = path
+        self.context_override = context_override
+        self.read_only_override = read_only_override
+
+        self.context = self.context_override if self.context_override else ParadoxContext
         self.root = GenericDirectory(self, self.file_path, {})
         self.directories = {
             Path("."): self.root
         }
-        self.context = ParadoxContext
         self._build_tree()
-
-    # def parse_files(self):
-    #     self.root.parse_files()
 
     def _build_tree(self):
         for root, dirs, files in os.walk(self.file_path):
@@ -90,7 +90,7 @@ class ParadoxSource:
 
 class ParadoxVanilla(ParadoxSource):
     def __init__(self, path):
-        super().__init__("Vanilla", path)
+        super().__init__("Vanilla", path, ReadOnlyContext, True)
 
     def _apply_dlc_files(self):
         dlc_path = Path(os.path.join(self.file_path, "dlc"))

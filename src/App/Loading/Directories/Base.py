@@ -22,7 +22,7 @@ class GenericDirectory:
         self.source = source
         self.path = Path(file_path)
         self.context_resolver = context
-        self.context = context.get('dir', ParadoxContext)
+        self.context = self.source.context_override if self.source.context_override else context.get('dir', ParadoxContext)
 
         self.parser = parser
         self.read_only = read_only
@@ -39,7 +39,7 @@ class GenericDirectory:
             self.files[name] = FileReference(
                 self,
                 UnloadedFile(path, name, self.parser),
-                self.context_resolver[path.suffix],
+                self.source.context_override if self.source.context_override else self.context_resolver[path.suffix],
                 self.read_only
             )
 

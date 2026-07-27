@@ -21,19 +21,6 @@ class ParadoxContext:
     def get_node_context(node):
         return ParadoxNodeContext
 
-class NotImplementedContext(ParadoxContext):
-    @staticmethod
-    def get_file_context():
-        return NullContext
-    
-    @staticmethod
-    def get_block_context(node):
-        return NullContext
-
-    @staticmethod
-    def get_node_context(node):
-        return NullContext
-
 class ParadoxFileContext:
     @staticmethod
     def get_actions(app_controller, file):
@@ -75,6 +62,19 @@ class ParadoxNodeContext:
     def errors(app_controller, node_context):
         return
 
+class ReadOnlyContext(ParadoxContext):
+    @staticmethod
+    def get_file_context():
+        return NullContext
+    
+    @staticmethod
+    def get_block_context(node):
+        return NullContext
+
+    @staticmethod
+    def get_node_context(node):
+        return NullContext
+    
 class NullContext:
     @staticmethod
     def get_actions(app_controller, block_context):
