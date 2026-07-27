@@ -23,7 +23,7 @@ class EventContext(ParadoxContext):
         return EventRootContext
     
     @staticmethod
-    def get_node_context(node):
+    def get_node_context(parent_node, node):
         if isinstance(node, GenericKeyValue):
             if node.key in ("name", "title", "desc", "text"):
                 return LocalisationFieldContext

@@ -168,7 +168,7 @@ class ScriptView(QWidget):
         else:
             effective_state = self.app_controller.file_system.change_tracker.get_node_state(node)
 
-        node_context = open_file_context.get_node_context(node)
+        node_context = open_file_context.get_node_context(parent_node, node)
         block_context = open_file_context.get_block_context(parent_node)
         
         item.setData(0, QtStorage.EDITABLE, key_editable)

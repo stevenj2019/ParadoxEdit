@@ -9,7 +9,7 @@ from App.Loading.Directories.Operations import IntelligenceOperationDirectory
 from App.Loading.Directories.Raids import RaidsDirectory
 from App.Loading.Directories.SpecialProjects import SpecialProjectsDirectory
 from App.Loading.Directories.States import StatesDirectory
-
+from App.Loading.Directories.FocusTree import FocusTreeDirectory
 DIRECTORY_REGISTRY = {
     "events": EventDirectory,
     "interface": InterfaceDirectory,
@@ -21,5 +21,6 @@ DIRECTORY_REGISTRY = {
     "common/operations": IntelligenceOperationDirectory,
     "common/raids": RaidsDirectory,
     "common/special_projects/projects":SpecialProjectsDirectory,
-    "history/states": StatesDirectory
+    "history/states": StatesDirectory,
+    "common/national_focus": FocusTreeDirectory
 }

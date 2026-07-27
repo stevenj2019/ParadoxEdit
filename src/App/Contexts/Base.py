@@ -17,7 +17,7 @@ class ParadoxContext:
         return ParadoxBlockContext
 
     @staticmethod
-    def get_node_context(node):
+    def get_node_context(parent_node, node):
         return ParadoxNodeContext
 
 class ParadoxFileContext:
@@ -71,7 +71,7 @@ class ReadOnlyContext(ParadoxContext):
         return NullContext
 
     @staticmethod
-    def get_node_context(node):
+    def get_node_context(parent_node, node):
         return NullContext
     
 class NullContext:

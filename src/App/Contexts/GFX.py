@@ -21,7 +21,7 @@ class GFXContext(ParadoxContext):
         return GFXRootContext
     
     @staticmethod
-    def get_node_context(node):
+    def get_node_context(parent_node, node):
         return ParadoxNodeContext
     
 class GFXFileContext(ParadoxFileContext):
