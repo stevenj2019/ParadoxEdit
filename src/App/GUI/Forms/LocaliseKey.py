@@ -19,11 +19,10 @@ class BaseLocaliseForm(QDialog):
         self.setLayout(QFormLayout())
         self.form = self.layout()
 
-    def _loc_key_widget(self, key, value=None):
-        label = QLabel(key)
+    def _loc_key_widget(self, node):
+        label = QLabel(node.key)
         text_edit = QTextEdit()
-        if value is not None:
-            text_edit.setPlainText(value)
+        text_edit.setPlainText(node.value)
         self._handle_localisation_field(text_edit)
         label.setBuddy(text_edit)
         text_edit.textChanged.connect(lambda: self._resize_localisation_field(text_edit))
@@ -75,33 +74,23 @@ class BaseLocaliseForm(QDialog):
         self.adjustSize()
 
 class LocaliseNodeForm(BaseLocaliseForm):
-    def __init__(self, app_controller, key:str=None):
+    def __init__(self, app_controller, node):
         super().__init__(app_controller, "Localise Key")
+        key = node.value.value
         self.loc_key = key
         if key in self.localisation_meta.keys():
-            self.node_selected = self.localisation_meta[key]["english"]["node"]
-            text = self.node_selected.value
-            self.save_file = self.localisation_meta[key]["english"]["file"]
+            self.node_selected = self.localisation_meta[key]["l_english"]["node"]
+            self.save_file = self.localisation_meta[key]["l_english"]["file"]
         else:
-            self.node_selected = None
-            text = None
+            self.node_selected = GenericLocKey(key, "NOT FOUND")
             self.save_file = None
-        self.loc_text = self._loc_key_widget(key, text)
+        self.loc_text = self._loc_key_widget(self.node_selected)
         self._lower_form_body()
         self.exec_()
 
     def _submit(self):
         self._handle_localisation_field(self.loc_text)
         new_value = self.loc_text.toPlainText().replace("\n", "\\n")
-        if self.node_selected is not None:
-            self.app_controller.request_node_mutation.emit(
-                NodeMutationRequest(file=self.save_file, node=self.node_selected, target=TargetProperty.VALUE, value=new_value)
-            )
-        else:
-            node = GenericLocKey(self.loc_key, new_value)
-            self.app_controller.request_block_mutation.emit(
-                BlockMutationRequest.add(self.save_file, len(self.save_file.nodes)+1, node, self.save_file)
-            )
-# class LocaliseEventForm(BaseLocaliseForm):
-#     def __init__(self, app_controller, block:GenericBlock):
-#         super().__init__(app_controller, "Localise Event")
+        self.app_controller.request_node_mutation.emit(
+            NodeMutationRequest(file=self.save_file, node=self.node_selected, target=TargetProperty.VALUE, value=new_value)
+        )
