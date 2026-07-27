@@ -13,36 +13,91 @@ class ParadoxLoadOrder:
         self.sources.append(ParadoxMod(path))
 
     def resolve(self):
-        self._resolve_dependencies()
+        # self._resolve_dependencies()
+        dependency_graph = self._build_dependency_graph()
+        self.sources = self._resolve_load_order(dependency_graph)
         self._resolve_file_overrides()
         self._clear_empty_directories()
 
-    #TODO: This need to implement alphabetical load ordering for when dependencies arent avaiable
-    def _resolve_dependencies(self):
-        resolved = []
-        remaining = self.sources.copy()
-        source_by_name = {source.source_name:source
-                          for source in self.sources}
+    # def _resolve_dependencies(self):
+    #     resolved = []
+    #     remaining = self.sources.copy()
+    #     source_by_name = {source.source_name:source
+    #                       for source in self.sources}
 
-        while remaining:
-            for source in remaining:
-                if isinstance(source, ParadoxVanilla):
-                    resolved.insert(0, source)
-                    remaining.remove(source)
-                    break
+    #     while remaining:
+    #         for source in remaining:
+    #             if isinstance(source, ParadoxVanilla):
+    #                 resolved.insert(0, source)
+    #                 remaining.remove(source)
+    #                 break
 
-                dependencies = [
-                    source_by_name[name] 
+    #             dependencies = [
+    #                 source_by_name[name] 
+    #                 for name in source.dependencies
+    #                 if name in source_by_name
+    #             ]
+
+    #             if all(dependency in resolved for dependency in dependencies):
+    #                 resolved.append(source)
+    #                 remaining.remove(source)
+    #                 break
+
+    #     self.sources = resolved
+
+    def _build_dependency_graph(self):
+        source_by_name = {
+            source.source_name: source
+            for source in self.sources
+        }
+
+        graph = {}
+
+        for source in self.sources:
+            if not isinstance(source, ParadoxVanilla):
+                graph[source] = [
+                    source_by_name[name]
                     for name in source.dependencies
                     if name in source_by_name
                 ]
 
-                if all(dependency in resolved for dependency in dependencies):
-                    resolved.append(source)
-                    remaining.remove(source)
-                    break
+        return graph
+    
+    def _resolve_load_order(self, graph):
+        resolved = list()
+        vanilla = next(
+            (source for source in self.sources if isinstance(source, ParadoxVanilla)),
+            None
+        )
+        if vanilla:
+            resolved.append(vanilla)
+            
+        remaining = set(graph.keys())
 
-        self.sources = resolved
+        while remaining:
+            available = [
+                source
+                for source in remaining
+                if all(
+                    dependency in resolved
+                    for dependency in graph[source]
+                )
+            ]
+
+            if not available:
+                # circular dependency / impossible order
+                raise Exception("Unable to resolve load order")
+
+            available.sort(
+                key=lambda source: source.source_name.lower()
+            )
+
+            source = available[0]
+
+            resolved.append(source)
+            remaining.remove(source)
+
+        return resolved
 
     def _resolve_file_overrides(self):
         loaded_sources = []
