@@ -121,11 +121,15 @@ class CheckableComboBox(QComboBox):
 
     def updateText(self):
         texts = []
+        checked = 0
+        total = self.model().rowCount()
+
         for i in range(self.model().rowCount()):
             if self.model().item(i).checkState() == Qt.Checked:
                 texts.append(self.model().item(i).text())
-        text = ", ".join(texts)
+                checked += 1
 
+        text = "All" if checked is 0 or checked is total else ", ".join(texts)
         metrics = QFontMetrics(self.lineEdit().font())
         elidedText = metrics.elidedText(text, Qt.ElideRight, self.lineEdit().width())
         self.lineEdit().setText(elidedText)
