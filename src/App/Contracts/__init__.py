@@ -1,22 +1,24 @@
 from __future__ import annotations
+
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
+    from App.Loading.Directories.Base import GenericDirectory
     from App.Loading.LoadOrder import ParadoxLoadOrder
-    from App.Loading.Directories.Base import GenericDirectory, ParadoxFileContext, ParadoxBlockContext, ParadoxNodeContext
     from App.Loading.Models import FileReference
     from App.Services import Workspace
 
 from dataclasses import dataclass
-from typing import Optional, Callable
+from typing import Callable, Optional
 
+from ParadoxParser import GenericBlock, GenericKeyValue, GenericNode
+from ParadoxParser import ParadoxLocParser as PDXLocFile
 from PyQt5.QtWidgets import QTreeWidget, QTreeWidgetItem
 
-from ParadoxParser import ParadoxScriptParser as PDXScriptFile
-from ParadoxParser import ParadoxLocParser as PDXLocFile
-from ParadoxParser import GenericBlock, GenericKeyValue, GenericNode
+from App.Contexts.Base import ParadoxFileContext, ParadoxNodeContext
+from App.Contracts.Enums import ChangeState, PropagationType, TargetProperty
 
-from App.Contracts.Enums import PropagationType, ChangeState, TargetProperty
+
 @dataclass
 class ModLoaderResult:
     workspace:Workspace
@@ -26,33 +28,33 @@ class ModLoaderResult:
     
 @dataclass
 class OpenFile:
-    file:PDXScriptFile|PDXLocFile
+    file:FileReference
     context:ParadoxFileContext
 
 @dataclass
 class PropagationRequest:
     type  :PropagationType
-    file  :PDXScriptFile
+    file  :FileReference
     node  :Optional[GenericBlock|GenericKeyValue|GenericNode]
     state :ChangeState
 
 @dataclass
 class NodeMutationRequest:
-    file:Optional[PDXScriptFile]
+    file:Optional[FileReference]
     node:GenericBlock|GenericKeyValue
     target:TargetProperty
     value:str|int|float
 
 @dataclass
 class BlockMutationRequest:
-    file:Optional[PDXScriptFile]
-    parent:PDXScriptFile|GenericBlock
+    file:Optional[FileReference]
+    parent:FileReference|GenericBlock
     index:int
     payload:Callable|GenericBlock|GenericKeyValue|GenericNode
     state:ChangeState
 
     @classmethod
-    def add(cls, parent, index, payload, file=None):
+    def add(cls, parent:FileReference|GenericBlock, index:int, payload:Callable|GenericBlock|GenericKeyValue|GenericNode, file:FileReference=None)->BlockMutationRequest:
         return cls(
             file=file, 
             parent=parent,

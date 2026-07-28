@@ -1,5 +1,6 @@
 from enum import Enum, auto
 
+
 class SaveTarget(Enum):
     ALL = auto()
     OPEN = auto()
