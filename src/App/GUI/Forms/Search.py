@@ -34,6 +34,7 @@ class SearchForm(QDialog):
         self.control_layout.addWidget(self.search_control_widget)
 
         self.toggle_advanced_search = QToolButton()
+        self.toggle_advanced_search.setToolTip("Show advanced options")
         self.toggle_advanced_search.setFixedWidth(24)
         self.toggle_advanced_search.setArrowType(Qt.DownArrow)
         self.toggle_advanced_search.clicked.connect(self.toggle_options)
@@ -80,6 +81,7 @@ class SearchForm(QDialog):
     def toggle_options(self):
         self.toggle_advanced_search.setArrowType(Qt.DownArrow if self.advanced_control_container.isVisible() else Qt.UpArrow)
         self.advanced_control_container.setVisible(not self.advanced_control_container.isVisible())
+        self.toggle_advanced_search.setToolTip(f"{'Hide' if self.advanced_control_container.isVisible() else 'Show'} advanced options")
         self.adjustSize()
 
     def _set_case_sensitivity(self, case_sensitive:bool):
