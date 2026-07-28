@@ -1,20 +1,40 @@
-from ParadoxParser.ParadoxNodes import GenericBlock, GenericKeyValue
+from __future__ import annotations
 
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from App import AppController
+    from App.Loading.Models import FileReference
+
+from ParadoxParser.ParadoxNodes import GenericBlock, GenericKeyValue, GenericNode
+
+from App.Contexts import BlockContext, NodeContext
+from App.Contexts.Base import (
+    GFXFieldContext,
+    LocalisationFieldContext,
+    ParadoxBlockContext,
+    ParadoxContext,
+    ParadoxFileContext,
+    ParadoxNodeContext,
+)
 from App.Contracts import BlockMutationRequest
-from App.Contexts.Base import (ParadoxContext, ParadoxFileContext, ParadoxBlockContext, 
-                               ParadoxNodeContext, LocalisationFieldContext, GFXFieldContext)
-from App.GUI.Actions import Action
-from App.PDXFactory.Blocks.Events import (add_namespace_keyval, country_event_block, news_event_block, 
-                                          immediate_block, option_block)
-from App.GUI.Forms.LocaliseKey import LocaliseEventForm
+from App.GUI.Actions import Action, ActionsResult
+from App.PDXFactory.Blocks.Events import (
+    add_namespace_keyval,
+    country_event_block,
+    immediate_block,
+    news_event_block,
+    option_block,
+)
+
 
 class EventContext(ParadoxContext):
     @staticmethod
-    def get_file_context():
+    def get_file_context() -> type[ParadoxFileContext]:
         return EventFileContext
     
     @staticmethod
-    def get_block_context(node):
+    def get_block_context(node:GenericNode) -> type[ParadoxBlockContext]:
         if isinstance(node, GenericBlock):
             if node.key in ["news_event", "country_event"]:
                 return EventBlockContext
@@ -23,7 +43,7 @@ class EventContext(ParadoxContext):
         return EventRootContext
     
     @staticmethod
-    def get_node_context(parent_node, node):
+    def get_node_context(parent_node:GenericBlock, node:GenericNode) -> type[ParadoxNodeContext]:
         if isinstance(node, GenericKeyValue):
             if node.key in ("name", "title", "desc", "text"):
                 return LocalisationFieldContext
@@ -33,7 +53,7 @@ class EventContext(ParadoxContext):
             
 class EventFileContext(ParadoxFileContext):
     @staticmethod
-    def get_actions(app_controller, file):
+    def get_actions(app_controller:AppController, file:FileReference) -> ActionsResult:
         return [
             *ParadoxFileContext.get_actions(app_controller, file),
             # Action("Inject Event Logs", dummy, False),
@@ -42,7 +62,7 @@ class EventFileContext(ParadoxFileContext):
 
 class EventRootContext(ParadoxBlockContext):
     @staticmethod
-    def get_actions(app_controller, block_context):
+    def get_actions(app_controller:AppController, block_context:BlockContext) -> ActionsResult:
         return [
             *ParadoxNodeContext.get_actions(app_controller, block_context),
             # Action("Add Namespace", 
@@ -66,7 +86,8 @@ class EventRootContext(ParadoxBlockContext):
         ]
 class EventBlockContext:
     @staticmethod
-    def get_actions(app_controller, block_context):
+    def get_actions(app_controller:AppController, block_context:BlockContext) -> ActionsResult:
+        from App.GUI.Forms.LocaliseKey import LocaliseEventForm
         return [
             *ParadoxNodeContext.get_actions(app_controller, block_context),
             # Action("Add Immediate Block",
@@ -87,7 +108,7 @@ class EventBlockContext:
     
 class EventOptionContext:
     @staticmethod
-    def get_actions(app_controller, block_context):
+    def get_actions(app_controller:AppController, block_context:BlockContext) -> ActionsResult:
         return [
             *ParadoxNodeContext.get_actions(app_controller, block_context),
             # *TriggerBlockActions.get_actions(context), 

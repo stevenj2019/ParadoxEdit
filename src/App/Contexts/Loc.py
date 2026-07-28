@@ -1,25 +1,40 @@
-from App.Contexts.Base import (ParadoxContext, 
-                              ParadoxFileContext, ParadoxNodeContext)
+from __future__ import annotations
+
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from App import AppController
+    from App.Loading.Models import FileReference
+
+from ParadoxParser.ParadoxNodes import GenericBlock, GenericNode
+
+from App.Contexts.Base import (
+    ParadoxBlockContext,
+    ParadoxContext,
+    ParadoxFileContext,
+    ParadoxNodeContext,
+)
 from App.Contracts import BulkMutationRequest
-from App.GUI.Actions import Action
+from App.GUI.Actions import Action, ActionsResult
 from App.Scripts.Localisation import convert_legacy
+
 
 class LocalisationContext(ParadoxContext):
     @staticmethod
-    def get_file_context():
+    def get_file_context() -> type[ParadoxFileContext]:
         return LocalisationFileContext
     
     @staticmethod
-    def get_block_context(node):
+    def get_block_context(node:GenericNode) -> type[ParadoxBlockContext]:
         return ParadoxNodeContext
     
     @staticmethod
-    def get_node_context(parent_node, node):
+    def get_node_context(parent_node:GenericBlock, node:GenericNode) -> type[ParadoxNodeContext]:
         return ParadoxNodeContext
             
 class LocalisationFileContext(ParadoxFileContext):
     @staticmethod
-    def get_actions(app_controller, file):
+    def get_actions(app_controller:AppController, file:FileReference) -> ActionsResult:
         return [
             *ParadoxFileContext.get_actions(app_controller, file),
             Action("Convert to new format",

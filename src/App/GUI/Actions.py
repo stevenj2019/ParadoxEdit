@@ -1,5 +1,5 @@
 from dataclasses import dataclass
-from typing import Callable, List
+from typing import Callable, List, TypeAlias
 
 @dataclass
 class Action:
@@ -16,3 +16,5 @@ class ActionGroup:
 class ActionSubMenu:
     text: str
     actions:List[Action]
+
+ActionsResult: TypeAlias = list[Action|ActionGroup|ActionSubMenu]

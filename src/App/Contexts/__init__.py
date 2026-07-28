@@ -1,14 +1,21 @@
 from __future__ import annotations
+
 from typing import TYPE_CHECKING
+
 if TYPE_CHECKING:
-    from App.Contexts.Base import (GenericDirectory, ParadoxFileContext, 
-                                   ParadoxBlockContext, ParadoxNodeContext)
+    from App.Contexts.Base import (
+        GenericDirectory,
+        ParadoxBlockContext,
+        ParadoxFileContext,
+        ParadoxNodeContext,
+    )
     
 from dataclasses import dataclass
 
-from ParadoxParser import ParadoxScriptParser as PDXScriptFile
 from ParadoxParser import ParadoxLocParser as PDXLocFile
+from ParadoxParser import ParadoxScriptParser as PDXScriptFile
 from ParadoxParser.ParadoxNodes import GenericBlock, GenericKeyValue, GenericNode
+
 
 @dataclass
 class FileContext:
