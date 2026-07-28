@@ -4,7 +4,7 @@ from ParadoxParser import ParadoxScriptParser as PDXFile
 from ParadoxParser.ParadoxNodes import GenericBlock
 
 from App.Contracts import BlockMutationRequest
-from App.Contexts.Base import ParadoxContext, ParadoxFileContext, ParadoxNodeContext
+from App.Contexts.Base import ParadoxContext, ParadoxFileContext, ParadoxNodeContext, ParadoxBlockContext
 from App.GUI.Actions import Action
 from App.PDXFactory.Blocks.Sprites import GFX_icon, GFX_shine_icon
 
@@ -35,14 +35,14 @@ class GFXFileContext(ParadoxFileContext):
                    True)
         ]
 
-class GFXRootContext(ParadoxFileContext):
+class GFXRootContext(ParadoxBlockContext):
     @staticmethod
     def get_actions(app_controller, block_context):
         return [
             *ParadoxNodeContext.get_actions(app_controller, block_context)
         ]
     
-class GFXSpriteTypesContext(ParadoxFileContext):
+class GFXSpriteTypesContext(ParadoxBlockContext):
     def get_actions(app_controller, block_context):
         return [
             *ParadoxNodeContext.get_actions(app_controller, block_context),
