@@ -1,4 +1,4 @@
-#TODO: query tree recrusion issue, may be duplicating operations
+# TODO: query tree recrusion issue, may be duplicating operations
 # from __future__ import annotations
 
 # from typing import TYPE_CHECKING
@@ -11,7 +11,7 @@
 # from ParadoxParser import ParadoxScriptParser as PDXFile
 # from ParadoxParser.ParadoxNodes import GenericBlock, GenericComment
 
-# from PyQt5.QtWidgets import (QDialog, QFormLayout, QHBoxLayout, QTreeWidget, QTreeWidgetItem, 
+# from PyQt5.QtWidgets import (QDialog, QFormLayout, QHBoxLayout, QTreeWidget, QTreeWidgetItem,
 #                              QPushButton, QLabel, QLineEdit, QCheckBox, QComboBox)
 
 # from App.Loading.Models import FileReference, IconFile
@@ -82,7 +82,7 @@
 #         path, exists = gfx_save_folder_selector(self, str(self.source.file_path / "gfx"))
 #         if exists:
 #             self.storage_folder_path_element_text.setText(path)
-    
+
 #     def _submit(self) -> None:
 #         self.file_list = self.file_selector.file_list
 #         sprites = []
@@ -99,7 +99,7 @@
 #                 if path.suffix in (".dds", ".png"):
 #                     sprites.append(Path(path))
 #             return sprites
-        
+
 #         def generate_icon_files(save_to, sprites):
 #             icons = list()
 #             for sprite in sprites:
@@ -109,9 +109,9 @@
 #                 directory = self.source.directories[directory]
 
 #                 new_file = FileReference(
-#                     directory, 
-#                     IconFile.add(new_path, sprite), 
-#                     ParadoxContext, 
+#                     directory,
+#                     IconFile.add(new_path, sprite),
+#                     ParadoxContext,
 #                     False
 #                 )
 #                 icons.append(new_file)
@@ -123,19 +123,19 @@
 #             sprite_path = icon_file.filepath.relative_to(file_path)
 #             if get_shines:
 #                 return [GenericComment(f"Focus Icon for: {icon_file.filepath.stem}"),
-#                                         GFX_icon(sprite_name, sprite_path), 
+#                                         GFX_icon(sprite_name, sprite_path),
 #                                         GFX_shine_icon(sprite_name, sprite_path)]
 #             else:
 #                 return [GFX_icon(sprite_name, sprite_path)]
 
 #         try:
 #             sprite_block = next(node for node in self.save_file.file.nodes
-#                                 if (isinstance(node, GenericBlock) 
+#                                 if (isinstance(node, GenericBlock)
 #                                     and node.key.lower() == "spritetypes"))
 #         except StopIteration:
 #             #TODO: warning
 #             return
-    
+
 #         if not self.storage_folder_path_element_text.text().strip() or not self.file_list:
 #             form_missing_value(self)
 #             return

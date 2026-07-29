@@ -8,14 +8,17 @@ class Action:
     callback: Callable
     enabled: bool
 
-@dataclass 
+
+@dataclass
 class ActionGroup:
     text: str
-    actions:List[Action]
+    actions: List[Action]
 
-@dataclass 
+
+@dataclass
 class ActionSubMenu:
     text: str
-    actions:List[Action]
+    actions: List[Action]
 
-ActionsResult: TypeAlias = list[Action|ActionGroup|ActionSubMenu]
+
+ActionsResult: TypeAlias = list[Action | ActionGroup | ActionSubMenu]

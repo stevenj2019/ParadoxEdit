@@ -1,4 +1,3 @@
-from ParadoxParser.ParadoxNodes import GenericBlock
 # def add_missing_shines(file):
 # 	focus_sprites = list()
 # 	for node in file.obj.nodes:
@@ -6,7 +5,7 @@ from ParadoxParser.ParadoxNodes import GenericBlock
 # 			for child in node.children:
 # 				if isinstance(child, GenericBlock):
 # 					icon_keys = [c.key for c in child.children]
-# 					if (child.key.lower() == "spritetype" and 
+# 					if (child.key.lower() == "spritetype" and
 # 		 				not any(k.startswith("animation") for k in icon_keys)):
 # 						icon_dict = dict()
 # 						for kv in child.children:
@@ -56,4 +55,3 @@ from ParadoxParser.ParadoxNodes import GenericBlock
 #         for icon in normal_icons:
 #             icon_name = get_node_name(icon)
 #             if f"{icon_name}_shine" not in shine_icon_names:
-                

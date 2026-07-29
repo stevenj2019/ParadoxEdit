@@ -1,22 +1,36 @@
-import qdarktheme
-from contextlib import contextmanager
-import traceback
 import copy
 import sys
+import traceback
+from contextlib import contextmanager
 
-from PyQt5.QtCore import QObject, pyqtSignal, QThread
+import qdarktheme
+from PyQt5.QtCore import QObject, QThread, pyqtSignal
 from PyQt5.QtWidgets import QApplication, QDialog
 
-from App.Loading import LoadingDialog, LoadProcess
-from App.Loading.ParadoxSource import ParadoxSource, ParadoxMod
-from App.Loading.Directories.Base import GenericDirectory
-from App.Services import ConfigurationManager, AppLogger, FilesystemMananger, ParadoxRegistry, Workspace
-from App.GUI.StyleManager import StyleManager
-from App.GUI.Main import MainWindow
+from App.Contracts import (
+    BlockMutationRequest,
+    BulkMutationRequest,
+    FileMutationRequest,
+    NodeMutationRequest,
+    PropagationRequest,
+)
+from App.Contracts.Enums import ChangeState, PropagationType, SaveTarget, TargetProperty
 from App.GUI.Forms.Settings import SettingsForm
+from App.GUI.Main import MainWindow
+from App.GUI.StyleManager import StyleManager
 from App.GUI.Widgets.PopupModels import setup_process_cancelled
-from App.Contracts import PropagationRequest, NodeMutationRequest, BlockMutationRequest, BulkMutationRequest, FileMutationRequest
-from App.Contracts.Enums import SaveTarget, PropagationType, ChangeState, TargetProperty
+from App.Loading import LoadingDialog, LoadProcess
+from App.Loading.Directories.Base import GenericDirectory
+from App.Loading.Models import FileReference
+from App.Loading.ParadoxSource import ParadoxMod, ParadoxSource
+from App.Services import (
+    AppLogger,
+    ConfigurationManager,
+    FilesystemMananger,
+    ParadoxRegistry,
+    Workspace,
+)
+
 
 class AppController(QObject):
     request_node_mutation = pyqtSignal(object)
@@ -25,16 +39,16 @@ class AppController(QObject):
     request_file_change = pyqtSignal(object)
     request_save = pyqtSignal(object)
 
-    def __init__(self):
+    def __init__(self) -> None:
         super().__init__()
         AppLogger.initialise()
         sys.excepthook = self.global_exception_handler
-        self.app           = QApplication(sys.argv)
+        self.app = QApplication(sys.argv)
 
         self.configuration = ConfigurationManager()
-        self.file_system   = FilesystemMananger(self.configuration)
+        self.file_system = FilesystemMananger(self.configuration)
         self.style_manager = StyleManager(self.configuration)
-        self.registry      = ParadoxRegistry()
+        self.registry = ParadoxRegistry()
 
         self.main = MainWindow(self)
 
@@ -51,24 +65,20 @@ class AppController(QObject):
 
         self.run()
 
-    def global_exception_handler(self, exc_type, exc_value, exc_traceback):
+    def global_exception_handler(self, exc_type, exc_value, exc_traceback) -> None:
         if exc_type is KeyboardInterrupt:
             sys.__excepthook__(exc_type, exc_value, exc_traceback)
             return
-        error = "".join(
-            traceback.format_exception(
-                exc_type,
-                exc_value,
-                exc_traceback
+        error = "".join(traceback.format_exception(exc_type, exc_value, exc_traceback))
+
+        AppLogger.error(f"Unhandled exception:\n{error}")
+
+    def run(self) -> None:
+        self.app.setStyleSheet(
+            qdarktheme.load_stylesheet(
+                "dark" if self.configuration.dark_mode else "light"
             )
         )
-
-        AppLogger.error(
-            f"Unhandled exception:\n{error}"
-        )
-
-    def run(self):
-        self.app.setStyleSheet(qdarktheme.load_stylesheet("dark" if self.configuration.dark_mode else "light"))
         self.request_node_mutation.connect(self._request_node_mutation)
         self.request_block_mutation.connect(self._request_block_mutation)
         self.request_bulk_mutation.connect(self._request_bulk_mutation)
@@ -78,69 +88,79 @@ class AppController(QObject):
 
         self.app.exec_()
 
-    def load_vanilla_files(self):
+    def load_vanilla_files(self) -> None:
         workspace_candidate = copy.deepcopy(self.file_system.workspace)
         workspace_candidate.set_vanilla_status(True)
 
         self.reload_workspace(workspace_candidate)
 
-    def add_mod_to_workspace(self, path):
+    def add_mod_to_workspace(self, path) -> None:
         workspace_candidate = copy.deepcopy(self.file_system.workspace)
         workspace_candidate.add_mod_to_workspace(path)
 
         self.reload_workspace(workspace_candidate)
 
-    def load_workspace(self, path):
+    def load_workspace(self, path) -> None:
         workspace_candidate = Workspace()
         workspace_candidate.read_file(path)
 
         self.reload_workspace(workspace_candidate)
 
-    def reload_workspace(self, workspace):
+    def reload_workspace(self, workspace:Workspace) -> None:
         self.loading_screen = LoadingDialog()
 
         self.thread = QThread()
-        self.loading_process = LoadProcess(workspace, self.configuration.game_install_path)
-        
+        self.loading_process = LoadProcess(
+            workspace, self.configuration.game_install_path
+        )
+
         self.loading_process.moveToThread(self.thread)
         self.thread.started.connect(self.loading_process.run)
-        self.loading_process.progress_message.connect(self.loading_screen.update_message)
-        self.loading_process.progress_bar_start.connect(self.loading_screen.start_progress_bar)
-        self.loading_process.progress_bar_update.connect(self.loading_screen.update_progress_bar)
-        self.loading_process.progress_bar_end.connect(self.loading_screen.end_progress_bar)
+        self.loading_process.progress_message.connect(
+            self.loading_screen.update_message
+        )
+        self.loading_process.progress_bar_start.connect(
+            self.loading_screen.start_progress_bar
+        )
+        self.loading_process.progress_bar_update.connect(
+            self.loading_screen.update_progress_bar
+        )
+        self.loading_process.progress_bar_end.connect(
+            self.loading_screen.end_progress_bar
+        )
         self.loading_process.finished.connect(self.workspace_loaded)
         self.loading_process.failed.connect(self.workspace_load_failed)
         self.loading_screen.show()
         self.thread.start()
 
-    def workspace_loaded(self, result):
+    def workspace_loaded(self, result) -> None:
         self.registry.load_tokens(result.tokens)
         self.registry.load_metadata(result.metadata)
         self.file_system.load_workspace(result.workspace, result.load_order)
-        
+
         self.main.load_mod(result.load_order)
-        
+
         self.loading_screen.close()
         self.thread.quit()
         self.thread.wait()
 
-    def workspace_load_failed(self, error, traceback):
+    def workspace_load_failed(self, error, traceback) -> None:
         self.loading_screen.close()
         self.main.load_workspace_failed(error, traceback)
         self.thread.quit()
         self.thread.wait()
 
-    def save_workspace(self, file_path):
+    def save_workspace(self, file_path) -> None:
         self.file_system.workspace.write_file(file_path)
 
-    def _refresh_file(self):
+    def _refresh_file(self) -> None:
         for file in self._batch_file:
             if file is self.file_system.open_file:
                 self.main.load_file(self.file_system.open_file)
         self._batch_file.clear()
 
     @contextmanager
-    def batch_manager(self):
+    def batch_manager(self) -> None:
         self._batch_depth += 1
         try:
             yield
@@ -149,7 +169,7 @@ class AppController(QObject):
             if self._batch_depth == 0:
                 self._refresh_file()
 
-    def _request_node_mutation(self, request:NodeMutationRequest):
+    def _request_node_mutation(self, request: NodeMutationRequest) -> None:
         file = request.file if request.file else self.file_system.open_file
         node = request.node
         target = request.target
@@ -170,17 +190,21 @@ class AppController(QObject):
         if changed:
             AppLogger.info(f"{old_value} to {value}")
             self.file_system.changed_file(file.file, node, ChangeState.MODIFIED)
-            self.main.request_propagation.emit(PropagationRequest(type=PropagationType.NODE,
-                                                                  file=file,
-                                                                  node=node,
-                                                                  state=ChangeState.MODIFIED))
+            self.main.request_propagation.emit(
+                PropagationRequest(
+                    type=PropagationType.NODE,
+                    file=file,
+                    node=node,
+                    state=ChangeState.MODIFIED,
+                )
+            )
 
-    def _request_block_mutation(self, request:BlockMutationRequest):
-        file   = request.file if request.file else self.file_system.open_file
+    def _request_block_mutation(self, request: BlockMutationRequest) -> None:
+        file = request.file if request.file else self.file_system.open_file
         parent = request.parent
-        index  = request.index
-        payload  = request.payload
-        state  = request.state
+        index = request.index
+        payload = request.payload
+        state = request.state
 
         if state == ChangeState.ADDED:
             node = payload() if callable(payload) else payload
@@ -188,15 +212,16 @@ class AppController(QObject):
         else:
             node = parent.nodes[index]
         self.file_system.changed_file(file, node, state)
-        self.main.request_propagation.emit(PropagationRequest(type=PropagationType.NODE, 
-                                                       file=file,
-                                                       node=node,
-                                                       state=state))
+        self.main.request_propagation.emit(
+            PropagationRequest(
+                type=PropagationType.NODE, file=file, node=node, state=state
+            )
+        )
         self._batch_file.add(file)
-        if self._batch_depth ==0:
+        if self._batch_depth == 0:
             self._refresh_file()
 
-    def _request_bulk_mutation(self, request:BulkMutationRequest):
+    def _request_bulk_mutation(self, request: BulkMutationRequest) -> None:
         target = request.target
         action = request.action
         if isinstance(target, (ParadoxSource, GenericDirectory)):
@@ -206,14 +231,18 @@ class AppController(QObject):
 
         for file in files:
             action(file, self)
-            self.main.request_propagation.emit(PropagationRequest(type=PropagationType.FILE,
-                                                                  file=file,
-                                                                  node=None,
-                                                                  state=ChangeState.MODIFIED))
+            self.main.request_propagation.emit(
+                PropagationRequest(
+                    type=PropagationType.FILE,
+                    file=file,
+                    node=None,
+                    state=ChangeState.MODIFIED,
+                )
+            )
         if self.file_system.open_file.file in files:
             self.main.load_file(self.file_system.open_file)
 
-    def _request_file_change(self, request:FileMutationRequest):
+    def _request_file_change(self, request: FileMutationRequest) -> None:
         file = request.file
         if request.state == ChangeState.ADDED:
             request.directory.add_file(file.file.filepath, file.file.filename, file)
@@ -221,15 +250,15 @@ class AppController(QObject):
         self.main.mod_panel.add_file(request.directory, request.file)
         self.main.mod_panel.set_file_state(request.file, request.state)
 
-    def _save_target(self, target):
-        def save_routine(file):
+    def _save_target(self, target:SaveTarget) -> None:
+        def save_routine(file:FileReference) -> None:
             saved = self.file_system.save_file(file)
             if saved:
-                self.main.request_propagation.emit(PropagationRequest(type=PropagationType.FILE, 
-                                                                      file=file,
-                                                                      node=None,
-                                                                      state=None
-                                                                      ))
+                self.main.request_propagation.emit(
+                    PropagationRequest(
+                        type=PropagationType.FILE, file=file, node=None, state=None
+                    )
+                )
 
         if target is SaveTarget.ALL:
             for source in self.file_system.load_order.sources:

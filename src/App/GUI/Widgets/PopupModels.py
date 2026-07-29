@@ -1,10 +1,10 @@
-#TODO come back to type hinting
+# TODO come back to type hinting
 from PyQt5.QtWidgets import QMessageBox
 
 from App.Services import AppLogger
 
 
-def could_not_load_mod_critical(exc: Exception, traceback:str) -> None:
+def could_not_load_mod_critical(exc: Exception, traceback: str) -> None:
     msg = QMessageBox()
     msg.setIcon(QMessageBox.Critical)
     msg.setWindowTitle("Mod Could not be loaded")
@@ -16,25 +16,25 @@ def could_not_load_mod_critical(exc: Exception, traceback:str) -> None:
 
 
 def setup_process_cancelled() -> QMessageBox:
-    return QMessageBox.critical(None, "Startup Wizard Failed", "Startup Settings was aborted", QMessageBox.Ok)
-    
-def settings_error_critical(game_dir_error:bool, mod_dir_error:bool) -> QMessageBox:
+    return QMessageBox.critical(
+        None, "Startup Wizard Failed", "Startup Settings was aborted", QMessageBox.Ok
+    )
+
+
+def settings_error_critical(game_dir_error: bool, mod_dir_error: bool) -> QMessageBox:
     text = "The following Problems prevent saving:"
     if game_dir_error:
         text += "\nGame install directory could not find pdx_launcher, is invalid"
     if mod_dir_error:
         text += "\nMod folder does not contain any .mod files, is invalid"
-    return QMessageBox.critical(
-        None, 
-        "Error(s) in settings",
-        text,
-        QMessageBox.Ok
-    )
+    return QMessageBox.critical(None, "Error(s) in settings", text, QMessageBox.Ok)
+
 
 def form_missing_value(parent):
     return QMessageBox.warning(
         parent, "Missing Value", "Form is missing essential values", QMessageBox.Ok
     )
+
 
 def bulk_operation_warning(parent):
     if not parent.bulk_warning_shown:
@@ -52,10 +52,7 @@ def bulk_operation_warning(parent):
         )
 
         reply = QMessageBox.question(
-            parent,
-            "Bulk Operation Warning",
-            msg,
-            QMessageBox.Yes | QMessageBox.No
+            parent, "Bulk Operation Warning", msg, QMessageBox.Yes | QMessageBox.No
         )
         if reply == QMessageBox.Yes:
             parent.bulk_warning_shown = True
@@ -63,66 +60,67 @@ def bulk_operation_warning(parent):
     else:
         return True
 
+
 def toggle_safe_mode_warning(parent):
     if parent.safe_mode:
         reply = QMessageBox.question(
-            parent, 
-            "Warning", 
-            "This will disable safe mode, which allows for .bak generation on files modified.", 
-            QMessageBox.Yes | QMessageBox.No
+            parent,
+            "Warning",
+            "This will disable safe mode, which allows for .bak generation on files modified.",
+            QMessageBox.Yes | QMessageBox.No,
         )
         if reply == QMessageBox.Yes:
             parent.safe_mode = not parent.safe_mode
     else:
         parent.safe_mode = not parent.safe_mode
 
+
 def GFX_file_copying_warn(parent):
     reply = QMessageBox.question(
-        parent, 
+        parent,
         "Warning",
         "Wether or not you save the file, the code will not delete source files, you must do this manually if you proceed, but change your mind",
-        QMessageBox.Yes | QMessageBox.No
+        QMessageBox.Yes | QMessageBox.No,
     )
     return reply == QMessageBox.Yes
+
 
 def GFX_is_focus_upload(parent):
     reply = QMessageBox.question(
-        parent, 
+        parent,
         "Generate _shines",
         "Are these icons intended for use in Focus Trees?",
-        QMessageBox.Yes | QMessageBox.No
+        QMessageBox.Yes | QMessageBox.No,
     )
     return reply == QMessageBox.Yes
 
+
 def GFX_load_and_store_are_same():
     return QMessageBox.warning(
-        None, 
+        None,
         "Warning",
         "Source and Destination folders are identical, this operation will be terminated",
-        QMessageBox.Ok
+        QMessageBox.Ok,
     )
+
 
 def invalid_GFX_file_warning(parent):
     return QMessageBox.question(
-        parent, 
+        parent,
         "Invalid .gfx file provided",
-        "This .gfx file lacks a SpriteTypes block, Syntax Error.", 
-        QMessageBox.Ok
+        "This .gfx file lacks a SpriteTypes block, Syntax Error.",
+        QMessageBox.Ok,
     )
+
 
 def change_rejected_warning(message):
     AppLogger.warning(message)
-    return QMessageBox.warning(
-        None, 
-        "Warning",
-        message,
-        QMessageBox.Ok
-    )
+    return QMessageBox.warning(None, "Warning", message, QMessageBox.Ok)
+
 
 def no_icon_available_warning(message):
-    return QMessageBox.warning(
-        None, "Warning", message, QMessageBox.Ok
-    )
+    return QMessageBox.warning(None, "Warning", message, QMessageBox.Ok)
+
 
 def file_is_unsupported():
     return QMessageBox.warning(

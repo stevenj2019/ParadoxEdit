@@ -4,8 +4,11 @@ from PyQt5.QtCore import Qt
 
 
 class QtStorage(IntEnum):
-    def _generate_next_value_(name:str, start:int, count:int, last_values:list[int]) -> int:
+    def _generate_next_value_(
+        name: str, start: int, count: int, last_values: list[int]
+    ) -> int:
         return Qt.UserRole + count
+
     READ_ONLY = auto()
     IS_BLOCK = auto()
     IS_COMPARATOR = auto()
@@ -19,6 +22,7 @@ class QtStorage(IntEnum):
     PARENT_CONTEXT = auto()
     INDEX = auto()
     EDITABLE = auto()
+
 
 class ExpansionMode(Enum):
     ALL = auto()

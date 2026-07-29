@@ -26,38 +26,56 @@ from App.GUI.Widgets.PopupModels import settings_error_critical
 
 
 class SettingsForm(QDialog):
-    def __init__(self, title:str, app_controller:AppController) -> None:
+    def __init__(self, title: str, app_controller: AppController) -> None:
         super().__init__()
         self.app_controller = app_controller
         self.setWindowTitle(title)
-        self.resize(550,150)
+        self.resize(550, 150)
         self.setLayout(QFormLayout())
         self.form = self.layout()
 
-        safe_mode_checked = self.app_controller.configuration.safe_mode if self.app_controller.configuration.initialised else True
-        dark_mode_checked = self.app_controller.configuration.dark_mode if self.app_controller.configuration.initialised else False
+        safe_mode_checked = (
+            self.app_controller.configuration.safe_mode
+            if self.app_controller.configuration.initialised
+            else True
+        )
+        dark_mode_checked = (
+            self.app_controller.configuration.dark_mode
+            if self.app_controller.configuration.initialised
+            else False
+        )
 
-        self.config_file_label = QLabel(f"Configuration will be stored at: {self.app_controller.configuration.file_path.absolute()}")
+        self.config_file_label = QLabel(
+            f"Configuration will be stored at: {self.app_controller.configuration.file_path.absolute()}"
+        )
         self.form.addRow(self.config_file_label)
 
         self.game_install_path_label = QLabel("Paradox Game Path:")
         self.game_install_path_element = QHBoxLayout()
         self.game_install_path_element_text = QLineEdit()
-        self.game_install_path_element_text.setText(str(self.app_controller.configuration.game_install_path))
+        self.game_install_path_element_text.setText(
+            str(self.app_controller.configuration.game_install_path)
+        )
         self.game_install_path_element_button = QPushButton("...")
         self.game_install_path_element.addWidget(self.game_install_path_element_text)
         self.game_install_path_element.addWidget(self.game_install_path_element_button)
-        self.game_install_path_element_button.clicked.connect(self.browse_game_install_path)
+        self.game_install_path_element_button.clicked.connect(
+            self.browse_game_install_path
+        )
         self.form.addRow(self.game_install_path_label, self.game_install_path_element)
 
         self.mod_install_path_label = QLabel("Paradox Mods Path:")
         self.mod_install_path_element = QHBoxLayout()
         self.mod_install_path_element_text = QLineEdit()
-        self.mod_install_path_element_text.setText(str(self.app_controller.configuration.mod_file_path))
+        self.mod_install_path_element_text.setText(
+            str(self.app_controller.configuration.mod_file_path)
+        )
         self.mod_install_path_element_button = QPushButton("...")
         self.mod_install_path_element.addWidget(self.mod_install_path_element_text)
         self.mod_install_path_element.addWidget(self.mod_install_path_element_button)
-        self.mod_install_path_element_button.clicked.connect(self.browse_mod_install_path)
+        self.mod_install_path_element_button.clicked.connect(
+            self.browse_mod_install_path
+        )
         self.form.addRow(self.mod_install_path_label, self.mod_install_path_element)
 
         self.safe_mode_label = QLabel("Safe Mode:")
@@ -86,33 +104,46 @@ class SettingsForm(QDialog):
         path = select_mod_directory(self.app_controller.main)
         if path:
             self.mod_install_path_element_text.setText(path)
-    
+
     def toggle_dark_mode(self) -> None:
-        self.app_controller.configuration.change_setting(dark_mode = not(self.app_controller.configuration.dark_mode))
-        self.app_controller.app.setStyleSheet(qdarktheme.load_stylesheet("dark" if self.app_controller.configuration.dark_mode else "light"))
+        self.app_controller.configuration.change_setting(
+            dark_mode=not (self.app_controller.configuration.dark_mode)
+        )
+        self.app_controller.app.setStyleSheet(
+            qdarktheme.load_stylesheet(
+                "dark" if self.app_controller.configuration.dark_mode else "light"
+            )
+        )
 
     def submit_form(self) -> None:
         game_dir_error = False
         mod_dir_error = False
-        
+
         game_folder = Path(self.game_install_path_element_text.text().strip())
         if not (game_folder.is_dir() and (game_folder / "pdx_launcher").is_dir()):
-           game_dir_error = True
+            game_dir_error = True
         mod_folder = Path(self.mod_install_path_element_text.text().strip())
-        if not (mod_folder.is_dir() 
-                and any(
-                    mod_file.name != "descriptor.mod"
-                    for mod_file in mod_folder.glob("*.mod")
-                )
-            ):
+        if not (
+            mod_folder.is_dir()
+            and any(
+                mod_file.name != "descriptor.mod"
+                for mod_file in mod_folder.glob("*.mod")
+            )
+        ):
             mod_dir_error = True
-        
+
         if not (game_dir_error or mod_dir_error):
             self.app_controller.configuration.create_file()
-            self.app_controller.configuration.change_setting(safe_mode = self.safe_mode_check.isChecked() )
-            self.app_controller.configuration.change_setting(dark_mode = self.dark_mode_check.isChecked() )
-            self.app_controller.configuration.change_setting(game_install_path = game_folder)
-            self.app_controller.configuration.change_setting(mod_file_path = mod_folder)
+            self.app_controller.configuration.change_setting(
+                safe_mode=self.safe_mode_check.isChecked()
+            )
+            self.app_controller.configuration.change_setting(
+                dark_mode=self.dark_mode_check.isChecked()
+            )
+            self.app_controller.configuration.change_setting(
+                game_install_path=game_folder
+            )
+            self.app_controller.configuration.change_setting(mod_file_path=mod_folder)
             self.app_controller.configuration.write_file()
             self.accept()
         else:

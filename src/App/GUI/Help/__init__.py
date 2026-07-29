@@ -4,7 +4,6 @@ from pathlib import Path
 from PyQt5.QtWidgets import (
     QDialog,
     QHBoxLayout,
-    QLabel,
     QPushButton,
     QStackedWidget,
     QTextBrowser,
@@ -14,7 +13,7 @@ from PyQt5.QtWidgets import (
 
 
 class HelpDialog(QDialog):
-    def __init__(self):
+    def __init__(self) -> None:
         super().__init__()
 
         self.pages = []
@@ -23,7 +22,7 @@ class HelpDialog(QDialog):
         if getattr(sys, "frozen", False):
             self.html_directory = Path(sys._MEIPASS) / "HTML"
         else:
-            self.html_directory = (Path(__file__).parent / "HTML")
+            self.html_directory = Path(__file__).parent / "HTML"
 
         layout = QHBoxLayout(self)
         self.nav = QVBoxLayout()
@@ -39,7 +38,7 @@ class HelpDialog(QDialog):
         self.add_page("Report Issues", "GithubHelp.html")
         self.show()
 
-    def add_page(self, name:str, file:str) -> None:
+    def add_page(self, name: str, file: str) -> None:
         widget = HelpPage(self.read_html(file))
         button = QPushButton(name)
         button.clicked.connect(lambda _, w=widget: self.stack.setCurrentWidget(w))
@@ -49,11 +48,12 @@ class HelpDialog(QDialog):
         self.stack.addWidget(widget)
         self.pages.append(widget)
 
-    def read_html(self, file_name:str) -> None:
+    def read_html(self, file_name: str) -> None:
         return (self.html_directory / file_name).read_text()
-    
+
+
 class HelpPage(QWidget):
-    def __init__(self, text:str):
+    def __init__(self, text: str) -> None:
         super().__init__()
 
         layout = QVBoxLayout(self)

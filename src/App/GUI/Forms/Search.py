@@ -7,14 +7,6 @@ if TYPE_CHECKING:
 
 import re
 
-from ParadoxParser import ParadoxLocParser as PDXLocFile
-from ParadoxParser import ParadoxScriptParser as PDXScriptFile
-from ParadoxParser.ParadoxNodes import (
-    GenericBlock,
-    GenericComparator,
-    GenericKeyValue,
-    GenericNode,
-)
 from PyQt5.QtCore import Qt
 from PyQt5.QtWidgets import (
     QDialog,
@@ -32,10 +24,16 @@ from PyQt5.QtWidgets import (
 from App.Contracts import SearchResult
 from App.GUI.Enums import QtStorage
 from App.GUI.Widgets.CustomWidgets import CheckableComboBox, SearchLineEdit
+from ParadoxParser import ParadoxLocParser as PDXLocFile
+from ParadoxParser import ParadoxScriptParser as PDXScriptFile
+from ParadoxParser.ParadoxNodes import (
+    GenericBlock,
+    GenericNode,
+)
 
 
 class SearchForm(QDialog):
-    def __init__(self, app_controller:AppController) -> None:
+    def __init__(self, app_controller: AppController) -> None:
         super().__init__()
         self.app_controller = app_controller
         self.load_order = self.app_controller.file_system.load_order
@@ -70,7 +68,9 @@ class SearchForm(QDialog):
         self.advanced_control_container_layout = QFormLayout()
         self.advanced_control_container_layout.setContentsMargins(0, 0, 0, 0)
 
-        self.advanced_control_container.setLayout(self.advanced_control_container_layout)
+        self.advanced_control_container.setLayout(
+            self.advanced_control_container_layout
+        )
 
         self.source_selector_widget = CheckableComboBox()
         for source in self.load_order.sources:
@@ -102,40 +102,46 @@ class SearchForm(QDialog):
         self.form.addRow(self.result)
 
     def toggle_options(self) -> None:
-        self.toggle_advanced_search.setArrowType(Qt.DownArrow if self.advanced_control_container.isVisible() else Qt.UpArrow)
-        self.advanced_control_container.setVisible(not self.advanced_control_container.isVisible())
-        self.toggle_advanced_search.setToolTip(f"{'Hide' if self.advanced_control_container.isVisible() else 'Show'} advanced options")
+        self.toggle_advanced_search.setArrowType(
+            Qt.DownArrow if self.advanced_control_container.isVisible() else Qt.UpArrow
+        )
+        self.advanced_control_container.setVisible(
+            not self.advanced_control_container.isVisible()
+        )
+        self.toggle_advanced_search.setToolTip(
+            f"{'Hide' if self.advanced_control_container.isVisible() else 'Show'} advanced options"
+        )
         self.adjustSize()
 
-    def _set_case_sensitivity(self, case_sensitive:bool) -> None:
+    def _set_case_sensitivity(self, case_sensitive: bool) -> None:
         self.case_sensitive = case_sensitive
 
-    def _set_regex(self, regex:bool) -> None:
+    def _set_regex(self, regex: bool) -> None:
         self.regex_search = regex
 
     def _get_search_results(self) -> None:
         selected_sources = self.source_selector_widget.currentData()
         search_text = self.search_control_widget.text().strip()
 
-        def matches(value:str, node_value:str) -> bool:
+        def matches(value: str, node_value: str) -> bool:
             # value = str(value)
             # node_value = str(node_value)
 
             if self.regex_search:
-                flags = 0 
+                flags = 0
                 if not self.case_sensitive:
                     flags |= re.IGNORECASE
                 try:
                     return re.search(value, node, flags) is not None
                 except re.error:
                     return False
-                
+
             if not self.case_sensitive:
                 value = value.lower()
                 node_value = node_value.lower()
             return value in node_value
 
-        def recurse(result:SearchResult, node:GenericNode) -> None:
+        def recurse(result: SearchResult, node: GenericNode) -> None:
             if isinstance(node, GenericBlock):
                 if matches(search_text, node.key):
                     result.results.append(node)
@@ -146,7 +152,9 @@ class SearchForm(QDialog):
                     result.results.append(node)
 
         self.search_results = list()
-        search_sources = selected_sources if selected_sources else self.load_order.sources
+        search_sources = (
+            selected_sources if selected_sources else self.load_order.sources
+        )
         for source in search_sources:
             for file in source.root.iter_files():
                 if isinstance(file.file, (PDXScriptFile, PDXLocFile)):
@@ -161,7 +169,9 @@ class SearchForm(QDialog):
         self.results_tree.clear()
         if self.search_results:
             for result in self.search_results:
-                file_item = QTreeWidgetItem([f"{result.file.file.filename} - {len(result.results)} instance(s)"])
+                file_item = QTreeWidgetItem(
+                    [f"{result.file.file.filename} - {len(result.results)} instance(s)"]
+                )
                 file_item.setToolTip(0, str(result.file.file.filepath))
                 file_item.setData(0, QtStorage.FILE, result.file)
                 self.results_tree.addTopLevelItem(file_item)
@@ -182,7 +192,7 @@ class SearchForm(QDialog):
         self.result.setVisible(True)
         self.adjustSize()
 
-    def _result_double_clicked(self, item:QTreeWidgetItem, column:int) -> None:
+    def _result_double_clicked(self, item: QTreeWidgetItem, column: int) -> None:
         file = item.data(0, QtStorage.FILE)
         self.app_controller.main.load_file(file)
         node = item.data(0, QtStorage.NODE)

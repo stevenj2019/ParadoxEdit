@@ -22,13 +22,13 @@ from App.GUI.Widgets.FileDialogues import (
 
 
 class FileFolderSelectorWidget(QWidget):
-    def __init__(self):
+    def __init__(self) -> None:
         super().__init__()
         self._file_list = list()
 
         self.layout = QVBoxLayout(self)
         self.setLayout(self.layout)
-        
+
         self.file_list_item = QTreeWidget()
         self.file_list_item.setColumnCount(1)
         self.file_list_item.setHeaderLabel("Folder(s)")
@@ -47,7 +47,8 @@ class FileFolderSelectorWidget(QWidget):
         self.layout.addLayout(self.buttons)
 
     @property
-    def file_list(self)-> list[str]: return self._file_list
+    def file_list(self) -> list[str]:
+        return self._file_list
 
     def _add_folder_to_input_list(self) -> None:
         path, exists = gfx_files_folder_selector(self)
@@ -62,7 +63,7 @@ class FileFolderSelectorWidget(QWidget):
             self._file_list.append(path)
             item = QTreeWidgetItem([path])
             self.file_list_item.invisibleRootItem().addChild(item)
-    
+
     def _remove_selected_from_input_list(self) -> None:
         item = self.file_list_item.currentItem()
         if item is None:
@@ -73,9 +74,10 @@ class FileFolderSelectorWidget(QWidget):
         self._file_list.pop(index)
         self.file_list_item.takeTopLevelItem(index)
 
+
 class CheckableComboBox(QComboBox):
     class Delegate(QStyledItemDelegate):
-        def sizeHint(self, option:QStyleOptionViewItem, index:QModelIndex) -> QSize:
+        def sizeHint(self, option: QStyleOptionViewItem, index: QModelIndex) -> QSize:
             size = super().sizeHint(option, index)
             size.setHeight(20)
             return size
@@ -95,11 +97,11 @@ class CheckableComboBox(QComboBox):
 
         self.view().viewport().installEventFilter(self)
 
-    def resizeEvent(self, event:QEvent):
+    def resizeEvent(self, event: QEvent):
         self.updateText()
         super().resizeEvent(event)
 
-    def eventFilter(self, object:QObject, event:QEvent) -> bool:
+    def eventFilter(self, object: QObject, event: QEvent) -> bool:
         if object == self.lineEdit():
             if event.type() == QEvent.MouseButtonRelease:
                 if self.closeOnLineEditClick:
@@ -130,7 +132,7 @@ class CheckableComboBox(QComboBox):
         self.startTimer(100)
         self.updateText()
 
-    def timerEvent(self, event:QEvent) -> None:
+    def timerEvent(self, event: QEvent) -> None:
         self.killTimer(event.timerId())
         self.closeOnLineEditClick = False
 
@@ -144,12 +146,12 @@ class CheckableComboBox(QComboBox):
                 texts.append(self.model().item(i).text())
                 checked += 1
 
-        text = "All" if checked is 0 or checked is total else ", ".join(texts)
+        text = "All" if checked == 0 or checked is total else ", ".join(texts)
         metrics = QFontMetrics(self.lineEdit().font())
         elidedText = metrics.elidedText(text, Qt.ElideRight, self.lineEdit().width())
         self.lineEdit().setText(elidedText)
 
-    def addItem(self, text:str, data:Any=None) -> None:
+    def addItem(self, text: str, data: Any = None) -> None:
         item = QStandardItem()
         item.setText(text)
         if data is None:
@@ -167,9 +169,11 @@ class CheckableComboBox(QComboBox):
                 res.append(self.model().item(i).data())
         return res
 
+
 class SearchLineEdit(QLineEdit):
     caseChanged = pyqtSignal(bool)
     regexChanged = pyqtSignal(bool)
+
     def __init__(self) -> None:
         super().__init__()
         self.buttons = list()
@@ -186,7 +190,7 @@ class SearchLineEdit(QLineEdit):
         self.regex_button.toggled.connect(self.regexChanged.emit)
         self.buttons.append(self.regex_button)
 
-    def resizeEvent(self, event:QEvent) -> None:
+    def resizeEvent(self, event: QEvent) -> None:
         super().resizeEvent(event)
         button_width = 32
         margin = 2
@@ -194,16 +198,11 @@ class SearchLineEdit(QLineEdit):
         x = self.width() - margin
         for button in self.buttons:
             x -= button_width
-            button.setGeometry(
-                x,
-                margin,
-                button_width,
-                self.height() - (margin*2)
-            )
+            button.setGeometry(x, margin, button_width, self.height() - (margin * 2))
             x -= spacing
             button.raise_()
         button_space = (
-            len(self.buttons)*button_width
+            len(self.buttons) * button_width
             + max(0, len(self.buttons) - 1) * spacing
             + margin
         )

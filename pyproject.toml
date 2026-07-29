@@ -1,0 +1,10 @@
+[tool.ruff.lint]
+select = [
+    "E",
+    "F",
+    "I",
+    "ANN"
+]
+
+[tool.ruff.lint.isort]
+known-first-party = ["App", "ParadoxParser"]

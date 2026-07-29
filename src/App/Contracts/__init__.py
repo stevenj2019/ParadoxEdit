@@ -11,77 +11,90 @@ if TYPE_CHECKING:
 from dataclasses import dataclass
 from typing import Callable, Optional
 
-from ParadoxParser import GenericBlock, GenericKeyValue, GenericNode
-from ParadoxParser import ParadoxLocParser as PDXLocFile
 from PyQt5.QtWidgets import QTreeWidget, QTreeWidgetItem
 
-from App.Contexts.Base import ParadoxFileContext, ParadoxNodeContext
+from App.Contexts.Base import ParadoxFileContext
 from App.Contracts.Enums import ChangeState, PropagationType, TargetProperty
+from ParadoxParser import GenericBlock, GenericKeyValue, GenericNode
 
 
 @dataclass
 class ModLoaderResult:
-    workspace:Workspace
-    load_order:ParadoxLoadOrder
-    tokens:dict
-    metadata:dict
-    
+    workspace: Workspace
+    load_order: ParadoxLoadOrder
+    tokens: dict
+    metadata: dict
+
+
 @dataclass
 class OpenFile:
-    file:FileReference
-    context:ParadoxFileContext
+    file: FileReference
+    context: ParadoxFileContext
+
 
 @dataclass
 class PropagationRequest:
-    type  :PropagationType
-    file  :FileReference
-    node  :Optional[GenericBlock|GenericKeyValue|GenericNode]
-    state :ChangeState
+    type: PropagationType
+    file: FileReference
+    node: Optional[GenericBlock | GenericKeyValue | GenericNode]
+    state: ChangeState
+
 
 @dataclass
 class NodeMutationRequest:
-    file:Optional[FileReference]
-    node:GenericBlock|GenericKeyValue
-    target:TargetProperty
-    value:str|int|float
+    file: Optional[FileReference]
+    node: GenericBlock | GenericKeyValue
+    target: TargetProperty
+    value: str | int | float
+
 
 @dataclass
 class BlockMutationRequest:
-    file:Optional[FileReference]
-    parent:FileReference|GenericBlock
-    index:int
-    payload:Callable|GenericBlock|GenericKeyValue|GenericNode
-    state:ChangeState
+    file: Optional[FileReference]
+    parent: FileReference | GenericBlock
+    index: int
+    payload: Callable | GenericBlock | GenericKeyValue | GenericNode
+    state: ChangeState
 
     @classmethod
-    def add(cls, parent:FileReference|GenericBlock, index:int, payload:Callable|GenericBlock|GenericKeyValue|GenericNode, file:FileReference=None)->BlockMutationRequest:
+    def add(
+        cls,
+        parent: FileReference | GenericBlock,
+        index: int,
+        payload: Callable | GenericBlock | GenericKeyValue | GenericNode,
+        file: FileReference = None,
+    ) -> BlockMutationRequest:
         return cls(
-            file=file, 
+            file=file,
             parent=parent,
             index=index,
-            payload=payload, 
-            state=ChangeState.ADDED
+            payload=payload,
+            state=ChangeState.ADDED,
         )
+
 
 @dataclass
 class BulkMutationRequest:
-    target:GenericDirectory|FileReference
-    action:Callable
+    target: GenericDirectory | FileReference
+    action: Callable
+
 
 @dataclass
 class FileMutationRequest:
-    directory:GenericDirectory
-    file:FileReference
-    state:ChangeState
+    directory: GenericDirectory
+    file: FileReference
+    state: ChangeState
+
 
 @dataclass
 class InLineEditRequest:
-    tree:QTreeWidget
-    item:QTreeWidgetItem
-    node:GenericBlock|GenericKeyValue|GenericNode
-    target:TargetProperty
+    tree: QTreeWidget
+    item: QTreeWidgetItem
+    node: GenericBlock | GenericKeyValue | GenericNode
+    target: TargetProperty
+
 
 @dataclass
 class SearchResult:
-    file:FileReference
-    results:list
+    file: FileReference
+    results: list

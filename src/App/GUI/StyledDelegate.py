@@ -25,11 +25,15 @@ from App.Loading.ParadoxSource import ParadoxSource
 
 
 class ParadoxFileDelegate(QStyledItemDelegate):
-    def __init__(self, app_controller:AppController, parent:QTreeWidget=None):
+    def __init__(
+        self, app_controller: AppController, parent: QTreeWidget = None
+    ) -> None:
         super().__init__(parent)
         self.app_controller = app_controller
 
-    def paint(self, painter:QPainter, option:QStyleOptionViewItem, index:QModelIndex) -> None:
+    def paint(
+        self, painter: QPainter, option: QStyleOptionViewItem, index: QModelIndex
+    ) -> None:
         super().paint(painter, option, index)
 
         radius = 4
@@ -45,27 +49,36 @@ class ParadoxFileDelegate(QStyledItemDelegate):
                 colour = self.app_controller.style_manager.get_node_state_colour(state)
                 painter.setPen(Qt.NoPen)
                 painter.setBrush(QColour(colour))
-                painter.drawEllipse(x, y-radius, radius*2, radius*2)
+                painter.drawEllipse(x, y - radius, radius * 2, radius * 2)
         else:
             state = index.model().data(index, QtStorage.STATE)
             if state == ChangeState.MODIFIED:
-                colour = self.app_controller.style_manager.get_node_state_colour(ChangeState.MODIFIED)
+                colour = self.app_controller.style_manager.get_node_state_colour(
+                    ChangeState.MODIFIED
+                )
                 painter.setBrush(Qt.NoBrush)
                 painter.setPen(QPen(colour, 2))
                 painter.drawEllipse(x, y - radius, radius * 2, radius * 2)
         painter.restore()
-        
+
+
 class NodeStateDelegate(QStyledItemDelegate):
-    def __init__(self, app_controller:AppController, parent:QTreeWidget=None):
+    def __init__(
+        self, app_controller: AppController, parent: QTreeWidget = None
+    ) -> None:
         super().__init__(parent)
         self.app_controller = app_controller
 
-    def paint(self, painter:QPainter, option:QStyleOptionViewItem, index:QModelIndex) -> None:
+    def paint(
+        self, painter: QPainter, option: QStyleOptionViewItem, index: QModelIndex
+    ) -> None:
         super().paint(painter, option, index)
         self.paint_change_state(painter, option, index)
         self.paint_error_icon(painter, option, index)
 
-    def paint_change_state(self, painter:QPainter, option:QStyleOptionViewItem, index:QModelIndex) -> None:
+    def paint_change_state(
+        self, painter: QPainter, option: QStyleOptionViewItem, index: QModelIndex
+    ) -> None:
         state = index.model().data(index, QtStorage.STATE)
 
         if state in (ChangeState.ADDED, ChangeState.MODIFIED, ChangeState.DELETED):
@@ -75,19 +88,23 @@ class NodeStateDelegate(QStyledItemDelegate):
             viewport_rect = view.viewport().rect()
 
             rect = option.rect
-            
+
             stripe_width = 5
-            
+
             painter.save()
             painter.setPen(Qt.NoPen)
             painter.setBrush(QBrush(colour))
-            painter.drawRect(viewport_rect.left(), rect.top(), stripe_width, rect.height())
+            painter.drawRect(
+                viewport_rect.left(), rect.top(), stripe_width, rect.height()
+            )
             painter.restore()
 
-    def paint_error_icon(self, painter:QPainter, option:QStyleOptionViewItem, index:QModelIndex) -> None:
+    def paint_error_icon(
+        self, painter: QPainter, option: QStyleOptionViewItem, index: QModelIndex
+    ) -> None:
         if index.column() != 1:
-            return 
-        
+            return
+
         source_index = index.sibling(index.row(), 0)
         is_block = source_index.model().data(source_index, QtStorage.IS_BLOCK)
         is_comparator = source_index.model().data(source_index, QtStorage.IS_COMPARATOR)
@@ -95,7 +112,7 @@ class NodeStateDelegate(QStyledItemDelegate):
             node = source_index.model().data(source_index, QtStorage.NODE)
             context = source_index.model().data(source_index, QtStorage.CONTEXT)
             if not context:
-                return 
+                return
             error = context.errors(self.app_controller, node.value)
             if error:
                 icon = QApplication.style().standardIcon(QStyle.SP_MessageBoxWarning)
@@ -108,12 +125,15 @@ class NodeStateDelegate(QStyledItemDelegate):
                 rect = option.rect
                 x = rect.left() + text_width + 10
                 y = rect.center().y() - icon_size // 2
-                icon.paint(
-                    painter, 
-                    QRect(x, y, icon_size, icon_size)
-                )
+                icon.paint(painter, QRect(x, y, icon_size, icon_size))
 
-    def helpEvent(self, event:QEvent, view:QAbstractItemView, option:QStyleOptionViewItem, index:QModelIndex) -> None:
+    def helpEvent(
+        self,
+        event: QEvent,
+        view: QAbstractItemView,
+        option: QStyleOptionViewItem,
+        index: QModelIndex,
+    ) -> None:
         if event.type() == QEvent.ToolTip:
             if index.column() == 1:
                 source_index = index.sibling(index.row(), 0)
@@ -122,10 +142,6 @@ class NodeStateDelegate(QStyledItemDelegate):
 
                 error = context.errors(self.app_controller, node.value)
                 if error:
-                    QToolTip.showText(
-                        event.globalPos(),
-                        error, 
-                        view
-                    )
+                    QToolTip.showText(event.globalPos(), error, view)
                     return True
         return super().helpEvent(event, view, option, index)

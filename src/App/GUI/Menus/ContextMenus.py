@@ -4,8 +4,6 @@ from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
     from App import AppController
-from ParadoxParser import ParadoxScriptParser as PDXScriptFile
-from ParadoxParser.ParadoxNodes import GenericBlock
 from PyQt5.QtCore import pyqtSignal
 from PyQt5.QtWidgets import (
     QAction,
@@ -22,18 +20,23 @@ from App.Contracts import BlockMutationRequest
 from App.Contracts.Enums import ChangeState
 from App.GUI.Actions import Action, ActionGroup, ActionsResult, ActionSubMenu
 from App.GUI.Enums import ExpansionMode
+from ParadoxParser import ParadoxScriptParser as PDXScriptFile
+from ParadoxParser.ParadoxNodes import GenericBlock
 
 
-def dummy(): return 
+def dummy():
+    return
+
+
 class GenericContextMenu(QMenu):
-    def __init__(self, parent:QTreeWidgetItem, app_controller:AppController):
+    def __init__(self, parent: QTreeWidgetItem, app_controller: AppController) -> None:
         super().__init__()
-        self.parent:QTreeWidget = parent
+        self.parent: QTreeWidget = parent
         self.app_controller = app_controller
-        self.menu_def:list = []
+        self.menu_def: list = []
         self.parent_node = None
         self.parent_index = None
-    
+
     def _build_menu(self) -> None:
         for item in self.menu_def:
             if isinstance(item, ActionGroup):
@@ -42,8 +45,8 @@ class GenericContextMenu(QMenu):
                 self._build_submenu(item)
             elif isinstance(item, Action):
                 self._build_button(self, item)
-    
-    def _build_subcategory(self, group:ActionGroup) -> None:
+
+    def _build_subcategory(self, group: ActionGroup) -> None:
         label = QLabel(group.text)
         label.setStyleSheet("""
             font-weight:bold;
@@ -59,63 +62,110 @@ class GenericContextMenu(QMenu):
             elif isinstance(item, ActionSubMenu):
                 self._build_submenu(item)
 
-    def _build_submenu(self, group:ActionSubMenu) -> None:
+    def _build_submenu(self, group: ActionSubMenu) -> None:
         _menu = QMenu(group.text, self)
         for item in group.actions:
             self._build_button(_menu, item)
         self.addMenu(_menu)
 
-    def _build_button(self, menu:ActionGroup|ActionSubMenu, item:Action) -> None:
+    def _build_button(self, menu: ActionGroup | ActionSubMenu, item: Action) -> None:
         action = QAction(item.text, menu)
         action.triggered.connect(item.callback)
         action.setEnabled(item.enabled)
         menu.addAction(action)
 
-class GenericDirectoryMenu(GenericContextMenu):
-    def __init__(self, parent:QTreeWidget, app_controller:AppController) -> None:
-        super().__init__(parent, app_controller)
-        self.menu_def:list = []
 
-    def call(self, file_context:FileContext) -> None:
+class GenericDirectoryMenu(GenericContextMenu):
+    def __init__(self, parent: QTreeWidget, app_controller: AppController) -> None:
+        super().__init__(parent, app_controller)
+        self.menu_def: list = []
+
+    def call(self, file_context: FileContext) -> None:
         self.clear()
         self.menu_def = self._get_context_menu_options(file_context)
         self._build_menu()
 
-    def _get_context_menu_options(self, file_context:FileContext) -> None:
-        return file_context.context.get_actions(self.app_controller, file_context.target)
-    
+    def _get_context_menu_options(self, file_context: FileContext) -> None:
+        return file_context.context.get_actions(
+            self.app_controller, file_context.target
+        )
+
+
 class ParadoxNodesContextMenu(GenericContextMenu):
     request_expansion = pyqtSignal(object)
-    def __init__(self, parent:QTreeWidget, app_controller:AppController) -> None:
-        super().__init__(parent, app_controller)
-        self.menu_def:list = []
 
-    def call(self, block_context:BlockContext, node_context:NodeContext) -> None:
+    def __init__(self, parent: QTreeWidget, app_controller: AppController) -> None:
+        super().__init__(parent, app_controller)
+        self.menu_def: list = []
+
+    def call(self, block_context: BlockContext, node_context: NodeContext) -> None:
         self.clear()
         self.menu_def = self._get_context_menu_options(block_context, node_context)
         self._build_menu()
 
-    def _get_context_menu_options(self, block_context:BlockContext, node_context:NodeContext) -> ActionsResult:
+    def _get_context_menu_options(
+        self, block_context: BlockContext, node_context: NodeContext
+    ) -> ActionsResult:
         return [
-            ActionGroup("Tree Options", [
-                Action("Expand All", lambda:self.parent.set_expansion_rule(ExpansionMode.ALL), True),
-                Action("Collapse All", lambda:self.parent.set_expansion_rule(ExpansionMode.DEPTH, depth_limit=1), True),
-                Action("Expand This", lambda:self.parent.set_expansion_rule(ExpansionMode.FROM_NODE, root_item=block_context.parent), (block_context.parent_index == 0 and isinstance(block_context.parent, GenericBlock))),
-                Action("Copy", lambda:QApplication.clipboard().setText(node_context.selected_node.value), True)
-            ]),
-            ActionGroup("Block Options", [
-                Action("Delete", 
-                       lambda:self.app_controller.request_block_mutation.emit(
-                           BlockMutationRequest(file=None,
-                                                parent=block_context.parent,
-                                                index=block_context.parent_index, 
-                                                payload=None,
-                                                state=ChangeState.DELETED)), 
-                    (not isinstance(block_context.parent, PDXScriptFile))
-                ),
-                # *block_context.parent_context.get_actions(self.app_controller, block_context.parent)
-            ]),
-            ActionGroup("Node Options",[
-                *node_context.node_context.get_actions(self.app_controller, node_context)
-            ])
+            ActionGroup(
+                "Tree Options",
+                [
+                    Action(
+                        "Expand All",
+                        lambda: self.parent.set_expansion_rule(ExpansionMode.ALL),
+                        True,
+                    ),
+                    Action(
+                        "Collapse All",
+                        lambda: self.parent.set_expansion_rule(
+                            ExpansionMode.DEPTH, depth_limit=1
+                        ),
+                        True,
+                    ),
+                    Action(
+                        "Expand This",
+                        lambda: self.parent.set_expansion_rule(
+                            ExpansionMode.FROM_NODE, root_item=block_context.parent
+                        ),
+                        (
+                            block_context.parent_index == 0
+                            and isinstance(block_context.parent, GenericBlock)
+                        ),
+                    ),
+                    Action(
+                        "Copy",
+                        lambda: QApplication.clipboard().setText(
+                            node_context.selected_node.value
+                        ),
+                        True,
+                    ),
+                ],
+            ),
+            ActionGroup(
+                "Block Options",
+                [
+                    Action(
+                        "Delete",
+                        lambda: self.app_controller.request_block_mutation.emit(
+                            BlockMutationRequest(
+                                file=None,
+                                parent=block_context.parent,
+                                index=block_context.parent_index,
+                                payload=None,
+                                state=ChangeState.DELETED,
+                            )
+                        ),
+                        (not isinstance(block_context.parent, PDXScriptFile)),
+                    ),
+                    # *block_context.parent_context.get_actions(self.app_controller, block_context.parent)
+                ],
+            ),
+            ActionGroup(
+                "Node Options",
+                [
+                    *node_context.node_context.get_actions(
+                        self.app_controller, node_context
+                    )
+                ],
+            ),
         ]

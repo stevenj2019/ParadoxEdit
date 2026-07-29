@@ -1,14 +1,14 @@
 import traceback
 
-from App.Services import AppLogger
-from PyQt5.QtWidgets import QDialog, QLabel, QVBoxLayout, QProgressBar
-from PyQt5.QtCore import Qt, QObject, pyqtSignal
+from PyQt5.QtCore import QObject, Qt, pyqtSignal
+from PyQt5.QtWidgets import QDialog, QLabel, QProgressBar, QVBoxLayout
 
-from App.Loading.LoadOrder import ParadoxLoadOrder
 from App.Contracts import ModLoaderResult
+from App.Loading.LoadOrder import ParadoxLoadOrder
+
 
 class LoadingDialog(QDialog):
-    def __init__(self):
+    def __init__(self) -> None:
         super().__init__()
 
         self.setWindowTitle("Loading Mod")
@@ -27,19 +27,20 @@ class LoadingDialog(QDialog):
 
         self.setLayout(layout)
 
-    def update_message(self, message):
+    def update_message(self, message: str) -> None:
         self.label.setText(message)
 
-    def start_progress_bar(self, n_files):
+    def start_progress_bar(self, n_files: int) -> None:
         self.progress_bar.setRange(0, n_files)
         self.progress_bar.setValue(0)
         self.progress_bar.setVisible(True)
 
-    def update_progress_bar(self, n_progress):
+    def update_progress_bar(self, n_progress: int) -> None:
         self.progress_bar.setValue(n_progress)
 
-    def end_progress_bar(self):
+    def end_progress_bar(self) -> None:
         self.progress_bar.setVisible(False)
+
 
 class LoadProcess(QObject):
     progress_message = pyqtSignal(str)
@@ -49,12 +50,12 @@ class LoadProcess(QObject):
     finished = pyqtSignal(object)
     failed = pyqtSignal(Exception, str)
 
-    def __init__(self, workspace, game_path):
+    def __init__(self, workspace, game_path) -> None:
         super().__init__()
         self.workspace = workspace
         self.game_path = game_path
 
-    def run(self):
+    def run(self) -> None:
         try:
             load_order = ParadoxLoadOrder(True)
             if self.workspace.vanilla_loaded:
@@ -64,21 +65,23 @@ class LoadProcess(QObject):
             self.progress_message.emit("Loading Mod Files")
             for mod in self.workspace.mods:
                 load_order.load_mod(mod)
-            
+
             self.progress_message.emit("Resolving Load Order")
             load_order.resolve()
 
-            self.tokens:dict = {}
-            self.metadata:dict = {}
+            self.tokens: dict = {}
+            self.metadata: dict = {}
 
             self._process_files(load_order)
 
             self.progress_message.emit("Finishing Up")
-            self.finished.emit(ModLoaderResult(self.workspace, load_order, self.tokens, self.metadata))
+            self.finished.emit(
+                ModLoaderResult(self.workspace, load_order, self.tokens, self.metadata)
+            )
         except Exception as e:
             self.failed.emit(e, traceback.format_exc())
 
-    def _process_files(self, load_order):
+    def _process_files(self, load_order) -> None:
         self.progress_message.emit("Preparing Files")
         files = list()
         processed = 0
@@ -93,12 +96,14 @@ class LoadProcess(QObject):
             self._file_processing(source, file)
             processed += 1
         self.progress_bar_end.emit()
-        
-    def _file_processing(self, source, file):
+
+    def _file_processing(self, source, file) -> None:
         file.file = file.file.load()
         self._merge_registry(self.tokens, file.directory.token_collection(source, file))
-        self._merge_registry(self.metadata, file.directory.metadata_collection(source, file))
+        self._merge_registry(
+            self.metadata, file.directory.metadata_collection(source, file)
+        )
 
-    def _merge_registry(self, dict, insertions):
+    def _merge_registry(self, dict, insertions) -> None:
         for key, value in insertions.items():
             dict.setdefault(key, type(value)()).update(value)

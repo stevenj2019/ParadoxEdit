@@ -6,7 +6,6 @@ if TYPE_CHECKING:
     from App import AppController
     from App.Loading.Models import FileReference
 
-from ParadoxParser.ParadoxNodes import GenericBlock
 from PyQt5.QtCore import Qt, pyqtSignal
 from PyQt5.QtGui import QKeySequence
 from PyQt5.QtWidgets import QApplication, QMainWindow, QShortcut, QSplitter
@@ -34,15 +33,19 @@ from App.GUI.Widgets.PopupModels import (
 from App.Loading.Models import UnloadedFile
 from App.Loading.ParadoxSource import ParadoxSource
 from App.Services import AppLogger
+from ParadoxParser.ParadoxNodes import GenericBlock
 
 
 class MainWindow(QMainWindow):
     request_propagation = pyqtSignal(object)
     request_icon_preview = pyqtSignal(object)
-    def __init__(self, app_controller:AppController) -> None:
+
+    def __init__(self, app_controller: AppController) -> None:
         super().__init__()
         self.app_controller = app_controller
-        self.editor_session = InLineEditManager(mutate_callback=self.app_controller.request_node_mutation)
+        self.editor_session = InLineEditManager(
+            mutate_callback=self.app_controller.request_node_mutation
+        )
 
         self.setWindowTitle("ParadoxEdit")
         self.showMaximized()
@@ -66,7 +69,9 @@ class MainWindow(QMainWindow):
         self.contents_panel = ContentsPanel(self.app_controller)
         self.contents_panel.setMinimumWidth(300)
         self.splitter.addWidget(self.contents_panel)
-        self.contents_panel.script_view.edit_open_request.connect(self.editor_session.open_request)
+        self.contents_panel.script_view.edit_open_request.connect(
+            self.editor_session.open_request
+        )
 
         self.splitter.setSizes([200, 600])
         self.showMaximized()
@@ -77,16 +82,18 @@ class MainWindow(QMainWindow):
         self.search_shortcut = QShortcut(QKeySequence("Ctrl+F"), self)
         self.search_shortcut.activated.connect(self.handle_search)
 
-    def _propogate_mutations(self, request:PropagationRequest) -> None:
+    def _propogate_mutations(self, request: PropagationRequest) -> None:
         type = request.type
         file = request.file
         node = request.node
         state = request.state
-        def recurse(node):
+
+        def recurse(node) -> None:
             self.contents_panel.script_view.set_node_state(node, state)
             if isinstance(node, GenericBlock):
                 for child in node.nodes:
                     recurse(child)
+
         match type:
             case PropagationType.NODE:
                 self.mod_panel.set_file_state(file, ChangeState.MODIFIED)
@@ -109,7 +116,7 @@ class MainWindow(QMainWindow):
                     return
                 widget = widget.parent()
             self.search_window_requested()
-    
+
     def settings_window_requested(self) -> None:
         settings = SettingsForm("PDXEdit Settings", self.app_controller)
         settings.exec_()
@@ -121,17 +128,17 @@ class MainWindow(QMainWindow):
     def load_mod_requested(self) -> None:
         path = select_mod_file(self)
         self.app_controller.add_mod_to_workspace(path)
-     
+
     def load_workspace(self) -> None:
         path, exists = workspace_selector(self)
         if exists:
             self.app_controller.load_workspace(path)
 
-    def load_mod(self, source:ParadoxSource) -> None:
+    def load_mod(self, source: ParadoxSource) -> None:
         self.mod_panel.populate_tree(source)
         self.topbar._enable_actions()
 
-    def load_workspace_failed(self, exc:Exception, tb:str) -> None:
+    def load_workspace_failed(self, exc: Exception, tb: str) -> None:
         could_not_load_mod_critical(exc, tb)
 
     def save_workspace_as_file(self) -> None:
@@ -139,17 +146,19 @@ class MainWindow(QMainWindow):
         if exists:
             self.app_controller.save_workspace(file_path)
 
-    def load_file(self, file:FileReference) -> None:
+    def load_file(self, file: FileReference) -> None:
         if isinstance(file.file, UnloadedFile):
             file_is_unsupported()
-            AppLogger.warning(f"attemped to open {file.file.path}/{file.file.filename}, is unsupported.")
+            AppLogger.warning(
+                f"attemped to open {file.file.path}/{file.file.filename}, is unsupported."
+            )
             return
         else:
             self.editor_session.cancel_request(reason="file switch")
             self.app_controller.file_system.load_file(file)
             self.contents_panel.load_file(file)
 
-    def _preview_icon(self, icon:str) -> None:
+    def _preview_icon(self, icon: str) -> None:
         icon_name = icon.value
         icon_registry = self.app_controller.registry.get_metadata(PDXMetadata.GFXIcon)
         if icon_name in icon_registry.keys():

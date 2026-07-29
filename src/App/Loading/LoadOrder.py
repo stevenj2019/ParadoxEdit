@@ -1,55 +1,28 @@
 from pathlib import Path
-from App.Loading.ParadoxSource import ParadoxSource, ParadoxVanilla, ParadoxMod
+
+from App.Loading.ParadoxSource import ParadoxMod, ParadoxSource, ParadoxVanilla
+
 
 class ParadoxLoadOrder:
-    def __init__(self, vanilla_loaded):
+    def __init__(self, vanilla_loaded) -> None:
         self.vanilla_loaded = vanilla_loaded
-        self.sources:list[ParadoxSource] = []
+        self.sources: list[ParadoxSource] = []
 
-    def load_vanilla(self, path):
+    def load_vanilla(self, path) -> None:
         self.sources.append(ParadoxVanilla(path))
-    
-    def load_mod(self, path):
+
+    def load_mod(self, path) -> None:
         self.sources.append(ParadoxMod(path))
 
-    def resolve(self):
+    def resolve(self) -> None:
         # self._resolve_dependencies()
         dependency_graph = self._build_dependency_graph()
         self.sources = self._resolve_load_order(dependency_graph)
         self._resolve_file_overrides()
         self._clear_empty_directories()
 
-    # def _resolve_dependencies(self):
-    #     resolved = []
-    #     remaining = self.sources.copy()
-    #     source_by_name = {source.source_name:source
-    #                       for source in self.sources}
-
-    #     while remaining:
-    #         for source in remaining:
-    #             if isinstance(source, ParadoxVanilla):
-    #                 resolved.insert(0, source)
-    #                 remaining.remove(source)
-    #                 break
-
-    #             dependencies = [
-    #                 source_by_name[name] 
-    #                 for name in source.dependencies
-    #                 if name in source_by_name
-    #             ]
-
-    #             if all(dependency in resolved for dependency in dependencies):
-    #                 resolved.append(source)
-    #                 remaining.remove(source)
-    #                 break
-
-    #     self.sources = resolved
-
-    def _build_dependency_graph(self):
-        source_by_name = {
-            source.source_name: source
-            for source in self.sources
-        }
+    def _build_dependency_graph(self) -> dict[ParadoxSource, str]:
+        source_by_name = {source.source_name: source for source in self.sources}
 
         graph = {}
 
@@ -62,35 +35,30 @@ class ParadoxLoadOrder:
                 ]
 
         return graph
-    
-    def _resolve_load_order(self, graph):
+
+    def _resolve_load_order(self, graph) -> list[ParadoxSource]:
         resolved = list()
         vanilla = next(
             (source for source in self.sources if isinstance(source, ParadoxVanilla)),
-            None
+            None,
         )
         if vanilla:
             resolved.append(vanilla)
-            
+
         remaining = set(graph.keys())
 
         while remaining:
             available = [
                 source
                 for source in remaining
-                if all(
-                    dependency in resolved
-                    for dependency in graph[source]
-                )
+                if all(dependency in resolved for dependency in graph[source])
             ]
 
             if not available:
                 # circular dependency / impossible order
                 raise Exception("Unable to resolve load order")
 
-            available.sort(
-                key=lambda source: source.source_name.lower()
-            )
+            available.sort(key=lambda source: source.source_name.lower())
 
             source = available[0]
 
@@ -99,7 +67,7 @@ class ParadoxLoadOrder:
 
         return resolved
 
-    def _resolve_file_overrides(self):
+    def _resolve_file_overrides(self) -> None:
         loaded_sources = []
         for source in self.sources:
             for target in loaded_sources:
@@ -108,7 +76,7 @@ class ParadoxLoadOrder:
                 self._apply_override_traversal(source, source.root, target)
             loaded_sources.append(source)
 
-    def _apply_override_traversal(self, source, source_dir, target_source):
+    def _apply_override_traversal(self, source, source_dir, target_source) -> None:
         for file in source_dir.files.values():
             path = Path(file.file.path)
             path = path.relative_to(source.file_path)
@@ -116,6 +84,6 @@ class ParadoxLoadOrder:
         for directory in source_dir.directories.values():
             self._apply_override_traversal(source, directory, target_source)
 
-    def _clear_empty_directories(self):
+    def _clear_empty_directories(self) -> None:
         for source in self.sources:
             source.root.prune()

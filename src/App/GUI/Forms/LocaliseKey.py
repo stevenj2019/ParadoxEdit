@@ -1,4 +1,4 @@
-#TODO: needs more testing prior to refactor
+# TODO: needs more testing prior to refactor
 # from pathlib import Path
 # from PyQt5.QtWidgets import QDialog, QFormLayout, QLabel, QTextEdit, QComboBox, QPushButton
 # from PyQt5.QtGui import QShowEvent
@@ -34,7 +34,7 @@
 #         text_edit.textChanged.connect(lambda: self._resize_localisation_field(text_edit))
 #         self.form.addRow(label, text_edit)
 #         return text_edit
-    
+
 #     def _lower_form_body(self) -> None:
 #         self.save_to_file_label = QLabel("Localisation File:")
 #         self.file_dropdown = QComboBox()
@@ -50,16 +50,16 @@
 
 #         self.save_to_file_label.setBuddy(self.file_dropdown)
 #         self.file_dropdown.currentIndexChanged.connect(self._change_save_file)
-#         self.form.addRow(self.save_to_file_label, self.file_dropdown)    
-        
+#         self.form.addRow(self.save_to_file_label, self.file_dropdown)
+
 #         self.submit_button = QPushButton("Continue")
 #         self.form.addRow(self.submit_button)
 #         self.submit_button.clicked.connect(self._submit)
-    
+
 #     def _change_save_file(self, index) -> None:
 #         file = self.file_dropdown.itemText(index)
 #         self.save_file = self.localisation_directory.files[file]
-    
+
 #     def _handle_localisation_field(self, text_edit:QTextEdit) -> None:
 #         text = self._decode_pdx_string(text_edit.toPlainText())
 #         if text != text_edit.toPlainText():
@@ -68,7 +68,7 @@
 #             text_edit.blockSignals(False)
 
 #         self._resize_localisation_field(text_edit)
-    
+
 #     def _resize_localisation_field(self, text_edit:QTextEdit) -> None:
 #         doc_height = text_edit.document().size().height()
 #         new_height = max(30, int(doc_height+1))
@@ -155,7 +155,7 @@
 #             self.localisation_fields.append(text_edit)
 #             if multiple_file_error:
 #                 pass #dialog
-        
+
 #         self._lower_form_body()
 #         for field in self.localisation_fields:
 #             self._resize_localisation_field(field)

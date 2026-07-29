@@ -1,6 +1,6 @@
-from PyQt5.QtCore import Qt
-from enum import Enum, auto, IntEnum
-    
+from enum import Enum, auto
+
+
 class PDXTokens(Enum):
     EVENT = auto()
     CHARACTER = auto()
@@ -12,6 +12,7 @@ class PDXTokens(Enum):
     SPECIAL_PROJECT = auto()
     STATE = auto()
     STRATEGIC_REGION = auto()
+
 
 class PDXMetadata(Enum):
     GFXIcon = auto()

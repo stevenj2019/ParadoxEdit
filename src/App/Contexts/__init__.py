@@ -18,17 +18,19 @@ from ParadoxParser.ParadoxNodes import GenericBlock, GenericKeyValue, GenericNod
 
 @dataclass
 class FileContext:
-    target:GenericDirectory|PDXScriptFile|PDXLocFile
-    context:ParadoxFileContext
+    target: GenericDirectory | PDXScriptFile | PDXLocFile
+    context: ParadoxFileContext
+
 
 @dataclass
 class BlockContext:
-    parent:GenericBlock
-    parent_index:int
-    parent_context:ParadoxBlockContext
+    parent: GenericBlock
+    parent_index: int
+    parent_context: ParadoxBlockContext
+
 
 @dataclass
 class NodeContext:
-    key_node:GenericBlock|GenericKeyValue
-    selected_node:GenericNode
-    node_context:ParadoxNodeContext
+    key_node: GenericBlock | GenericKeyValue
+    selected_node: GenericNode
+    node_context: ParadoxNodeContext

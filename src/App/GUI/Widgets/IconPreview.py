@@ -5,7 +5,7 @@ from PyQt5.QtWidgets import QDialog, QLabel, QVBoxLayout
 
 
 class IconPreviewDialog(QDialog):
-    def __init__(self, icon:str, path:str) -> None:
+    def __init__(self, icon: str, path: str) -> None:
         super().__init__()
         self.setWindowTitle(path.name)
 
@@ -19,19 +19,11 @@ class IconPreviewDialog(QDialog):
             img = img.convert("RGBA")
             width, height = img.size
 
-            qimage = QImage(
-                img.tobytes(),
-                width,
-                height,
-                QImage.Format_RGBA8888
-            )
+            qimage = QImage(img.tobytes(), width, height, QImage.Format_RGBA8888)
             pixmap = QPixmap.fromImage(qimage)
         label.setPixmap(pixmap)
         label.setAlignment(Qt.AlignCenter)
-        self.resize(
-            min(width, 800),
-            min(height, 800)
-        )
+        self.resize(min(width, 800), min(height, 800))
         layout.addWidget(QLabel(f"Icon Name:{icon.value}"))
         layout.addWidget(QLabel(f"File name:{path.name}"))
         layout.addWidget(QLabel(f"File size: {path.stat().st_size / 1024:.1f} KB"))

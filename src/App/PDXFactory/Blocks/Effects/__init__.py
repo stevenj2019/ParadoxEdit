@@ -13,10 +13,10 @@
 #         #     PDXTokens.STRATEGIC_REGION:StrategicRegionIndexer,
 #         # }
 #         return
-    
+
 #     def _load_module(scope:PDXTokens):
 #         return
-    
+
 # class Effect:
 #     def __init__(self, name:str, description:str, enabled:bool=True):
 #         self.name = name
@@ -26,4 +26,3 @@
 
 #     def to_node():
 #         return NotImplementedError
-    
