@@ -221,7 +221,6 @@ class AppController(QObject):
         self.main.mod_panel.add_file(request.directory, request.file)
         self.main.mod_panel.set_file_state(request.file, request.state)
 
-
     def _save_target(self, target):
         def save_routine(file):
             saved = self.file_system.save_file(file)

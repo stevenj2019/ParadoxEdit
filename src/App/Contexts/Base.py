@@ -4,15 +4,12 @@ from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
     from App import AppController
+    from App.Contracts import BlockMutationRequest, BulkMutationRequest
     from App.Loading.Models import FileReference
 
-from ParadoxParser.ParadoxNodes import (
-    GenericBlock,
-    GenericNode,
-)
+from ParadoxParser.ParadoxNodes import GenericBlock, GenericNode
 
 from App.Contexts import BlockContext, NodeContext
-from App.Contracts import BlockMutationRequest, BulkMutationRequest
 from App.Enums import PDXMetadata
 from App.GUI.Actions import Action, ActionsResult
 from App.PDXFactory.Blocks.Generic import comment_node
@@ -117,7 +114,7 @@ class GFXFieldContext:
     def get_actions(app_controller:AppController, node_context:NodeContext) -> ActionsResult:
         return [
             Action("Preview Icon", 
-                   lambda:app_controller.main.request_icon_preview.emit(node_context.key_node.value),
+                   lambda:app_controller.main.request_icon_preview.emit(node_context.key_node.value.value),
                    True)
         ]
     

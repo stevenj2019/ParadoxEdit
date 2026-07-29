@@ -1,28 +1,40 @@
-from PyQt5.QtWidgets import QApplication, QTreeWidget, QTreeWidgetItem, QMenu, QLabel, QWidgetAction, QAction
-from PyQt5.QtCore import pyqtSignal
+from __future__ import annotations
 
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from App import AppController
 from ParadoxParser import ParadoxScriptParser as PDXScriptFile
 from ParadoxParser.ParadoxNodes import GenericBlock
+from PyQt5.QtCore import pyqtSignal
+from PyQt5.QtWidgets import (
+    QAction,
+    QApplication,
+    QLabel,
+    QMenu,
+    QTreeWidget,
+    QTreeWidgetItem,
+    QWidgetAction,
+)
 
-from App.Contracts.Enums import ChangeState
+from App.Contexts import BlockContext, FileContext, NodeContext
 from App.Contracts import BlockMutationRequest
+from App.Contracts.Enums import ChangeState
+from App.GUI.Actions import Action, ActionGroup, ActionsResult, ActionSubMenu
 from App.GUI.Enums import ExpansionMode
-from App.GUI.Actions import ActionGroup, ActionSubMenu, Action
+
 
 def dummy(): return 
 class GenericContextMenu(QMenu):
-    def __init__(self, parent, app_controller):
+    def __init__(self, parent:QTreeWidgetItem, app_controller:AppController):
         super().__init__()
         self.parent:QTreeWidget = parent
         self.app_controller = app_controller
         self.menu_def:list = []
         self.parent_node = None
         self.parent_index = None
-
-    def _get_context_menu_options():
-        return 
     
-    def _build_menu(self):
+    def _build_menu(self) -> None:
         for item in self.menu_def:
             if isinstance(item, ActionGroup):
                 self._build_subcategory(item)
@@ -31,7 +43,7 @@ class GenericContextMenu(QMenu):
             elif isinstance(item, Action):
                 self._build_button(self, item)
     
-    def _build_subcategory(self, group):
+    def _build_subcategory(self, group:ActionGroup) -> None:
         label = QLabel(group.text)
         label.setStyleSheet("""
             font-weight:bold;
@@ -47,43 +59,43 @@ class GenericContextMenu(QMenu):
             elif isinstance(item, ActionSubMenu):
                 self._build_submenu(item)
 
-    def _build_submenu(self, group):
+    def _build_submenu(self, group:ActionSubMenu) -> None:
         _menu = QMenu(group.text, self)
         for item in group.actions:
             self._build_button(_menu, item)
         self.addMenu(_menu)
 
-    def _build_button(self, menu, item):
+    def _build_button(self, menu:ActionGroup|ActionSubMenu, item:Action) -> None:
         action = QAction(item.text, menu)
         action.triggered.connect(item.callback)
         action.setEnabled(item.enabled)
         menu.addAction(action)
 
 class GenericDirectoryMenu(GenericContextMenu):
-    def __init__(self, parent:QTreeWidget, app_controller):
+    def __init__(self, parent:QTreeWidget, app_controller:AppController) -> None:
         super().__init__(parent, app_controller)
         self.menu_def:list = []
 
-    def call(self, file_context):
+    def call(self, file_context:FileContext) -> None:
         self.clear()
         self.menu_def = self._get_context_menu_options(file_context)
         self._build_menu()
 
-    def _get_context_menu_options(self, file_context):
+    def _get_context_menu_options(self, file_context:FileContext) -> None:
         return file_context.context.get_actions(self.app_controller, file_context.target)
     
 class ParadoxNodesContextMenu(GenericContextMenu):
     request_expansion = pyqtSignal(object)
-    def __init__(self, parent:QTreeWidget, app_controller):
+    def __init__(self, parent:QTreeWidget, app_controller:AppController) -> None:
         super().__init__(parent, app_controller)
         self.menu_def:list = []
 
-    def call(self, block_context, node_context):
+    def call(self, block_context:BlockContext, node_context:NodeContext) -> None:
         self.clear()
         self.menu_def = self._get_context_menu_options(block_context, node_context)
         self._build_menu()
 
-    def _get_context_menu_options(self, block_context, node_context):
+    def _get_context_menu_options(self, block_context:BlockContext, node_context:NodeContext) -> ActionsResult:
         return [
             ActionGroup("Tree Options", [
                 Action("Expand All", lambda:self.parent.set_expansion_rule(ExpansionMode.ALL), True),

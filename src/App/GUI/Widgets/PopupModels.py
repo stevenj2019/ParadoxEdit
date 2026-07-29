@@ -1,7 +1,10 @@
-from App.Services import AppLogger
+#TODO come back to type hinting
 from PyQt5.QtWidgets import QMessageBox
 
-def could_not_load_mod_critical(exc: Exception, traceback:str):
+from App.Services import AppLogger
+
+
+def could_not_load_mod_critical(exc: Exception, traceback:str) -> None:
     msg = QMessageBox()
     msg.setIcon(QMessageBox.Critical)
     msg.setWindowTitle("Mod Could not be loaded")
@@ -12,10 +15,10 @@ def could_not_load_mod_critical(exc: Exception, traceback:str):
     AppLogger.exception(traceback)
 
 
-def setup_process_cancelled():
+def setup_process_cancelled() -> QMessageBox:
     return QMessageBox.critical(None, "Startup Wizard Failed", "Startup Settings was aborted", QMessageBox.Ok)
     
-def settings_error_critical(game_dir_error:bool, mod_dir_error:bool):
+def settings_error_critical(game_dir_error:bool, mod_dir_error:bool) -> QMessageBox:
     text = "The following Problems prevent saving:"
     if game_dir_error:
         text += "\nGame install directory could not find pdx_launcher, is invalid"

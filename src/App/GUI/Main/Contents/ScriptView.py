@@ -1,22 +1,42 @@
-from PyQt5.QtWidgets import QApplication, QWidget, QVBoxLayout, QTreeWidget, QTreeWidgetItem, QShortcut
-from PyQt5.QtCore import Qt, pyqtSignal
-from PyQt5.QtGui import QBrush, QKeySequence
+from __future__ import annotations
 
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from App import AppController
+    from App.Loading.Models import FileReference
 from ParadoxParser import ParadoxScriptParser as PDXScript
-from ParadoxParser.ParadoxNodes import (GenericBlock, GenericKeyValue, GenericNode, 
-                                        GenericLocKey, GenericLegacyLocKey, GenericComparator)
+from ParadoxParser.ParadoxNodes import (
+    GenericBlock,
+    GenericComparator,
+    GenericKeyValue,
+    GenericLegacyLocKey,
+    GenericLocKey,
+    GenericNode,
+)
+from PyQt5.QtCore import QPoint, Qt, pyqtSignal
+from PyQt5.QtGui import QBrush, QKeySequence
+from PyQt5.QtWidgets import (
+    QApplication,
+    QShortcut,
+    QTreeWidget,
+    QTreeWidgetItem,
+    QVBoxLayout,
+    QWidget,
+)
 
 from App.Contexts import BlockContext, NodeContext
-from App.Contracts import InLineEditRequest
-from App.Contracts.Enums import ChangeState, TargetProperty
-from App.GUI.Enums import QtStorage, ExpansionMode
 from App.Contexts.Base import ParadoxContext
+from App.Contracts import InLineEditRequest, NodeMutationRequest
+from App.Contracts.Enums import ChangeState, TargetProperty
+from App.GUI.Enums import ExpansionMode, QtStorage
 from App.GUI.Menus.ContextMenus import ParadoxNodesContextMenu
 from App.GUI.StyledDelegate import NodeStateDelegate
 
+
 class ScriptView(QWidget):
     edit_open_request = pyqtSignal(object)
-    def __init__(self, app_controller):
+    def __init__(self, app_controller:AppController) -> None:
         super().__init__()
         self.app_controller = app_controller
         self.node_to_item:dict = {}
@@ -42,7 +62,7 @@ class ScriptView(QWidget):
         self.copy_shortcut = QShortcut(QKeySequence("Ctrl+C"), self)
         self.copy_shortcut.activated.connect(self.copy_selected_item)
 
-    def set_node_state(self, node, state):
+    def set_node_state(self, node:GenericNode, state:ChangeState) -> None:
         try:
             item = self.node_to_item[node]
         except KeyError:
@@ -50,7 +70,7 @@ class ScriptView(QWidget):
         item.setData(0, QtStorage.STATE, state)
         self.tree.update()
 
-    def load_block(self, file):
+    def load_block(self, file:FileReference)-> None:
         """
         Load a GenericBlock into the tree for display.
         """
@@ -79,7 +99,8 @@ class ScriptView(QWidget):
                    parent_node:PDXScript|GenericBlock,
                    nodes:list, 
                    open_file_context:ParadoxContext, 
-                   inherited_state:ChangeState=None):
+                   inherited_state:ChangeState=None
+    ) -> None:
         for index, node in enumerate(nodes):
             effective_state = (
                 inherited_state 
@@ -107,7 +128,7 @@ class ScriptView(QWidget):
                      node:GenericKeyValue|GenericNode, 
                      open_file_context:ParadoxContext, 
                      inherited_state:ChangeState
-    ):
+    ) -> None:
         item = QTreeWidgetItem([str(node.key), ""])
         self.node_to_item[node] = item
         effective_state = inherited_state or self.app_controller.file_system.change_tracker.get_node_state(node)
@@ -140,7 +161,7 @@ class ScriptView(QWidget):
                    node:GenericKeyValue|GenericNode, 
                    open_file_context:ParadoxContext, 
                    inherited_state:ChangeState=None
-    ):
+    )-> None:
         match node:
             case GenericKeyValue():
                 key_editable = True
@@ -192,13 +213,13 @@ class ScriptView(QWidget):
 
         parent_item.addChild(item)
 
-    def _on_item_double_click(self, item, column):
+    def _on_item_double_click(self, item:QTreeWidgetItem, column:int) -> None:
         if not item.data(0,QtStorage.READ_ONLY) and item.data(column, QtStorage.EDITABLE):
             target = TargetProperty.KEY if column is 0 else TargetProperty.VALUE
             node = item.data(column, QtStorage.NODE)
             self.edit_open_request.emit(InLineEditRequest(self.tree, item, node, target))
 
-    def _request_context_menu(self, pos):
+    def _request_context_menu(self, pos:QPoint) -> None:
         pos = self.tree.viewport().mapFrom(self, pos)
         column = self.tree.columnAt(pos.x())
         item = self.tree.itemAt(pos)
@@ -221,10 +242,10 @@ class ScriptView(QWidget):
         self.context_menu.call(block_context, node_context)
         self.context_menu.exec_(self.tree.viewport().mapToGlobal(pos))
 
-    def request_node_mutation(self, request):
+    def request_node_mutation(self, request:NodeMutationRequest) -> None:
         self.app_controller.request_block_mutation.emit(request)
 
-    def set_expansion_rule(self, mode, depth_limit=1, root_item=None):
+    def set_expansion_rule(self, mode:ExpansionMode, depth_limit:int=1, root_item:QTreeWidgetItem=None) -> None:
         self.tree.setUpdatesEnabled(False)
         
         if isinstance(root_item, GenericBlock):
@@ -247,7 +268,7 @@ class ScriptView(QWidget):
         self.tree.setUpdatesEnabled(True)
         self.tree.resizeColumnToContents(0)
 
-    def reveal_item(self, item):
+    def reveal_item(self, item:QTreeWidgetItem) -> None:
         self.tree.setUpdatesEnabled(False)
 
         while item is not None:
@@ -256,19 +277,19 @@ class ScriptView(QWidget):
 
         self.tree.setUpdatesEnabled(True)
 
-    def reveal_node(self, node):
+    def reveal_node(self, node:GenericNode) -> None:
         item = self.node_to_item.get(node)
         if item:
             self.reveal_item(node)
 
-    def jump_to_node(self, node):
+    def jump_to_node(self, node:QTreeWidgetItem) -> None:
         item = self.node_to_item[node]
         if item:
             self.reveal_item(item)
             self.tree.setCurrentItem(item)
             self.tree.scrollToItem(item)
 
-    def copy_selected_item(self):
+    def copy_selected_item(self) -> None:
         item = self.tree.currentItem()
         if item is None:
             return

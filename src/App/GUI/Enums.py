@@ -1,8 +1,10 @@
+from enum import Enum, IntEnum, auto
+
 from PyQt5.QtCore import Qt
-from enum import Enum, auto, IntEnum
+
 
 class QtStorage(IntEnum):
-    def _generate_next_value_(name, start, count, last_values):
+    def _generate_next_value_(name:str, start:int, count:int, last_values:list[int]) -> int:
         return Qt.UserRole + count
     READ_ONLY = auto()
     IS_BLOCK = auto()

@@ -1,10 +1,11 @@
-from PyQt5.QtWidgets import QDialog, QLabel, QVBoxLayout
-from PyQt5.QtGui import QImage, QPixmap
-from PyQt5.QtCore import Qt
 from PIL import Image
+from PyQt5.QtCore import Qt
+from PyQt5.QtGui import QImage, QPixmap
+from PyQt5.QtWidgets import QDialog, QLabel, QVBoxLayout
+
 
 class IconPreviewDialog(QDialog):
-    def __init__(self, icon, path):
+    def __init__(self, icon:str, path:str) -> None:
         super().__init__()
         self.setWindowTitle(path.name)
 

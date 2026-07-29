@@ -1,13 +1,32 @@
+from __future__ import annotations
+
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from App import AppController
 from pathlib import Path
+
 import qdarktheme
+from PyQt5.QtWidgets import (
+    QCheckBox,
+    QDialog,
+    QDialogButtonBox,
+    QFormLayout,
+    QHBoxLayout,
+    QLabel,
+    QLineEdit,
+    QPushButton,
+)
 
-from PyQt5.QtWidgets import QDialog, QFormLayout, QHBoxLayout, QLabel, QCheckBox, QLineEdit, QPushButton, QDialogButtonBox
-
-from App.GUI.Widgets.FileDialogues import select_hoi4_install_directory, select_mod_directory
+from App.GUI.Widgets.FileDialogues import (
+    select_hoi4_install_directory,
+    select_mod_directory,
+)
 from App.GUI.Widgets.PopupModels import settings_error_critical
 
+
 class SettingsForm(QDialog):
-    def __init__(self, title:str, app_controller):
+    def __init__(self, title:str, app_controller:AppController) -> None:
         super().__init__()
         self.app_controller = app_controller
         self.setWindowTitle(title)
@@ -58,21 +77,21 @@ class SettingsForm(QDialog):
         self.form.addRow(self.button)
         self.button.accepted.connect(self.submit_form)
 
-    def browse_game_install_path(self):
+    def browse_game_install_path(self) -> None:
         path = select_hoi4_install_directory(self.app_controller.main)
         if path:
             self.game_install_path_element_text.setText(path)
 
-    def browse_mod_install_path(self):
+    def browse_mod_install_path(self) -> None:
         path = select_mod_directory(self.app_controller.main)
         if path:
             self.mod_install_path_element_text.setText(path)
     
-    def toggle_dark_mode(self):
+    def toggle_dark_mode(self) -> None:
         self.app_controller.configuration.change_setting(dark_mode = not(self.app_controller.configuration.dark_mode))
         self.app_controller.app.setStyleSheet(qdarktheme.load_stylesheet("dark" if self.app_controller.configuration.dark_mode else "light"))
 
-    def submit_form(self):
+    def submit_form(self) -> None:
         game_dir_error = False
         mod_dir_error = False
         

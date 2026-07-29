@@ -1,6 +1,17 @@
 import sys
 from pathlib import Path
-from PyQt5.QtWidgets import QDialog, QWidget, QStackedWidget, QVBoxLayout, QHBoxLayout, QPushButton, QLabel, QTextBrowser
+
+from PyQt5.QtWidgets import (
+    QDialog,
+    QHBoxLayout,
+    QLabel,
+    QPushButton,
+    QStackedWidget,
+    QTextBrowser,
+    QVBoxLayout,
+    QWidget,
+)
+
 
 class HelpDialog(QDialog):
     def __init__(self):
@@ -28,7 +39,7 @@ class HelpDialog(QDialog):
         self.add_page("Report Issues", "GithubHelp.html")
         self.show()
 
-    def add_page(self, name, file):
+    def add_page(self, name:str, file:str) -> None:
         widget = HelpPage(self.read_html(file))
         button = QPushButton(name)
         button.clicked.connect(lambda _, w=widget: self.stack.setCurrentWidget(w))
@@ -38,11 +49,11 @@ class HelpDialog(QDialog):
         self.stack.addWidget(widget)
         self.pages.append(widget)
 
-    def read_html(self, file_name):
+    def read_html(self, file_name:str) -> None:
         return (self.html_directory / file_name).read_text()
     
 class HelpPage(QWidget):
-    def __init__(self, text):
+    def __init__(self, text:str):
         super().__init__()
 
         layout = QVBoxLayout(self)

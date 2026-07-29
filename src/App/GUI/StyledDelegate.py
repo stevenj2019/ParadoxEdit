@@ -1,19 +1,35 @@
-from PyQt5.QtWidgets import QApplication, QStyle, QStyledItemDelegate, QToolTip
-from PyQt5.QtCore import Qt, QRect, QEvent
-from PyQt5.QtGui import QColor as QColour, QBrush, QPen
+from __future__ import annotations
 
-from App.Loading.ParadoxSource import ParadoxSource
-from App.Loading.Directories.Base import GenericDirectory
+from typing import TYPE_CHECKING
 
-from App.GUI.Enums import QtStorage
+if TYPE_CHECKING:
+    from App import AppController
+
+from PyQt5.QtCore import QEvent, QModelIndex, QRect, Qt
+from PyQt5.QtGui import QBrush, QPainter, QPen
+from PyQt5.QtGui import QColor as QColour
+from PyQt5.QtWidgets import (
+    QAbstractItemView,
+    QApplication,
+    QStyle,
+    QStyledItemDelegate,
+    QStyleOptionViewItem,
+    QToolTip,
+    QTreeWidget,
+)
+
 from App.Contracts.Enums import ChangeState
+from App.GUI.Enums import QtStorage
+from App.Loading.Directories.Base import GenericDirectory
+from App.Loading.ParadoxSource import ParadoxSource
+
 
 class ParadoxFileDelegate(QStyledItemDelegate):
-    def __init__(self, app_controller, parent=None):
+    def __init__(self, app_controller:AppController, parent:QTreeWidget=None):
         super().__init__(parent)
         self.app_controller = app_controller
 
-    def paint(self, painter, option, index):
+    def paint(self, painter:QPainter, option:QStyleOptionViewItem, index:QModelIndex) -> None:
         super().paint(painter, option, index)
 
         radius = 4
@@ -40,16 +56,16 @@ class ParadoxFileDelegate(QStyledItemDelegate):
         painter.restore()
         
 class NodeStateDelegate(QStyledItemDelegate):
-    def __init__(self, app_controller, parent=None):
+    def __init__(self, app_controller:AppController, parent:QTreeWidget=None):
         super().__init__(parent)
         self.app_controller = app_controller
 
-    def paint(self, painter, option, index):
+    def paint(self, painter:QPainter, option:QStyleOptionViewItem, index:QModelIndex) -> None:
         super().paint(painter, option, index)
         self.paint_change_state(painter, option, index)
         self.paint_error_icon(painter, option, index)
 
-    def paint_change_state(self, painter, option, index):
+    def paint_change_state(self, painter:QPainter, option:QStyleOptionViewItem, index:QModelIndex) -> None:
         state = index.model().data(index, QtStorage.STATE)
 
         if state in (ChangeState.ADDED, ChangeState.MODIFIED, ChangeState.DELETED):
@@ -68,7 +84,7 @@ class NodeStateDelegate(QStyledItemDelegate):
             painter.drawRect(viewport_rect.left(), rect.top(), stripe_width, rect.height())
             painter.restore()
 
-    def paint_error_icon(self, painter, option, index):
+    def paint_error_icon(self, painter:QPainter, option:QStyleOptionViewItem, index:QModelIndex) -> None:
         if index.column() != 1:
             return 
         
@@ -97,7 +113,7 @@ class NodeStateDelegate(QStyledItemDelegate):
                     QRect(x, y, icon_size, icon_size)
                 )
 
-    def helpEvent(self, event, view, option, index):
+    def helpEvent(self, event:QEvent, view:QAbstractItemView, option:QStyleOptionViewItem, index:QModelIndex) -> None:
         if event.type() == QEvent.ToolTip:
             if index.column() == 1:
                 source_index = index.sibling(index.row(), 0)

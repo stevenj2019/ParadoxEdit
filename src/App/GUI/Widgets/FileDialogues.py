@@ -1,7 +1,10 @@
-from PyQt5.QtWidgets import QFileDialog
+#TODO: come back to type hint
 from pathlib import Path
 
-def select_hoi4_install_directory(parent):
+from PyQt5.QtWidgets import QFileDialog, QMainWindow
+
+
+def select_hoi4_install_directory(parent:QMainWindow):
     options = QFileDialog.Options()
     options |= QFileDialog.ReadOnly
     return QFileDialog.getExistingDirectory(
@@ -11,7 +14,7 @@ def select_hoi4_install_directory(parent):
         QFileDialog.ShowDirsOnly
     )
 
-def select_mod_directory(parent):
+def select_mod_directory(parent:QMainWindow):
     options = QFileDialog.Option()
     options |= QFileDialog.ReadOnly
     return QFileDialog.getExistingDirectory(
@@ -21,7 +24,7 @@ def select_mod_directory(parent):
         QFileDialog.ShowDirsOnly
     )
 
-def select_mod_file(parent):
+def select_mod_file(parent:QMainWindow):
     options = QFileDialog.Options()
     options |= QFileDialog.ReadOnly
     filepath, _ = QFileDialog.getOpenFileName(
@@ -33,7 +36,7 @@ def select_mod_file(parent):
     )
     return filepath
     
-def gfx_files_folder_selector(parent):
+def gfx_files_folder_selector(parent:QMainWindow):
     options = QFileDialog.Options()
     options |= QFileDialog.ReadOnly
     filepath = QFileDialog.getExistingDirectory(
@@ -44,7 +47,7 @@ def gfx_files_folder_selector(parent):
     )
     return filepath, Path(filepath).exists()
 
-def gfx_files_file_selector(parent):
+def gfx_files_file_selector(parent:QMainWindow):
     options = QFileDialog.Options()
     options |= QFileDialog.ReadOnly
     filepath, _ = QFileDialog.getOpenFileName(
@@ -66,7 +69,7 @@ def gfx_save_folder_selector(parent, path):
     )
     return filepath, Path(filepath).exists()
 
-def workspace_selector(parent):
+def workspace_selector(parent:QMainWindow):
     options = QFileDialog.Options()
     options |= QFileDialog.ReadOnly
     filepath, _ = QFileDialog.getOpenFileName(
@@ -78,7 +81,7 @@ def workspace_selector(parent):
     )
     return filepath, Path(filepath).exists()
 
-def workspace_save_selector(parent):
+def workspace_save_selector(parent:QMainWindow):
     filepath, _ = QFileDialog.getSaveFileName(
         parent, 
         "Save Workspace",

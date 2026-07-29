@@ -1,13 +1,22 @@
-from PyQt5.QtWidgets import QWidget, QStackedWidget, QVBoxLayout
+from __future__ import annotations
 
-from ParadoxParser import ParadoxScriptParser as PDXScript, ParadoxLocParser as PDXLoc
+from typing import TYPE_CHECKING
 
-from App.Loading.Models import IconFile
-from App.GUI.Main.Contents.ScriptView import ScriptView
+if TYPE_CHECKING:
+    from App import AppController
+    from App.Loading.Models import FileReference
+
+from ParadoxParser import ParadoxLocParser as PDXLoc
+from ParadoxParser import ParadoxScriptParser as PDXScript
+from PyQt5.QtWidgets import QStackedWidget, QVBoxLayout, QWidget
+
 from App.GUI.Main.Contents.ImageView import IconView
+from App.GUI.Main.Contents.ScriptView import ScriptView
+from App.Loading.Models import IconFile
+
 
 class ContentsPanel(QWidget):
-    def __init__(self, app_controller):
+    def __init__(self, app_controller:AppController) -> None:
         super().__init__()
         self.stack = QStackedWidget()
 
@@ -21,17 +30,17 @@ class ContentsPanel(QWidget):
         layout.addWidget(self.stack)
         self.setLayout(layout)
 
-    def load_file(self, file):
+    def load_file(self, file:FileReference) -> None:
         if isinstance(file.file, (PDXScript, PDXLoc)):
             self.show_script(file)
         elif isinstance(file.file, IconFile):
             self.show_image(file)
 
-    def show_script(self, file):
+    def show_script(self, file:FileReference) -> None:
         self.stack.setCurrentWidget(self.script_view)
         self.script_view.load_block(file)
 
-    def show_image(self, file):
+    def show_image(self, file:FileReference) -> None:
         self.stack.setCurrentWidget(self.image_viewer)
         self.image_viewer.load_image(file)
         return 

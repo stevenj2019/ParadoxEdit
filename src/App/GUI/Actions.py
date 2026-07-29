@@ -1,6 +1,7 @@
 from dataclasses import dataclass
 from typing import Callable, List, TypeAlias
 
+
 @dataclass
 class Action:
     text: str

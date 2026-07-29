@@ -1,10 +1,18 @@
-from PyQt5.QtWidgets import QWidget, QLabel, QVBoxLayout
-from PyQt5.QtGui import QImage, QPixmap
-from PyQt5.QtCore import Qt
+from __future__ import annotations
+
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from App import AppController
+    from App.Loading.Models import FileReference
 from PIL import Image
+from PyQt5.QtCore import Qt
+from PyQt5.QtGui import QImage, QPixmap
+from PyQt5.QtWidgets import QLabel, QVBoxLayout, QWidget
+
 
 class IconView(QWidget):
-    def __init__(self, app_controller):
+    def __init__(self, app_controller:AppController) -> None:
         super().__init__()
         self.app_controller = app_controller
 
@@ -13,7 +21,7 @@ class IconView(QWidget):
         layout.addWidget(self.icon_label,
                          alignment=Qt.AlignTop | Qt.AlignLeft )
 
-    def load_image(self, file):
+    def load_image(self, file:FileReference) -> None:
         file_path = file.file.get_path()
         with Image.open(file_path) as img:
             img.load()

@@ -20,7 +20,7 @@ from App.Contexts.Base import (
 )
 from App.Contracts import BlockMutationRequest
 from App.GUI.Actions import Action, ActionsResult
-from App.GUI.Forms.AddGFX import AddNewGFXForm
+# from App.GUI.Forms.AddGFX import AddNewGFXForm
 from App.PDXFactory.Blocks.Sprites import GFX_icon, GFX_shine_icon
 
 
@@ -46,9 +46,9 @@ class GFXFileContext(ParadoxFileContext):
         # from App.GUI.Forms.AddGFX import AddNewGFXForm
         return [
             *ParadoxFileContext.get_actions(app_controller, file),
-            Action("Bulk-Upload Sprites",
-                   lambda:AddNewGFXForm(app_controller, file),
-                   True)
+            # Action("Bulk-Upload Sprites",
+            #        lambda:AddNewGFXForm(app_controller, file),
+            #        True)
         ]
 
 class GFXRootContext(ParadoxBlockContext):

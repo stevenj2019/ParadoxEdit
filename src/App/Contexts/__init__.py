@@ -4,12 +4,11 @@ from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
     from App.Contexts.Base import (
-        GenericDirectory,
         ParadoxBlockContext,
         ParadoxFileContext,
         ParadoxNodeContext,
     )
-    
+    from App.Loading.Directories.Base import GenericDirectory
 from dataclasses import dataclass
 
 from ParadoxParser import ParadoxLocParser as PDXLocFile
