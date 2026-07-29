@@ -12,7 +12,6 @@ from App.Contexts.Base import ParadoxContext
 from App.Enums import PDXTokens
 from App.Loading.Directories.Base import GenericDirectory
 from App.Loading.Models import FileReference
-from App.Loading.ParadoxSource import ParadoxSource
 from ParadoxParser import ParadoxScriptParser as PDXScriptFile
 from ParadoxParser.ParadoxNodes import GenericBlock
 

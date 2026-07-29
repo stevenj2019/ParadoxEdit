@@ -1,11 +1,11 @@
 import os
 from pathlib import Path
 
+from App.AppLogger import AppLogger
 from App.Contexts.Base import ParadoxContext, ReadOnlyContext
 from App.Loading.Directories import DIRECTORY_REGISTRY
 from App.Loading.Directories.Base import GenericDirectory
 from App.Loading.Models import FileReference
-from App.Services import AppLogger
 from ParadoxParser import ParadoxScriptParser
 from ParadoxParser.ParadoxNodes import GenericBlock, GenericKeyValue
 

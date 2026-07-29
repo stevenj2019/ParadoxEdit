@@ -103,11 +103,29 @@ class LoadProcess(QObject):
 
     def _file_processing(self, source: ParadoxSource, file: FileReference) -> None:
         file.file = file.file.load()
-        self._merge_registry(self.tokens, file.directory.token_collection(source, file))
+        self._merge_registry(
+            self.tokens, file.directory.token_collection(source, file))
         self._merge_registry(
             self.metadata, file.directory.metadata_collection(source, file)
         )
 
-    def _merge_registry(self, dict: dict, insertions: dict | set) -> None:
+    def _merge_registry(self, target: dict, insertions: dict | set) -> None:
         for key, value in insertions.items():
-            dict.setdefault(key, type(value)()).update(value)
+            if key not in target:
+                target[key] = type(value)()
+
+            if isinstance(value, dict):
+                self._merge_dict(target[key], value)
+            else:
+                target[key].update(value)
+
+
+    def _merge_dict(self, target: dict, source: dict) -> None:
+        for key, value in source.items():
+            if (
+                isinstance(value, dict)
+                and isinstance(target.get(key), dict)
+            ):
+                self._merge_dict(target[key], value)
+            else:
+                target[key] = value

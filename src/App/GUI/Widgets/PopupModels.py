@@ -1,6 +1,6 @@
 from PyQt5.QtWidgets import QMessageBox, QWidget
 
-from App.Services import AppLogger
+from App.AppLogger import AppLogger
 
 
 def could_not_load_mod_critical(
@@ -71,4 +71,18 @@ def no_icon_available_warning(parent: QWidget, message: str) -> None:
 def file_is_unsupported(parent: QWidget) -> None:
     QMessageBox.warning(
         parent, "Warning", "This File is currently unsupported", QMessageBox.Ok
+    )
+
+def form_is_read_only(parent:QWidget) -> None:
+    QMessageBox.warning(
+        parent, "Warning", 
+        "This form is in read-only mode, localisation file belongs to a different source",
+        QMessageBox.Ok
+    )
+
+def split_loc_file(parent:QWidget) -> None:
+    QMessageBox.warning(
+        parent, "Error",
+        "localisation keys split across multiple files, exiting.",
+        QMessageBox.Ok
     )

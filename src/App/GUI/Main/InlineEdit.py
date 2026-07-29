@@ -11,10 +11,10 @@ from PyQt5.QtWidgets import (
     QWidget,
 )
 
+from App.AppLogger import AppLogger
 from App.Contracts import InLineEditRequest, NodeMutationRequest
 from App.Contracts.Enums import TargetProperty
 from App.GUI.Widgets.PopupModels import change_rejected_warning
-from App.Services import AppLogger
 from ParadoxParser.ParadoxNodes import (
     GenericBool,
     GenericComment,

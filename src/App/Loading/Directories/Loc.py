@@ -27,16 +27,13 @@ class LocDirectory(GenericDirectory):
         metadata = dict()
         metadata[PDXMetadata.LanguageKey] = set()
         metadata[PDXMetadata.LocKey] = dict()
-        file = file.file
-        if "_l_" not in file.filename:
-            return metadata
-        language = Path(file.filename).stem.rsplit("_l_", 1)[1]
-        language_key = f"l_{language}"
+        language_key = file.file.language_key
         metadata[PDXMetadata.LanguageKey].add(language_key)
-        for node in file.nodes:
+        for node in file.file.nodes:
             if isinstance(node, (GenericLocKey, GenericLegacyLocKey)):
                 metadata[PDXMetadata.LocKey].setdefault(node.key, dict())
                 metadata[PDXMetadata.LocKey][node.key][language_key] = {
+                    "source": source,
                     "file": file,
                     "node": node,
                 }

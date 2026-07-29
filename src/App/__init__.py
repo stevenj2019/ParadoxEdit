@@ -10,6 +10,7 @@ import qdarktheme
 from PyQt5.QtCore import QObject, QThread, pyqtSignal
 from PyQt5.QtWidgets import QApplication, QDialog
 
+from App.AppLogger import AppLogger
 from App.Contracts import (
     BlockMutationRequest,
     BulkMutationRequest,
@@ -28,7 +29,6 @@ from App.Loading.Directories.Base import GenericDirectory
 from App.Loading.Models import FileReference
 from App.Loading.ParadoxSource import ParadoxMod, ParadoxSource
 from App.Services import (
-    AppLogger,
     ConfigurationManager,
     FilesystemMananger,
     ParadoxRegistry,

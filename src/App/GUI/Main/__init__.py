@@ -10,6 +10,7 @@ from PyQt5.QtCore import Qt, pyqtSignal
 from PyQt5.QtGui import QKeySequence
 from PyQt5.QtWidgets import QApplication, QMainWindow, QShortcut, QSplitter
 
+from App.AppLogger import AppLogger
 from App.Contracts import PropagationRequest
 from App.Contracts.Enums import ChangeState, PropagationType
 from App.Enums import PDXMetadata
@@ -32,7 +33,6 @@ from App.GUI.Widgets.PopupModels import (
 )
 from App.Loading.Models import UnloadedFile
 from App.Loading.ParadoxSource import ParadoxSource
-from App.Services import AppLogger
 from ParadoxParser.ParadoxNodes import GenericBlock, GenericNode
 
 
