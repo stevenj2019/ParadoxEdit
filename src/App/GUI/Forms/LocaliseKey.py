@@ -9,20 +9,27 @@ from pathlib import Path
 
 from PyQt5.QtCore import Qt
 from PyQt5.QtGui import QShowEvent
-from PyQt5.QtWidgets import QComboBox, QDialog, QFormLayout, QLabel, QPushButton, QTextEdit, QListView
+from PyQt5.QtWidgets import (
+    QComboBox,
+    QDialog,
+    QFormLayout,
+    QLabel,
+    QPushButton,
+    QTextEdit,
+)
 
 from App.Contracts import BlockMutationRequest, NodeMutationRequest
 from App.Contracts.Enums import TargetProperty
 from App.Enums import PDXMetadata
+from App.GUI.Widgets.PopupModels import form_is_read_only, split_loc_file
 from ParadoxParser.ParadoxNodes import (
-    GenericNode, 
     GenericBlock,
     GenericComment,
     GenericKeyValue,
     GenericLegacyLocKey,
     GenericLocKey,
+    GenericNode,
 )
-from App.GUI.Widgets.PopupModels import form_is_read_only, split_loc_file
 
 UNSORTED_COMMENT = "#### unsorted keys ####"
 class BaseLocaliseForm(QDialog):
