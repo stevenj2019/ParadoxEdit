@@ -1,17 +1,18 @@
 from pathlib import Path
 
+from App.Loading.Directories.Base import GenericDirectory
 from App.Loading.ParadoxSource import ParadoxMod, ParadoxSource, ParadoxVanilla
 
 
 class ParadoxLoadOrder:
-    def __init__(self, vanilla_loaded) -> None:
+    def __init__(self, vanilla_loaded: bool) -> None:
         self.vanilla_loaded = vanilla_loaded
         self.sources: list[ParadoxSource] = []
 
-    def load_vanilla(self, path) -> None:
+    def load_vanilla(self, path: Path) -> None:
         self.sources.append(ParadoxVanilla(path))
 
-    def load_mod(self, path) -> None:
+    def load_mod(self, path: Path) -> None:
         self.sources.append(ParadoxMod(path))
 
     def resolve(self) -> None:
@@ -36,7 +37,9 @@ class ParadoxLoadOrder:
 
         return graph
 
-    def _resolve_load_order(self, graph) -> list[ParadoxSource]:
+    def _resolve_load_order(
+        self, graph: dict[ParadoxSource, str]
+    ) -> list[ParadoxSource]:
         resolved = list()
         vanilla = next(
             (source for source in self.sources if isinstance(source, ParadoxVanilla)),
@@ -76,7 +79,12 @@ class ParadoxLoadOrder:
                 self._apply_override_traversal(source, source.root, target)
             loaded_sources.append(source)
 
-    def _apply_override_traversal(self, source, source_dir, target_source) -> None:
+    def _apply_override_traversal(
+        self,
+        source: ParadoxSource,
+        source_dir: GenericDirectory,
+        target_source: ParadoxSource,
+    ) -> None:
         for file in source_dir.files.values():
             path = Path(file.file.path)
             path = path.relative_to(source.file_path)

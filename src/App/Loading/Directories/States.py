@@ -1,15 +1,18 @@
 from __future__ import annotations
 
+from pathlib import Path
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
+    from App.Loading.Models import FileReference
     from App.Loading.ParadoxSource import ParadoxSource
 
-import os
 
 from App.Contexts.Base import ParadoxContext
 from App.Enums import PDXTokens
 from App.Loading.Directories.Base import GenericDirectory
+from App.Loading.Models import FileReference
+from App.Loading.ParadoxSource import ParadoxSource
 from ParadoxParser import ParadoxScriptParser as PDXScriptFile
 from ParadoxParser.ParadoxNodes import GenericBlock
 
@@ -17,12 +20,12 @@ FILE_TYPES = {".txt": ParadoxContext}
 
 
 class StatesDirectory(GenericDirectory):
-    def __init__(
-        self, source: ParadoxSource, file_path: os.PathLike, read_only: bool
-    ) -> None:
+    def __init__(self, source: ParadoxSource, file_path: Path, read_only: bool) -> None:
         super().__init__(source, file_path, FILE_TYPES, PDXScriptFile, read_only)
 
-    def token_collection(self, source, file) -> dict[PDXTokens, set]:
+    def token_collection(
+        self, source: ParadoxSource, file: FileReference
+    ) -> dict[PDXTokens, set]:
         tokens = set()
         file = file.file
         for block in file.nodes:

@@ -285,7 +285,7 @@ class ScriptView(QWidget):
         elif isinstance(root_item, PDXScript) or not root_item:
             root_item = self.tree.invisibleRootItem()
 
-        def recurse(item, depth) -> None:
+        def recurse(item: QTreeWidgetItem, depth: int) -> None:
             for i in range(item.childCount()):
                 child = item.child(i)
                 match mode:

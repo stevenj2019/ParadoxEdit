@@ -5,7 +5,8 @@ from typing import TYPE_CHECKING
 if TYPE_CHECKING:
     from App.Loading.ParadoxSource import ParadoxSource
 
-import os
+
+from pathlib import Path
 
 from App.Contexts.Base import ReadOnlyContext
 from App.Loading.Directories.Base import GenericDirectory
@@ -15,7 +16,5 @@ FILE_TYPES = {"dir": ReadOnlyContext, ".dds": ReadOnlyContext, ".png": ReadOnlyC
 
 
 class IconDirectory(GenericDirectory):
-    def __init__(
-        self, source: ParadoxSource, file_path: os.PathLike, read_only: bool
-    ) -> None:
+    def __init__(self, source: ParadoxSource, file_path: Path, read_only: bool) -> None:
         super().__init__(source, file_path, FILE_TYPES, IconFile, read_only)

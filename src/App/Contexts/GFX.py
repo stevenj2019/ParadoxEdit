@@ -14,8 +14,7 @@ from App.Contexts.Base import (
     ParadoxFileContext,
     ParadoxNodeContext,
 )
-from App.Contracts import BlockMutationRequest
-from App.GUI.Actions import Action, ActionsResult
+from App.GUI.Actions import ActionsResult
 
 # from App.GUI.Forms.AddGFX import AddNewGFXForm
 # from App.PDXFactory.Blocks.Sprites import GFX_icon, GFX_shine_icon
@@ -69,22 +68,22 @@ class GFXSpriteTypesContext(ParadoxBlockContext):
     ) -> ActionsResult:
         return [
             *ParadoxNodeContext.get_actions(app_controller, block_context),
-            Action(
-                "Add Static Sprite",
-                lambda: app_controller.request_block_mutation.emit(
-                    BlockMutationRequest.add(
-                        block_context.parent, block_context.parent_index, GFX_icon
-                    )
-                ),
-                True,
-            ),
-            Action(
-                "Add Focus _shine Sprite",
-                lambda: app_controller.request_block_mutation.emit(
-                    BlockMutationRequest.add(
-                        block_context.parent, block_context.parent_index, GFX_shine_icon
-                    )
-                ),
-                True,
-            ),
+            # Action(
+            #     "Add Static Sprite",
+            #     lambda: app_controller.request_block_mutation.emit(
+            #         BlockMutationRequest.add(
+            #             block_context.parent, block_context.parent_index, GFX_icon
+            #         )
+            #     ),
+            #     True,
+            # ),
+            # Action(
+            #     "Add Focus _shine Sprite",
+            #     lambda: app_controller.request_block_mutation.emit(
+            #         BlockMutationRequest.add(
+            #             block_context.parent, block_context.parent_index, GFX_shine_icon
+            #         )
+            #     ),
+            #     True,
+            # ),
         ]

@@ -40,7 +40,7 @@ class IconFile:
         return self.filepath if not self.source_path else self.source_path
 
     @classmethod
-    def add(cls, save_path, source_path) -> IconFile:
+    def add(cls, save_path: Path, source_path: Path) -> IconFile:
         icon = cls(save_path)
         icon.source_path = source_path
         return icon
@@ -53,7 +53,7 @@ class FileReference:
     context: ParadoxContext
     read_only: bool
 
-    def commit(self, safe_mode) -> None:
+    def commit(self, safe_mode: bool) -> None:
         match self.file:
             case PDXScriptFile() | PDXLocFile():
                 if safe_mode:

@@ -8,3 +8,5 @@ select = [
 
 [tool.ruff.lint.isort]
 known-first-party = ["App", "ParadoxParser"]
+[tool.ruff]
+line-length = 100

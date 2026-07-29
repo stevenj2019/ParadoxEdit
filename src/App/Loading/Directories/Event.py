@@ -3,9 +3,10 @@ from __future__ import annotations
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
+    from App.Loading.Models import FileReference
     from App.Loading.ParadoxSource import ParadoxSource
 
-import os
+from pathlib import Path
 
 from App.Contexts.Event import EventContext
 from App.Enums import PDXTokens
@@ -17,12 +18,12 @@ FILE_TYPES = {"dir": EventContext, ".txt": EventContext}
 
 
 class EventDirectory(GenericDirectory):
-    def __init__(
-        self, source: ParadoxSource, file_path: os.PathLike, read_only: bool
-    ) -> None:
+    def __init__(self, source: ParadoxSource, file_path: Path, read_only: bool) -> None:
         super().__init__(source, file_path, FILE_TYPES, PDXScriptFile, read_only)
 
-    def token_collection(self, source, file) -> dict[PDXTokens, set]:
+    def token_collection(
+        self, source: ParadoxSource, file: FileReference
+    ) -> dict[PDXTokens, set]:
         tokens = set()
         file = file.file
         if isinstance(file, PDXScriptFile):

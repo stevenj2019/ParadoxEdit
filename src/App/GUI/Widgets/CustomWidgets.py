@@ -51,17 +51,17 @@ class FileFolderSelectorWidget(QWidget):
         return self._file_list
 
     def _add_folder_to_input_list(self) -> None:
-        path, exists = gfx_files_folder_selector(self)
-        if exists:
+        path = gfx_files_folder_selector(self)
+        if path:
             self._file_list.append(path)
-            item = QTreeWidgetItem([path])
+            item = QTreeWidgetItem([str(path)])
             self.file_list_item.invisibleRootItem().addChild(item)
 
     def _add_file_to_input_list(self) -> None:
-        path, exists = gfx_files_file_selector(self)
-        if exists:
+        path = gfx_files_file_selector(self)
+        if path:
             self._file_list.append(path)
-            item = QTreeWidgetItem([path])
+            item = QTreeWidgetItem([str(path)])
             self.file_list_item.invisibleRootItem().addChild(item)
 
     def _remove_selected_from_input_list(self) -> None:
@@ -97,7 +97,7 @@ class CheckableComboBox(QComboBox):
 
         self.view().viewport().installEventFilter(self)
 
-    def resizeEvent(self, event: QEvent):
+    def resizeEvent(self, event: QEvent) -> None:
         self.updateText()
         super().resizeEvent(event)
 
@@ -151,7 +151,7 @@ class CheckableComboBox(QComboBox):
         elidedText = metrics.elidedText(text, Qt.ElideRight, self.lineEdit().width())
         self.lineEdit().setText(elidedText)
 
-    def addItem(self, text: str, data: Any = None) -> None:
+    def addItem(self, text: str, data: Any = None) -> None: # noqa: ANN401
         item = QStandardItem()
         item.setText(text)
         if data is None:

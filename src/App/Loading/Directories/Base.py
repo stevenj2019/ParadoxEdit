@@ -5,7 +5,7 @@ from typing import TYPE_CHECKING
 if TYPE_CHECKING:
     from App.Loading.ParadoxSource import ParadoxSource
 
-import os
+from collections.abc import Iterator
 from pathlib import Path
 
 from App.Contexts.Base import ParadoxContext
@@ -15,8 +15,6 @@ from App.Services import AppLogger
 from ParadoxParser import ParadoxLocParser as PDXLocFile
 from ParadoxParser import ParadoxScriptParser as PDXScriptFile
 
-from collections.abc import Iterator
-
 FILE_TYPES = {".txt": ParadoxContext}
 
 
@@ -24,7 +22,7 @@ class GenericDirectory:
     def __init__(
         self,
         source: ParadoxSource,
-        file_path: os.PathLike,
+        file_path: Path,
         context: dict = FILE_TYPES,
         parser: PDXScriptFile | PDXLocFile = PDXScriptFile,
         read_only: bool = True,
@@ -43,7 +41,7 @@ class GenericDirectory:
         self.directories: dict[str, GenericDirectory] = {}
         self.files: dict[str:FileReference] = {}
 
-    def add_file(self, path, name, file_ref: FileReference = None) -> None:
+    def add_file(self, path: Path, name: str, file_ref: FileReference = None) -> None:
         if path.suffix not in self.context_resolver.keys():
             AppLogger.warning(f"{path.absolute()} ignored: lacks context.")
             return
@@ -59,7 +57,7 @@ class GenericDirectory:
                 self.read_only,
             )
 
-    def delete_file(self, file) -> None:
+    def delete_file(self, file: FileReference) -> None:
         self.files.pop(file, None)
 
     def add_directory(self, directory: GenericDirectory) -> None:
@@ -82,8 +80,12 @@ class GenericDirectory:
 
         return not self.directories and not self.files
 
-    def token_collection(self, source, file) -> dict[PDXTokens, set]:
+    def token_collection(
+        self, source: ParadoxSource, file: FileReference
+    ) -> dict[PDXTokens, set]:
         return {}
 
-    def metadata_collection(self, source, file) -> dict[PDXMetadata, dict]:
+    def metadata_collection(
+        self, source: ParadoxSource, file: FileReference
+    ) -> dict[PDXMetadata, dict]:
         return {}

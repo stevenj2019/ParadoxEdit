@@ -4,23 +4,25 @@ from pathlib import Path
 from PyQt5.QtWidgets import QFileDialog, QMainWindow
 
 
-def select_hoi4_install_directory(parent: QMainWindow):
+def select_hoi4_install_directory(parent: QMainWindow) -> Path | None:
     options = QFileDialog.Options()
     options |= QFileDialog.ReadOnly
-    return QFileDialog.getExistingDirectory(
+    filepath, _ = QFileDialog.getExistingDirectory(
         parent, "Select Paradox Game install directory", "", QFileDialog.ShowDirsOnly
     )
+    return Path(filepath) if filepath else None
 
 
-def select_mod_directory(parent: QMainWindow):
+def select_mod_directory(parent: QMainWindow) -> Path | None:
     options = QFileDialog.Option()
     options |= QFileDialog.ReadOnly
-    return QFileDialog.getExistingDirectory(
+    filepath, _ = QFileDialog.getExistingDirectory(
         parent, "Select Paradox game mod directory", "", QFileDialog.ShowDirsOnly
     )
+    return Path(filepath) if filepath else None
 
 
-def select_mod_file(parent: QMainWindow):
+def select_mod_file(parent: QMainWindow) -> Path | None:
     options = QFileDialog.Options()
     options |= QFileDialog.ReadOnly
     filepath, _ = QFileDialog.getOpenFileName(
@@ -32,10 +34,10 @@ def select_mod_file(parent: QMainWindow):
         "Paradox Mod Files (*.mod);;All Files (*)",
         options=options,
     )
-    return filepath
+    return Path(filepath) if filepath else None
 
 
-def gfx_files_folder_selector(parent: QMainWindow):
+def gfx_files_folder_selector(parent: QMainWindow) -> Path | None:
     options = QFileDialog.Options()
     options |= QFileDialog.ReadOnly
     filepath = QFileDialog.getExistingDirectory(
@@ -44,28 +46,31 @@ def gfx_files_folder_selector(parent: QMainWindow):
         str(Path.home()),
         QFileDialog.ShowDirsOnly,
     )
-    return filepath, Path(filepath).exists()
+    return Path(filepath) if filepath else None
 
 
-def gfx_files_file_selector(parent: QMainWindow):
+def gfx_files_file_selector(parent: QMainWindow) -> Path | None:
     options = QFileDialog.Options()
     options |= QFileDialog.ReadOnly
     filepath, _ = QFileDialog.getOpenFileName(
         parent, "Select import image", str(Path.home()), options=QFileDialog.ReadOnly
     )
-    return filepath, Path(filepath).exists()
+    return Path(filepath) if filepath else None
 
 
-def gfx_save_folder_selector(parent, path):
+def gfx_save_folder_selector(parent: QMainWindow, path: Path) -> Path | None:
     options = QFileDialog.Options()
     options |= QFileDialog.ReadOnly
     filepath = QFileDialog.getExistingDirectory(
-        parent, "Select imported images save directory", path, QFileDialog.ShowDirsOnly
+        parent,
+        "Select imported images save directory",
+        str(path),
+        QFileDialog.ShowDirsOnly,
     )
-    return filepath, Path(filepath).exists()
+    return Path(filepath) if filepath else None
 
 
-def workspace_selector(parent: QMainWindow):
+def workspace_selector(parent: QMainWindow) -> Path | None:
     options = QFileDialog.Options()
     options |= QFileDialog.ReadOnly
     filepath, _ = QFileDialog.getOpenFileName(
@@ -77,10 +82,10 @@ def workspace_selector(parent: QMainWindow):
         "PDXEdit Workspace Files(*.json);;All Files (*)",
         options=options,
     )
-    return filepath, Path(filepath).exists()
+    return Path(filepath) if filepath else None
 
 
-def workspace_save_selector(parent: QMainWindow):
+def workspace_save_selector(parent: QMainWindow) -> Path | None:
     filepath, _ = QFileDialog.getSaveFileName(
         parent,
         "Save Workspace",
@@ -89,4 +94,8 @@ def workspace_save_selector(parent: QMainWindow):
         else str(parent.app_controller.configuration.mod_file_path),
         "PDXEdit Workspace Files(*.json);;All Files (*)",
     )
-    return filepath if filepath.endswith(".json") else f"{filepath}.json"
+    if not filepath:
+        return None
+
+    path = Path(filepath)
+    return path if path.suffix == ".json" else path.with_suffix(".json")

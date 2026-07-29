@@ -1,8 +1,16 @@
+from __future__ import annotations
+
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from App import AppController
+
 from App.Contracts.Enums import ChangeState
+from ParadoxParser import ParadoxLocParser as PDXLocFile
 from ParadoxParser.ParadoxNodes import GenericLegacyLocKey, GenericLocKey
 
 
-def convert_legacy(file, app_controller) -> None:
+def convert_legacy(file: PDXLocFile, app_controller: AppController) -> None:
     node_changes = dict()
     for index, node in enumerate(file.nodes):
         if isinstance(node, GenericLegacyLocKey):

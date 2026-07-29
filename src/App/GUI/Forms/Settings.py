@@ -4,7 +4,6 @@ from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
     from App import AppController
-from pathlib import Path
 
 import qdarktheme
 from PyQt5.QtWidgets import (
@@ -44,9 +43,13 @@ class SettingsForm(QDialog):
             if self.app_controller.configuration.initialised
             else False
         )
+        self.game_install_path = None
+        self.mod_install_path = None
 
         self.config_file_label = QLabel(
-            f"Configuration will be stored at: {self.app_controller.configuration.file_path.absolute()}"
+            f"""
+            Configuration will be stored at: 
+            {self.app_controller.configuration.file_path.absolute()}"""
         )
         self.form.addRow(self.config_file_label)
 
@@ -98,11 +101,13 @@ class SettingsForm(QDialog):
     def browse_game_install_path(self) -> None:
         path = select_hoi4_install_directory(self.app_controller.main)
         if path:
-            self.game_install_path_element_text.setText(path)
+            self.game_install_path = path
+            self.game_install_path_element_text.setText(str(path))
 
     def browse_mod_install_path(self) -> None:
         path = select_mod_directory(self.app_controller.main)
         if path:
+            self.mod_install_path = path
             self.mod_install_path_element_text.setText(path)
 
     def toggle_dark_mode(self) -> None:
@@ -118,16 +123,16 @@ class SettingsForm(QDialog):
     def submit_form(self) -> None:
         game_dir_error = False
         mod_dir_error = False
-
-        game_folder = Path(self.game_install_path_element_text.text().strip())
-        if not (game_folder.is_dir() and (game_folder / "pdx_launcher").is_dir()):
-            game_dir_error = True
-        mod_folder = Path(self.mod_install_path_element_text.text().strip())
         if not (
-            mod_folder.is_dir()
+            self.game_install_path.is_dir()
+            and (self.game_install_path / "pdx_launcher").is_dir()
+        ):
+            game_dir_error = True
+        if not (
+            self.mod_install_path.is_dir()
             and any(
                 mod_file.name != "descriptor.mod"
-                for mod_file in mod_folder.glob("*.mod")
+                for mod_file in self.mod_install_path.glob("*.mod")
             )
         ):
             mod_dir_error = True
@@ -141,9 +146,11 @@ class SettingsForm(QDialog):
                 dark_mode=self.dark_mode_check.isChecked()
             )
             self.app_controller.configuration.change_setting(
-                game_install_path=game_folder
+                game_install_path=self.game_install_path
             )
-            self.app_controller.configuration.change_setting(mod_file_path=mod_folder)
+            self.app_controller.configuration.change_setting(
+                mod_file_path=self.mod_install_path
+            )
             self.app_controller.configuration.write_file()
             self.accept()
         else:

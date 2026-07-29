@@ -3,9 +3,9 @@ from __future__ import annotations
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
+    from App.Loading.Models import FileReference
     from App.Loading.ParadoxSource import ParadoxSource
 
-import os
 from pathlib import Path
 
 from App.Contexts.Loc import LocalisationContext
@@ -18,12 +18,12 @@ FILE_TYPES = {".yml": LocalisationContext}
 
 
 class LocDirectory(GenericDirectory):
-    def __init__(
-        self, source: ParadoxSource, file_path: os.PathLike, read_only: bool
-    ) -> None:
+    def __init__(self, source: ParadoxSource, file_path: Path, read_only: bool) -> None:
         super().__init__(source, file_path, FILE_TYPES, PDXLocFile, read_only)
 
-    def metadata_collection(self, source, file) -> dict[PDXMetadata, dict]:
+    def metadata_collection(
+        self, source: ParadoxSource, file: FileReference
+    ) -> dict[PDXMetadata, dict]:
         metadata = dict()
         metadata[PDXMetadata.LanguageKey] = set()
         metadata[PDXMetadata.LocKey] = dict()

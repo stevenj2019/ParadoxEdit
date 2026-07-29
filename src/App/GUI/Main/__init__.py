@@ -33,7 +33,7 @@ from App.GUI.Widgets.PopupModels import (
 from App.Loading.Models import UnloadedFile
 from App.Loading.ParadoxSource import ParadoxSource
 from App.Services import AppLogger
-from ParadoxParser.ParadoxNodes import GenericBlock
+from ParadoxParser.ParadoxNodes import GenericBlock, GenericNode
 
 
 class MainWindow(QMainWindow):
@@ -43,9 +43,7 @@ class MainWindow(QMainWindow):
     def __init__(self, app_controller: AppController) -> None:
         super().__init__()
         self.app_controller = app_controller
-        self.editor_session = InLineEditManager(
-            mutate_callback=self.app_controller.request_node_mutation
-        )
+        self.editor_session = InLineEditManager(self)
 
         self.setWindowTitle("ParadoxEdit")
         self.showMaximized()
@@ -88,7 +86,7 @@ class MainWindow(QMainWindow):
         node = request.node
         state = request.state
 
-        def recurse(node) -> None:
+        def recurse(node: GenericNode) -> None:
             self.contents_panel.script_view.set_node_state(node, state)
             if isinstance(node, GenericBlock):
                 for child in node.nodes:
@@ -130,8 +128,8 @@ class MainWindow(QMainWindow):
         self.app_controller.add_mod_to_workspace(path)
 
     def load_workspace(self) -> None:
-        path, exists = workspace_selector(self)
-        if exists:
+        path = workspace_selector(self)
+        if path:
             self.app_controller.load_workspace(path)
 
     def load_mod(self, source: ParadoxSource) -> None:
@@ -139,16 +137,16 @@ class MainWindow(QMainWindow):
         self.topbar._enable_actions()
 
     def load_workspace_failed(self, exc: Exception, tb: str) -> None:
-        could_not_load_mod_critical(exc, tb)
+        could_not_load_mod_critical(self, exc, tb)
 
     def save_workspace_as_file(self) -> None:
-        file_path, exists = workspace_save_selector(self)
-        if exists:
-            self.app_controller.save_workspace(file_path)
+        path = workspace_save_selector(self)
+        if path:
+            self.app_controller.save_workspace(path)
 
     def load_file(self, file: FileReference) -> None:
         if isinstance(file.file, UnloadedFile):
-            file_is_unsupported()
+            file_is_unsupported(self)
             AppLogger.warning(
                 f"attemped to open {file.file.path}/{file.file.filename}, is unsupported."
             )

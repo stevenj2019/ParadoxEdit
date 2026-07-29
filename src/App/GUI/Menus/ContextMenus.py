@@ -24,8 +24,8 @@ from ParadoxParser import ParadoxScriptParser as PDXScriptFile
 from ParadoxParser.ParadoxNodes import GenericBlock
 
 
-def dummy():
-    return
+def dummy() -> None:
+    pass
 
 
 class GenericContextMenu(QMenu):
@@ -157,7 +157,8 @@ class ParadoxNodesContextMenu(GenericContextMenu):
                         ),
                         (not isinstance(block_context.parent, PDXScriptFile)),
                     ),
-                    # *block_context.parent_context.get_actions(self.app_controller, block_context.parent)
+                    # *block_context.parent_context.get_actions(self.app_controller, 
+                    #                                           block_context.parent)
                 ],
             ),
             ActionGroup(

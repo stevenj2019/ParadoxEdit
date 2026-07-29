@@ -28,8 +28,8 @@ from ParadoxParser.ParadoxNodes import (
 
 
 class InLineEditManager(QObject):
-    def __init__(self, mutate_callback: Callable) -> None:
-        super().__init__()
+    def __init__(self, parent: QWidget) -> None:
+        super().__init__(parent)
         self.cell_editors = {
             GenericKeyValue: text_editor,
             GenericComment: text_editor,
@@ -39,7 +39,7 @@ class InLineEditManager(QObject):
             GenericFloat: float_editor,
             GenericBool: bool_dropdown,
         }
-        self.mutate_callback = mutate_callback
+        self.mutate_callback = parent.app_controller.request_node_mutation
         self.tree: QTreeWidget = None
         self.item: QTreeWidgetItem = None
         self.node: GenericNode = None
@@ -93,7 +93,7 @@ class InLineEditManager(QObject):
         self._clear()
 
     def _get_widget(self) -> QWidget:
-        def emit(value) -> None:
+        def emit(value: str | bool) -> None:
             self.complete_request(value)
 
         try:
@@ -104,7 +104,7 @@ class InLineEditManager(QObject):
         value = (
             self.node.value if self.target is TargetProperty.VALUE else self.node.key
         )
-        return editor_fn(self.node, emit, value)
+        return editor_fn(self, self.node, emit, value)
 
     def _create(self) -> None:
         self.tree.setItemWidget(self.item, self.column, self.editor)
@@ -125,7 +125,9 @@ class InLineEditManager(QObject):
         self.editor = None
 
 
-def text_editor(node: GenericNode, emit: Callable, value: str) -> QLineEdit:
+def text_editor(
+    editor: QObject, node: GenericNode, emit: Callable, value: str
+) -> QLineEdit:
     widget = QLineEdit(str(value))
     width = QFontMetrics(widget.font()).horizontalAdvance(widget.text()) + 20
     widget.setFixedWidth(max(60, min(width, 500)))
@@ -137,7 +139,9 @@ def text_editor(node: GenericNode, emit: Callable, value: str) -> QLineEdit:
     return widget
 
 
-def bool_dropdown(node: GenericNode, emit: Callable, value: str) -> QComboBox:
+def bool_dropdown(
+    editor: QObject, node: GenericNode, emit: Callable, value: str
+) -> QComboBox:
     widget = QComboBox()
     widget.addItems(["yes", "no"])
     widget.setCurrentIndex(0 if value else 1)
@@ -150,7 +154,9 @@ def bool_dropdown(node: GenericNode, emit: Callable, value: str) -> QComboBox:
     return widget
 
 
-def int_editor(node: GenericNode, emit: Callable, value: str) -> QLineEdit:
+def int_editor(
+    editor: QObject, node: GenericNode, emit: Callable, value: str
+) -> QLineEdit:
     widget = QLineEdit(str(value))
     width = QFontMetrics(widget.font()).horizontalAdvance(widget.text()) + 20
     widget.setFixedWidth(max(60, min(width, 500)))
@@ -161,7 +167,8 @@ def int_editor(node: GenericNode, emit: Callable, value: str) -> QLineEdit:
         except ValueError:
             output = node.value
             change_rejected_warning(
-                f"Input {widget.text()} is invalid, should be similar to {node.value}"
+                editor.parent(),
+                f"Input {widget.text()} is invalid, should be similar to {node.value}",
             )
         emit(output)
 
@@ -169,7 +176,9 @@ def int_editor(node: GenericNode, emit: Callable, value: str) -> QLineEdit:
     return widget
 
 
-def float_editor(node: GenericNode, emit: Callable, value: str) -> QLineEdit:
+def float_editor(
+    editor: QObject, node: GenericNode, emit: Callable, value: str
+) -> QLineEdit:
     widget = QLineEdit(str(value))
     width = QFontMetrics(widget.font()).horizontalAdvance(widget.text()) + 20
     widget.setFixedWidth(max(60, min(width, 500)))
@@ -180,7 +189,8 @@ def float_editor(node: GenericNode, emit: Callable, value: str) -> QLineEdit:
         except ValueError:
             output = node.value
             change_rejected_warning(
-                f"Input {widget.text()} is invalid, should be similar to {node.value}"
+                editor.parent(),
+                f"Input {widget.text()} is invalid, should be similar to {node.value}",
             )
         emit(output)
 

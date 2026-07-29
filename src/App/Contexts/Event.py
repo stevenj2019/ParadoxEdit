@@ -15,7 +15,9 @@ from App.Contexts.Base import (
     ParadoxFileContext,
     ParadoxNodeContext,
 )
+from App.Contracts import BlockMutationRequest
 from App.GUI.Actions import Action, ActionsResult
+from App.PDXFactory.Blocks import Events
 from ParadoxParser.ParadoxNodes import GenericBlock, GenericKeyValue, GenericNode
 
 
@@ -63,24 +65,30 @@ class EventRootContext(ParadoxBlockContext):
     ) -> ActionsResult:
         return [
             *ParadoxNodeContext.get_actions(app_controller, block_context),
-            # Action("Add Namespace",
-            #        lambda:app_controller.request_block_mutation.emit(
-            #            BlockMutationRequest.add(block_context.parent, block_context.parent_index, add_namespace_keyval)
-            #        ),
-            #        True
-            # ),
-            # Action("Add Country Event",
-            #        lambda:app_controller.request_block_mutation.emit(
-            #            BlockMutationRequest.add(block_context.parent, block_context.parent_index, country_event_block)
-            #        ),
-            #        True
-            # ),
-            # Action("Add News Event",
-            #        lambda:app_controller.request_block_mutation.emit(
-            #            BlockMutationRequest.add(block_context.parent, block_context.parent_index, news_event_block)
-            #        ),
-            #        True
-            # )
+            Action("Add Namespace",
+                   lambda:app_controller.request_block_mutation.emit(
+                       BlockMutationRequest.add(block_context.parent, 
+                                                block_context.parent_index, 
+                                                Events.add_namespace_keyval)
+                   ),
+                   False
+            ),
+            Action("Add Country Event",
+                   lambda:app_controller.request_block_mutation.emit(
+                       BlockMutationRequest.add(block_context.parent, 
+                                                block_context.parent_index, 
+                                                Events.country_event_block)
+                   ),
+                   False
+            ),
+            Action("Add News Event",
+                   lambda:app_controller.request_block_mutation.emit(
+                       BlockMutationRequest.add(block_context.parent, 
+                                                block_context.parent_index, 
+                                                Events.news_event_block)
+                   ),
+                   False
+            )
         ]
 
 
@@ -93,18 +101,22 @@ class EventBlockContext:
 
         return [
             *ParadoxNodeContext.get_actions(app_controller, block_context),
-            # Action("Add Immediate Block",
-            #        lambda:app_controller.request_block_mutation.emit(
-            #            BlockMutationRequest.add(block_context.parent, block_context.parent_index, immediate_block)
-            #        ),
-            #        True
-            # ),
-            # Action("Add Option Block",
-            #        lambda:app_controller.request_block_mutation.emit(
-            #            BlockMutationRequest.add(block_context.parent, block_context.parent_index, option_block)
-            #        ),
-            #        True
-            # )
+            Action("Add Immediate Block",
+                   lambda:app_controller.request_block_mutation.emit(
+                       BlockMutationRequest.add(block_context.parent, 
+                                                block_context.parent_index, 
+                                                Events.immediate_block)
+                   ),
+                   False
+            ),
+            Action("Add Option Block",
+                   lambda:app_controller.request_block_mutation.emit(
+                       BlockMutationRequest.add(block_context.parent, 
+                                                block_context.parent_index, 
+                                                Events.option_block)
+                   ),
+                   False
+            ),
             Action(
                 "Localise Event",
                 lambda: LocaliseEventForm(app_controller, block_context.key_node),

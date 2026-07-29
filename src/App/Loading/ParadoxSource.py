@@ -27,8 +27,8 @@ EXCLUDE_FILES = [""]
 class ParadoxSource:
     def __init__(
         self,
-        name,
-        path,
+        name: str,
+        path: Path,
         context_override: ParadoxContext = None,
         read_only_override: bool = None,
     ) -> None:
@@ -69,7 +69,7 @@ class ParadoxSource:
                 if file_path.suffix != ".bak":
                     parent.add_file(file_path, file_name)
 
-    def _create_directory(self, path) -> None:
+    def _create_directory(self, path: Path) -> None:
         matches = []
         rel_path = path.relative_to(self.file_path)
 
@@ -87,7 +87,7 @@ class ParadoxSource:
             source=self, file_path=path, read_only=isinstance(self, ParadoxVanilla)
         )
 
-    def apply_replace_path(self, path) -> None:
+    def apply_replace_path(self, path: Path) -> None:
         try:
             removed = self.directories[Path(path)]
             removed.delete_directory()
@@ -95,7 +95,7 @@ class ParadoxSource:
         except KeyError:
             pass
 
-    def apply_override(self, path) -> None:
+    def apply_override(self, path: Path) -> None:
         try:
             removed = self.directories[path.parent]
             removed.delete_file(path.name)
@@ -105,7 +105,7 @@ class ParadoxSource:
 
 
 class ParadoxVanilla(ParadoxSource):
-    def __init__(self, path) -> None:
+    def __init__(self, path: Path) -> None:
         super().__init__("Vanilla", path, ReadOnlyContext, True)
 
     def _apply_dlc_files(self) -> None:
@@ -125,8 +125,8 @@ class ParadoxVanilla(ParadoxSource):
 
 
 class ParadoxMod(ParadoxSource):
-    def __init__(self, path) -> None:
-        path = Path(path)
+    def __init__(self, path: Path) -> None:
+        # path = Path(path)
         self.descriptor_file = path.name
         self.descriptor_object = FileReference(
             None, ParadoxScriptParser(path), ParadoxContext, False

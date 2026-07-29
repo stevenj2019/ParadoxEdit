@@ -1,11 +1,12 @@
-# TODO come back to type hinting
-from PyQt5.QtWidgets import QMessageBox
+from PyQt5.QtWidgets import QMessageBox, QWidget
 
 from App.Services import AppLogger
 
 
-def could_not_load_mod_critical(exc: Exception, traceback: str) -> None:
-    msg = QMessageBox()
+def could_not_load_mod_critical(
+    parent: QWidget, exc: Exception, traceback: str
+) -> None:
+    msg = QMessageBox(parent)
     msg.setIcon(QMessageBox.Critical)
     msg.setWindowTitle("Mod Could not be loaded")
     msg.setText("PDXEdit was unable to load your mod")
@@ -15,96 +16,41 @@ def could_not_load_mod_critical(exc: Exception, traceback: str) -> None:
     AppLogger.exception(traceback)
 
 
-def setup_process_cancelled() -> QMessageBox:
-    return QMessageBox.critical(
-        None, "Startup Wizard Failed", "Startup Settings was aborted", QMessageBox.Ok
+def setup_process_cancelled(parent: QWidget) -> None:
+    QMessageBox.critical(
+        parent, "Startup Wizard Failed", "Startup Settings was aborted", QMessageBox.Ok
     )
 
 
-def settings_error_critical(game_dir_error: bool, mod_dir_error: bool) -> QMessageBox:
+def settings_error_critical(
+    parent: QWidget, game_dir_error: bool, mod_dir_error: bool
+) -> None:
     text = "The following Problems prevent saving:"
     if game_dir_error:
         text += "\nGame install directory could not find pdx_launcher, is invalid"
     if mod_dir_error:
         text += "\nMod folder does not contain any .mod files, is invalid"
-    return QMessageBox.critical(None, "Error(s) in settings", text, QMessageBox.Ok)
+    QMessageBox.critical(parent, "Error(s) in settings", text, QMessageBox.Ok)
 
 
-def form_missing_value(parent):
-    return QMessageBox.warning(
+def form_missing_value(parent: QWidget) -> None:
+    QMessageBox.warning(
         parent, "Missing Value", "Form is missing essential values", QMessageBox.Ok
     )
 
 
-def bulk_operation_warning(parent):
-    if not parent.bulk_warning_shown:
-        mode_text = (
-            "SAFE MODE ENABLED (recommended)"
-            if parent.safe_mode
-            else "SAFE MODE DISABLED (risky)"
-        )
-
-        msg = (
-            "You are performing a bulk operation.\n\n"
-            f"Current mode: {mode_text}\n\n"
-            "Bulk edits can modify many files at once.\n"
-            "This warning will only appear once per session."
-        )
-
-        reply = QMessageBox.question(
-            parent, "Bulk Operation Warning", msg, QMessageBox.Yes | QMessageBox.No
-        )
-        if reply == QMessageBox.Yes:
-            parent.bulk_warning_shown = True
-            return True
-    else:
-        return True
-
-
-def toggle_safe_mode_warning(parent):
-    if parent.safe_mode:
-        reply = QMessageBox.question(
-            parent,
-            "Warning",
-            "This will disable safe mode, which allows for .bak generation on files modified.",
-            QMessageBox.Yes | QMessageBox.No,
-        )
-        if reply == QMessageBox.Yes:
-            parent.safe_mode = not parent.safe_mode
-    else:
-        parent.safe_mode = not parent.safe_mode
-
-
-def GFX_file_copying_warn(parent):
-    reply = QMessageBox.question(
+# TODO: this should be used to make sure that GFX process doesnt copy into self
+def GFX_load_and_store_are_same(parent: QWidget) -> None:
+    QMessageBox.warning(
         parent,
-        "Warning",
-        "Wether or not you save the file, the code will not delete source files, you must do this manually if you proceed, but change your mind",
-        QMessageBox.Yes | QMessageBox.No,
-    )
-    return reply == QMessageBox.Yes
-
-
-def GFX_is_focus_upload(parent):
-    reply = QMessageBox.question(
-        parent,
-        "Generate _shines",
-        "Are these icons intended for use in Focus Trees?",
-        QMessageBox.Yes | QMessageBox.No,
-    )
-    return reply == QMessageBox.Yes
-
-
-def GFX_load_and_store_are_same():
-    return QMessageBox.warning(
-        None,
         "Warning",
         "Source and Destination folders are identical, this operation will be terminated",
         QMessageBox.Ok,
     )
 
 
-def invalid_GFX_file_warning(parent):
+# TODO this should be used to make sure save_to is not malformed in GFX import
+def invalid_GFX_file_warning(parent: QWidget) -> None:
     return QMessageBox.question(
         parent,
         "Invalid .gfx file provided",
@@ -113,16 +59,16 @@ def invalid_GFX_file_warning(parent):
     )
 
 
-def change_rejected_warning(message):
+def change_rejected_warning(parent: QWidget, message: str) -> None:
     AppLogger.warning(message)
-    return QMessageBox.warning(None, "Warning", message, QMessageBox.Ok)
+    return QMessageBox.warning(parent, "Warning", message, QMessageBox.Ok)
 
 
-def no_icon_available_warning(message):
-    return QMessageBox.warning(None, "Warning", message, QMessageBox.Ok)
+def no_icon_available_warning(parent: QWidget, message: str) -> None:
+    return QMessageBox.warning(parent, "Warning", message, QMessageBox.Ok)
 
 
-def file_is_unsupported():
-    return QMessageBox.warning(
-        None, "Warning", "This File is currently unsupported", QMessageBox.Ok
+def file_is_unsupported(parent: QWidget) -> None:
+    QMessageBox.warning(
+        parent, "Warning", "This File is currently unsupported", QMessageBox.Ok
     )

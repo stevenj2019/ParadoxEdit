@@ -2,6 +2,9 @@ import copy
 import sys
 import traceback
 from contextlib import contextmanager
+from pathlib import Path
+from types import TracebackType
+from typing import Type
 
 import qdarktheme
 from PyQt5.QtCore import QObject, QThread, pyqtSignal
@@ -11,6 +14,7 @@ from App.Contracts import (
     BlockMutationRequest,
     BulkMutationRequest,
     FileMutationRequest,
+    ModLoaderResult,
     NodeMutationRequest,
     PropagationRequest,
 )
@@ -57,7 +61,7 @@ class AppController(QObject):
             result = settings.exec_()
             if result != QDialog.Accepted:
                 AppLogger.error("Setup workflow cancelled.")
-                setup_process_cancelled()
+                setup_process_cancelled(self.main)
                 sys.exit()
 
         self._batch_depth = 0
@@ -65,7 +69,12 @@ class AppController(QObject):
 
         self.run()
 
-    def global_exception_handler(self, exc_type, exc_value, exc_traceback) -> None:
+    def global_exception_handler(
+        self,
+        exc_type: Type[BaseException],
+        exc_value: BaseException,
+        exc_traceback: TracebackType,
+    ) -> None:
         if exc_type is KeyboardInterrupt:
             sys.__excepthook__(exc_type, exc_value, exc_traceback)
             return
@@ -94,19 +103,19 @@ class AppController(QObject):
 
         self.reload_workspace(workspace_candidate)
 
-    def add_mod_to_workspace(self, path) -> None:
+    def add_mod_to_workspace(self, path: Path) -> None:
         workspace_candidate = copy.deepcopy(self.file_system.workspace)
         workspace_candidate.add_mod_to_workspace(path)
 
         self.reload_workspace(workspace_candidate)
 
-    def load_workspace(self, path) -> None:
+    def load_workspace(self, path: Path) -> None:
         workspace_candidate = Workspace()
         workspace_candidate.read_file(path)
 
         self.reload_workspace(workspace_candidate)
 
-    def reload_workspace(self, workspace:Workspace) -> None:
+    def reload_workspace(self, workspace: Workspace) -> None:
         self.loading_screen = LoadingDialog()
 
         self.thread = QThread()
@@ -133,7 +142,7 @@ class AppController(QObject):
         self.loading_screen.show()
         self.thread.start()
 
-    def workspace_loaded(self, result) -> None:
+    def workspace_loaded(self, result: ModLoaderResult) -> None:
         self.registry.load_tokens(result.tokens)
         self.registry.load_metadata(result.metadata)
         self.file_system.load_workspace(result.workspace, result.load_order)
@@ -144,13 +153,13 @@ class AppController(QObject):
         self.thread.quit()
         self.thread.wait()
 
-    def workspace_load_failed(self, error, traceback) -> None:
+    def workspace_load_failed(self, error: Exception, traceback: str) -> None:
         self.loading_screen.close()
         self.main.load_workspace_failed(error, traceback)
         self.thread.quit()
         self.thread.wait()
 
-    def save_workspace(self, file_path) -> None:
+    def save_workspace(self, file_path: Path) -> None:
         self.file_system.workspace.write_file(file_path)
 
     def _refresh_file(self) -> None:
@@ -250,8 +259,8 @@ class AppController(QObject):
         self.main.mod_panel.add_file(request.directory, request.file)
         self.main.mod_panel.set_file_state(request.file, request.state)
 
-    def _save_target(self, target:SaveTarget) -> None:
-        def save_routine(file:FileReference) -> None:
+    def _save_target(self, target: SaveTarget) -> None:
+        def save_routine(file: FileReference) -> None:
             saved = self.file_system.save_file(file)
             if saved:
                 self.main.request_propagation.emit(

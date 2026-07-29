@@ -1,10 +1,14 @@
 import traceback
+from pathlib import Path
 
 from PyQt5.QtCore import QObject, Qt, pyqtSignal
 from PyQt5.QtWidgets import QDialog, QLabel, QProgressBar, QVBoxLayout
 
 from App.Contracts import ModLoaderResult
 from App.Loading.LoadOrder import ParadoxLoadOrder
+from App.Loading.Models import FileReference
+from App.Loading.ParadoxSource import ParadoxSource
+from App.Services import Workspace
 
 
 class LoadingDialog(QDialog):
@@ -50,7 +54,7 @@ class LoadProcess(QObject):
     finished = pyqtSignal(object)
     failed = pyqtSignal(Exception, str)
 
-    def __init__(self, workspace, game_path) -> None:
+    def __init__(self, workspace: Workspace, game_path: Path) -> None:
         super().__init__()
         self.workspace = workspace
         self.game_path = game_path
@@ -81,7 +85,7 @@ class LoadProcess(QObject):
         except Exception as e:
             self.failed.emit(e, traceback.format_exc())
 
-    def _process_files(self, load_order) -> None:
+    def _process_files(self, load_order: ParadoxLoadOrder) -> None:
         self.progress_message.emit("Preparing Files")
         files = list()
         processed = 0
@@ -97,13 +101,13 @@ class LoadProcess(QObject):
             processed += 1
         self.progress_bar_end.emit()
 
-    def _file_processing(self, source, file) -> None:
+    def _file_processing(self, source: ParadoxSource, file: FileReference) -> None:
         file.file = file.file.load()
         self._merge_registry(self.tokens, file.directory.token_collection(source, file))
         self._merge_registry(
             self.metadata, file.directory.metadata_collection(source, file)
         )
 
-    def _merge_registry(self, dict, insertions) -> None:
+    def _merge_registry(self, dict: dict, insertions: dict | set) -> None:
         for key, value in insertions.items():
             dict.setdefault(key, type(value)()).update(value)

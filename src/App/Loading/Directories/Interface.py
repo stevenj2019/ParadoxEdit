@@ -3,6 +3,7 @@ from __future__ import annotations
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
+    from App.Loading.Models import FileReference
     from App.Loading.ParadoxSource import ParadoxSource
 
 import os
@@ -19,12 +20,12 @@ FILE_TYPES = {".gfx": GFXContext, ".gui": ParadoxContext}
 
 
 class InterfaceDirectory(GenericDirectory):
-    def __init__(
-        self, source: ParadoxSource, file_path: os.PathLike, read_only: bool
-    ) -> None:
+    def __init__(self, source: ParadoxSource, file_path: Path, read_only: bool) -> None:
         super().__init__(source, file_path, FILE_TYPES, PDXFile, read_only)
 
-    def metadata_collection(self, source, file) -> dict[PDXMetadata, dict]:
+    def metadata_collection(
+        self, source: ParadoxSource, file: FileReference
+    ) -> dict[PDXMetadata, dict]:
         metadata = dict()
         for file in self.files.values():
             if file.context is GFXContext:
