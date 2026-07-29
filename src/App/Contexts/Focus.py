@@ -14,7 +14,8 @@ from App.Contexts.Base import (
     ParadoxFileContext,
     ParadoxNodeContext,
 )
-from App.GUI.Actions import ActionsResult
+from App.GUI.Actions import Action, ActionsResult
+from App.GUI.Forms.LocaliseKey import LocaliseFocusForm
 from ParadoxParser.ParadoxNodes import GenericBlock, GenericKeyValue, GenericNode
 
 
@@ -25,7 +26,11 @@ class FocusTreeContext(ParadoxContext):
 
     @staticmethod
     def get_block_context(node: GenericNode) -> type[ParadoxBlockContext]:
-        return FocusRootContext
+        if node.key == "focus":
+            return FocusBlockContext
+        elif node.key == "focus_tree":
+            return FocusTreeBlockContext
+        return ParadoxBlockContext
 
     @staticmethod
     def get_node_context(
@@ -53,3 +58,19 @@ class FocusRootContext(ParadoxBlockContext):
         app_controller: AppController, block_context: BlockContext
     ) -> ActionsResult:
         return [*ParadoxNodeContext.get_actions(app_controller, block_context)]
+
+class FocusTreeBlockContext(ParadoxBlockContext):
+    @staticmethod
+    def get_actions(app_controller:AppController, block_context:BlockContext) -> ActionsResult:
+        return [
+
+        ]
+class FocusBlockContext(ParadoxBlockContext):
+    @staticmethod
+    def get_actions(app_controller:AppController, block_context:BlockContext) -> ActionsResult:
+        return [
+            Action("Localise Focus",
+                   lambda:LocaliseFocusForm(app_controller, block_context.key_node),
+                   True,
+            ),
+        ]

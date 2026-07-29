@@ -5,7 +5,6 @@ from typing import TYPE_CHECKING
 if TYPE_CHECKING:
     from App import AppController
 
-from App.Loading.ParadoxSource import ParadoxVanilla
 from pathlib import Path
 
 from PyQt5.QtCore import Qt
@@ -16,6 +15,7 @@ from App.Contracts import BlockMutationRequest, NodeMutationRequest
 from App.Contracts.Enums import TargetProperty
 from App.Enums import PDXMetadata
 from ParadoxParser.ParadoxNodes import (
+    GenericNode, 
     GenericBlock,
     GenericComment,
     GenericKeyValue,
@@ -26,7 +26,7 @@ from App.GUI.Widgets.PopupModels import form_is_read_only, split_loc_file
 
 UNSORTED_COMMENT = "#### unsorted keys ####"
 class BaseLocaliseForm(QDialog):
-    def __init__(self, app_controller:AppController, name:str) -> None:
+    def __init__(self, app_controller:AppController, node:GenericNode, name:str) -> None:
         super().__init__()
         self.setWindowTitle(name)
         self.app_controller = app_controller
@@ -34,7 +34,9 @@ class BaseLocaliseForm(QDialog):
         self.localisation_directory = self.source.directories[Path("localisation/english")]
         self.localisation_meta = self.app_controller.registry.get_metadata(PDXMetadata.LocKey)
         self.localisation_fields = list()
+        self.node = node
         self.save_file = None
+        self.read_only = False
 
         self.setLayout(QFormLayout())
         self.form = self.layout()
@@ -79,6 +81,23 @@ class BaseLocaliseForm(QDialog):
 
     def _change_save_file(self, index:int) -> None:
         self.save_file = self.file_dropdown.currentData()
+
+    def _get_localisation_node(self, key:str) -> tuple[GenericLocKey|GenericLegacyLocKey, bool]:
+        if key in self.localisation_meta.keys():
+            loc_node = self.localisation_meta[key]["l_english"]["node"]
+            file = self.localisation_meta[key]["l_english"]["file"]
+            if file.read_only:
+                self.read_only = True
+            exists = True
+            if file:
+                if self.save_file and self.save_file is not file:
+                    split_loc_file(self.app_controller.main)
+                    return
+                self.save_file = file
+        else:
+            loc_node = GenericLocKey(key, "")
+            exists = False
+        return loc_node, exists
 
     def _handle_localisation_field(self, text_edit:QTextEdit) -> None:
         text = self._decode_pdx_string(text_edit.toPlainText())
@@ -178,18 +197,8 @@ class BaseLocaliseForm(QDialog):
 
 class LocaliseNodeForm(BaseLocaliseForm):
     def __init__(self, app_controller:AppController, node:GenericKeyValue) -> None:
-        super().__init__(app_controller, "Localise Key")
-        key = node.value.value
-        if key in self.localisation_meta.keys():
-            loc_node = self.localisation_meta[key]["l_english"]["node"]
-            self.save_file = self.localisation_meta[key]["l_english"]["file"]
-            self.read_only = self.save_file.read_only
-            exists = True
-        else:
-            loc_node = GenericLocKey(key, "")
-            self.save_file = None
-            self.read_only = False
-            exists = False
+        super().__init__(app_controller, node, "Localise Key")
+        loc_node, exists = self._get_localisation_node(node.value.value)
         self.localisation_fields.append(self._loc_key_widget(loc_node, exists))
         self._lower_form_body()
         if self.read_only:
@@ -199,30 +208,14 @@ class LocaliseNodeForm(BaseLocaliseForm):
 #TODO doesnt get option names right now
 class LocaliseEventForm(BaseLocaliseForm):
     def __init__(self, app_controller:AppController, node:GenericBlock) -> None:
-        super().__init__(app_controller, "Localise Event")
-        self.localisation_fields = list()
-        self.node = node
+        super().__init__(app_controller, node, "Localise Event")
         localisation_nodes = [
             *self._get_localisation_nodes("title", "text"),
             *self._get_localisation_nodes("desc", "text"),
             *self._get_localisation_nodes("option", "name"),
         ]
-
         for node in localisation_nodes:
-            if node.value.value in self.localisation_meta.keys():
-                loc_node = self.localisation_meta[node.value.value]["l_english"]["node"]
-                file = self.localisation_meta[node.value.value]["l_english"]["file"]
-                self.read_only = file.read_only
-                exists = True
-                if file:
-                    if self.save_file and self.save_file is not file:
-                        split_loc_file(self.app_controller.main)
-                        return
-                    self.save_file = file
-            else:
-                loc_node = GenericLocKey(node.value.value, "")
-                exists = False
-
+            loc_node, exists = self._get_localisation_node(node.value.value)
             text_edit = self._loc_key_widget(loc_node, exists)
             self.localisation_fields.append(text_edit)
 
@@ -249,3 +242,29 @@ class LocaliseEventForm(BaseLocaliseForm):
             else:
                 loc_nodes.append(entry)
         return loc_nodes
+
+class LocaliseFocusForm(BaseLocaliseForm):
+    def __init__(self, app_controller:AppController, node:GenericBlock) -> None:
+        super().__init__(app_controller, node, "Localise National Focus")
+        self.localisation_fields = list()
+        focus_id_node = next((node for node in node.nodes
+                              if isinstance(node, GenericKeyValue)
+                              and node.key == "id"), None)
+        if not focus_id_node:
+            return #error
+        id_key = focus_id_node.value.value
+        id_loc_node, id_exists = self._get_localisation_node(id_key)
+        id_text_edit = self._loc_key_widget(id_loc_node, id_exists)
+        self.localisation_fields.append(id_text_edit)
+
+        desc_key = f"{id_key}_desc"
+        desc_loc_node, desc_exists = self._get_localisation_node(desc_key)
+        desc_text_exit = self._loc_key_widget(desc_loc_node, desc_exists)
+        self.localisation_fields.append(desc_text_exit)
+
+        self._lower_form_body()
+        for field in self.localisation_fields:
+            self._resize_localisation_field(field)
+        if self.read_only:
+            self._lock_form()
+        self.exec_()
