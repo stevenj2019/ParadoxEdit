@@ -1,7 +1,10 @@
 from PyQt5.QtWidgets import QMessageBox, QWidget
 
 from App.AppLogger import AppLogger
+from textwrap import dedent
 
+from platformdirs import user_log_dir
+from App.AppData import APPNAME
 
 def could_not_load_mod_critical(
     parent: QWidget, exc: Exception, traceback: str
@@ -15,6 +18,22 @@ def could_not_load_mod_critical(
     msg.exec_()
     AppLogger.exception(traceback)
 
+def unhandled_exception_popup(
+    parent: QWidget, exc:Exception, traceback:str
+) -> None:
+    user_log_dir(APPNAME)
+    msg = QMessageBox(parent)
+    msg.setIcon(QMessageBox.Critical)
+    msg.setWindowTitle("Unhandlec Exception")
+    msg.setText(dedent(
+    f"""ParadoxEdit has encountered an unhandled exception, 
+    you may continue, but it is reccomended to restart\n
+    you can report this issue on the github.
+    log located at {user_log_dir(APPNAME)}"""))
+
+    msg.setDetailedText(traceback)
+    msg.exec_()
+    
 
 def setup_process_cancelled(parent: QWidget) -> None:
     QMessageBox.critical(

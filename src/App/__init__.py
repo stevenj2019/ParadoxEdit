@@ -24,7 +24,7 @@ from App.Contracts.Enums import ChangeState, PropagationType, SaveTarget, Target
 from App.GUI.Forms.Settings import SettingsForm
 from App.GUI.Main import MainWindow
 from App.GUI.StyleManager import StyleManager
-from App.GUI.Widgets.PopupModels import setup_process_cancelled
+from App.GUI.Widgets.PopupModels import setup_process_cancelled, unhandled_exception_popup
 from App.Loading import LoadingDialog, LoadProcess
 from App.Loading.Directories.Base import GenericDirectory
 from App.Loading.Models import FileReference
@@ -49,6 +49,8 @@ class AppController(QObject):
     def __init__(self) -> None:
         super().__init__()
         AppLogger.initialise()
+        AppLogger.application_metadata_logger()
+        AppLogger.runtime_metadata_logger()
         sys.excepthook = self.global_exception_handler
         self.app = QApplication(sys.argv)
 
@@ -84,6 +86,7 @@ class AppController(QObject):
         error = "".join(traceback.format_exception(exc_type, exc_value, exc_traceback))
 
         AppLogger.error(f"Unhandled exception:\n{error}")
+        unhandled_exception_popup(self.main, exc_value, error)
 
     def run(self) -> None:
         self.app.setStyleSheet(
@@ -149,9 +152,8 @@ class AppController(QObject):
 
     def workspace_loaded(self, result: ModLoaderResult) -> None:
         self.file_system.load_workspace(result.workspace, result.load_order)
-
         self.main.load_mod(result.load_order)
-
+        AppLogger.workspace_metadata_logger(result.workspace, result.load_order)
         self.loading_screen.close()
         self.thread.quit()
         self.thread.wait()

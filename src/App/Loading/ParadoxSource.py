@@ -21,8 +21,6 @@ PARADOX_ROOT_DIRECTORIES = [
     "portraits",
     "sound",
 ]
-EXCLUDE_FILES = [""]
-
 
 class ParadoxSource:
     def __init__(
@@ -103,7 +101,7 @@ class ParadoxSource:
         try:
             removed = self.directories[Path(path)]
             removed.delete_directory()
-            AppLogger.info(f"{self.source_name} {path} removed {removed}")
+            # AppLogger.info(f"{self.source_name} {path} removed {removed}")
         except KeyError:
             pass
 
@@ -111,7 +109,7 @@ class ParadoxSource:
         try:
             removed = self.directories[path.parent]
             removed.delete_file(path.name)
-            AppLogger.info(f"{self.source_name} {path} removed")
+            # AppLogger.info(f"{self.source_name} {path} removed")
         except KeyError:
             pass
 
@@ -138,7 +136,6 @@ class ParadoxVanilla(ParadoxSource):
 
 class ParadoxMod(ParadoxSource):
     def __init__(self, path: Path) -> None:
-        # path = Path(path)
         self.descriptor_file = path.name
         self.descriptor_object = FileReference(
             None, ParadoxScriptParser(path), ParadoxContext, False

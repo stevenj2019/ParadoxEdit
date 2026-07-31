@@ -26,11 +26,12 @@ class FocusTreeContext(ParadoxContext):
 
     @staticmethod
     def get_block_context(node: GenericNode) -> type[ParadoxBlockContext]:
-        if node.key == "focus":
-            return FocusBlockContext
-        elif node.key == "focus_tree":
-            return FocusTreeBlockContext
-        return ParadoxBlockContext
+        if isinstance(node, (GenericBlock, GenericKeyValue)):
+            if node.key == "focus":
+                return FocusBlockContext
+            elif node.key == "focus_tree":
+                return FocusTreeBlockContext
+        return FocusRootContext
 
     @staticmethod
     def get_node_context(
