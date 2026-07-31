@@ -3,6 +3,7 @@ from __future__ import annotations
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
+    from App.Contexts.Base import ParadoxFileContext
     from App.Loading.Directories.Base import GenericDirectory
     from App.Loading.LoadOrder import ParadoxLoadOrder
     from App.Loading.Models import FileReference
@@ -13,7 +14,6 @@ from typing import Callable, Optional
 
 from PyQt5.QtWidgets import QTreeWidget, QTreeWidgetItem
 
-from App.Contexts.Base import ParadoxFileContext
 from App.Contracts.Enums import ChangeState, PropagationType, TargetProperty
 from ParadoxParser import GenericBlock, GenericKeyValue, GenericNode
 
@@ -22,8 +22,8 @@ from ParadoxParser import GenericBlock, GenericKeyValue, GenericNode
 class ModLoaderResult:
     workspace: Workspace
     load_order: ParadoxLoadOrder
-    tokens: dict
-    metadata: dict
+    # tokens: dict
+    # metadata: dict
 
 
 @dataclass

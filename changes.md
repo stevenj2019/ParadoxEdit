@@ -18,13 +18,11 @@
 ## TODO
 ### Generic
 ### Contexts
-* Focus Trees/Decisions/Events, should have icon/localisation forms/context/detection/errors.
 ### LoadOrder Related
-* ability to copy file to a new source (effective override)
 * ability to add a directory to replace_path (in descriptor)
-* alphabetical sorting as second priority (sort by dependency, then by alphabetical) (done, i think?)
+* alphabetical sorting as second priority (sort by dependency, then by alphabetical) (done, i think?, there is a log i can use to test this)
 * DLC tooling
 ### Architecture
 * Updates Actions Build Process
 ### Fixes 
-* POPULATE (i think? complete?)
+* Global ExceptionHook 

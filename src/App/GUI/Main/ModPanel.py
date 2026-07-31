@@ -7,9 +7,7 @@ if TYPE_CHECKING:
 
 from PyQt5.QtCore import QPoint, Qt, pyqtSignal
 from PyQt5.QtWidgets import (
-    QApplication,
     QHeaderView,
-    QStyle,
     QTreeWidget,
     QTreeWidgetItem,
     QVBoxLayout,
@@ -17,14 +15,14 @@ from PyQt5.QtWidgets import (
 )
 
 from App.Contexts import FileContext
-from App.Contexts.Base import ParadoxContext
 from App.Contracts.Enums import ChangeState
-from App.GUI.Enums import QtStorage
+from App.GUI.Enums import QtStorage, TreeItemType
 from App.GUI.Menus.ContextMenus import GenericDirectoryMenu
 from App.GUI.StyledDelegate import ParadoxFileDelegate
+from App.GUI.Widgets.Custom.TreeItems import DirectoryTreeItem
 from App.Loading.Directories.Base import GenericDirectory
 from App.Loading.LoadOrder import ParadoxLoadOrder
-from App.Loading.Models import FileReference, UnloadedFile
+from App.Loading.Models import FileReference
 from App.Loading.ParadoxSource import ParadoxMod, ParadoxSource, ParadoxVanilla
 
 
@@ -56,15 +54,105 @@ class ModPanel(QWidget):
         self.tree.setContextMenuPolicy(Qt.CustomContextMenu)
         self.tree.customContextMenuRequested.connect(self._request_context_menu)
 
+
+    def populate_tree(self, load_order: ParadoxLoadOrder) -> None:
+        self.tree.clear()
+        for source in load_order.sources:
+            self._load_source_tree(source)
+
+    def _load_source_tree(self, source: ParadoxSource) -> None:
+        root = DirectoryTreeItem(name=source.source_name or "Unnamed Mod",
+                                 item=source,
+                                 item_type=TreeItemType.SOURCE,
+                                 icon=None)
+        self.node_to_item[source] = root
+        self.tree.addTopLevelItem(root)
+
+        if isinstance(source, ParadoxMod):
+            item = DirectoryTreeItem(name = "Descriptor",
+                                     item=source.descriptor_object,
+                                     item_type=TreeItemType.DESCRIPTOR,
+                                     icon=self.app_controller.style_manager.get_icon(type(source.descriptor_object.file)))
+            self.node_to_item[source.descriptor_object] = item
+            root.addChild(item)
+
+        for entry in source.root.directories.values():
+            self._build_directory_item(root, entry, isinstance(source, ParadoxVanilla))
+
+        # root.sortChildren(0, Qt.AscendingOrder)
+        
+    def _build_directory_item(
+        self, parent_item: QTreeWidgetItem, directory: GenericDirectory, read_only: bool
+    ) -> None:
+        item = DirectoryTreeItem(name=directory.path.name,
+                                 item=directory, 
+                                 item_type=TreeItemType.DIRECTORY, 
+                                 icon=self.app_controller.style_manager.get_icon(GenericDirectory))
+        self.node_to_item[directory] = item
+        parent_item.addChild(item)
+
+        for child in directory.directories.values():
+            self._build_directory_item(item, child, read_only)
+
+        for file in directory.files.values():
+            self._build_file_item(item, file, read_only)
+
+        # item.sortChildren(0, Qt.AscendingOrder)
+
+    def _build_file_item(
+        self, parent_item: QTreeWidgetItem, file: FileReference, read_only: bool
+    ) -> None:
+        item = DirectoryTreeItem(name=file.file.filename,
+                                 item=file, 
+                                 item_type=TreeItemType.FILE, 
+                                 icon=self.app_controller.style_manager.get_icon(type(file.file)))
+        self.node_to_item[file] = item
+        parent_item.addChild(item)
+
     def set_file_state(self, file: FileReference, status: ChangeState) -> None:
         file_item = self.node_to_item[file]
         file_item.setData(0, QtStorage.STATE, status)
         self._propagate_state(file_item.parent())
         self.tree.update()
 
+    def add_folder(self, directory:GenericDirectory) -> None:
+        print("ADDING FOLDER", directory.path)
+        if directory in self.node_to_item.keys():
+            return 
+        parent = directory.parent if directory.parent else directory.source
+    
+        if parent not in self.node_to_item:
+            print("ADDING PARENT", parent.path)
+            self.add_folder(parent)
+        parent_item = self.node_to_item[parent]
+        item = DirectoryTreeItem(name=directory.path.name,
+                                 item=directory,
+                                 item_type=TreeItemType.DIRECTORY,
+                                 icon=self.app_controller.style_manager.get_icon(GenericDirectory))
+        self.node_to_item[directory] = item
+        parent_item.addChild(item)
+        parent_item.sortChildren(0, Qt.AscendingOrder)
+
     def add_file(self, directory: GenericDirectory, file: FileReference) -> None:
+        if directory not in self.node_to_item.keys():
+            self.add_folder(directory)
         item = self.node_to_item[directory]
         self._build_file_item(item, file, file.read_only)
+        item.sortChildren(0, Qt.AscendingOrder)
+        
+    def remove_file(self, obj:GenericDirectory|FileReference)-> None:
+        if isinstance(obj, GenericDirectory):
+            obj_parent = obj.parent if obj.parent else obj.source
+            # parent = self.node_to_item[obj.parent if obj.parent else obj.source]
+        else:
+            # parent = self.node_to_item[obj.directory]
+            obj_parent = obj.directory
+        parent_item = self.node_to_item[obj_parent]
+        item = self.node_to_item[obj]
+        parent_item.removeChild(item)
+        self.node_to_item.pop(obj)
+        if obj_parent and parent_item.childCount() == 0:
+            self.remove_file(obj.parent)
 
     def _propagate_state(self, item: QTreeWidgetItem) -> None:
         if item is None:
@@ -80,70 +168,12 @@ class ModPanel(QWidget):
                 return ChangeState.MODIFIED
         return None
 
-    def populate_tree(self, load_order: ParadoxLoadOrder) -> None:
-        self.tree.clear()
-        for source in load_order.sources:
-            self._load_source_tree(source)
-
-    def _load_source_tree(self, source: ParadoxSource) -> None:
-        root = QTreeWidgetItem([source.source_name or "Unnamed Mod"])
-        root.setData(0, QtStorage.NODE, source)
-        self.tree.addTopLevelItem(root)
-
-        if isinstance(source, ParadoxMod):
-            descriptor_item = QTreeWidgetItem(["Descriptor"])
-            descriptor_item.setData(0, QtStorage.NODE, source.descriptor_object)
-            descriptor_item.setData(0, QtStorage.STATE, None)
-            descriptor_item.setData(0, QtStorage.CONTEXT, ParadoxContext)
-            descriptor_item.setData(0, QtStorage.READ_ONLY, False)
-            self.node_to_item[source.descriptor_object.file] = descriptor_item
-
-            root.addChild(descriptor_item)
-
-        for entry in source.root.directories.values():
-            self._build_directory_item(root, entry, isinstance(source, ParadoxVanilla))
-
-    def _build_directory_item(
-        self, parent_item: QTreeWidgetItem, directory: GenericDirectory, read_only: bool
-    ) -> None:
-        read_only = read_only or directory.read_only
-        item = QTreeWidgetItem([directory.path.name])
-        self.node_to_item[directory] = item
-        item.setData(0, QtStorage.NODE, directory)
-        item.setData(0, QtStorage.READ_ONLY, read_only)
-        item.setIcon(0, self.app_controller.style_manager.get_icon(GenericDirectory))
-        parent_item.addChild(item)
-
-        for child in directory.directories.values():
-            self._build_directory_item(item, child, read_only)
-
-        for file in directory.files.values():
-            self._build_file_item(item, file, read_only)
-
-    def _build_file_item(
-        self, parent_item: QTreeWidgetItem, file: FileReference, read_only: bool
-    ) -> None:
-        con_text = file.context.__name__ if file.context else None
-
-        text = f"{file.file.filename}, {con_text}{'(ReadOnly)' if read_only else ''}"
-        item = QTreeWidgetItem([text])
-        self.node_to_item[file] = item
-        if isinstance(file.file, UnloadedFile):
-            item.setIcon(
-                0, QApplication.style().standardIcon(QStyle.SP_MessageBoxWarning)
-            )
-        item.setData(0, QtStorage.NODE, file)
-        item.setData(0, QtStorage.STATE, None)
-        item.setData(0, QtStorage.READ_ONLY, read_only)
-        item.setIcon(0, self.app_controller.style_manager.get_icon(type(file.file)))
-        parent_item.addChild(item)
-
     def _on_element_click(self, item: QTreeWidgetItem, column: int) -> None:
         file = item.data(0, QtStorage.NODE)
         if file:
             if isinstance(file, GenericDirectory) or isinstance(file, ParadoxSource):
                 return
-            self.request_load_block.emit(file, item.data(0, QtStorage.READ_ONLY))
+            self.request_load_block.emit(file, file.read_only)
 
     def _request_context_menu(self, pos: QPoint) -> None:
         selected = self.tree.itemAt(pos)

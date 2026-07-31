@@ -8,7 +8,7 @@ from App.Contracts import ModLoaderResult
 from App.Loading.LoadOrder import ParadoxLoadOrder
 from App.Loading.Models import FileReference
 from App.Loading.ParadoxSource import ParadoxSource
-from App.Services import Workspace
+from App.Services import ParadoxRegistry, Workspace
 
 
 class LoadingDialog(QDialog):
@@ -54,9 +54,10 @@ class LoadProcess(QObject):
     finished = pyqtSignal(object)
     failed = pyqtSignal(Exception, str)
 
-    def __init__(self, workspace: Workspace, game_path: Path) -> None:
+    def __init__(self, workspace: Workspace, registry:ParadoxRegistry, game_path: Path) -> None:
         super().__init__()
         self.workspace = workspace
+        self.registry = registry
         self.game_path = game_path
 
     def run(self) -> None:
@@ -79,8 +80,9 @@ class LoadProcess(QObject):
             self._process_files(load_order)
 
             self.progress_message.emit("Finishing Up")
+            self.registry._build_registry_cache()
             self.finished.emit(
-                ModLoaderResult(self.workspace, load_order, self.tokens, self.metadata)
+                ModLoaderResult(self.workspace, load_order)
             )
         except Exception as e:
             self.failed.emit(e, traceback.format_exc())
@@ -103,29 +105,4 @@ class LoadProcess(QObject):
 
     def _file_processing(self, source: ParadoxSource, file: FileReference) -> None:
         file.file = file.file.load()
-        self._merge_registry(
-            self.tokens, file.directory.token_collection(source, file))
-        self._merge_registry(
-            self.metadata, file.directory.metadata_collection(source, file)
-        )
-
-    def _merge_registry(self, target: dict, insertions: dict | set) -> None:
-        for key, value in insertions.items():
-            if key not in target:
-                target[key] = type(value)()
-
-            if isinstance(value, dict):
-                self._merge_dict(target[key], value)
-            else:
-                target[key].update(value)
-
-
-    def _merge_dict(self, target: dict, source: dict) -> None:
-        for key, value in source.items():
-            if (
-                isinstance(value, dict)
-                and isinstance(target.get(key), dict)
-            ):
-                self._merge_dict(target[key], value)
-            else:
-                target[key] = value
+        self.registry.load_file_data(source, file)

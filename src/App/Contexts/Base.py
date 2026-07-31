@@ -4,10 +4,10 @@ from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
     from App import AppController
-    from App.Contracts import BulkMutationRequest
     from App.Loading.Models import FileReference
 
 from App.Contexts import BlockContext, NodeContext
+from App.Contracts import BulkMutationRequest
 from App.Enums import PDXMetadata
 from App.GUI.Actions import Action, ActionsResult
 
@@ -93,8 +93,8 @@ class ParadoxNodeContext:
 
 class ReadOnlyContext(ParadoxContext):
     @staticmethod
-    def get_file_context() -> type[NullContext]:
-        return NullContext
+    def get_file_context() -> type[VanillaFileContext]:
+        return VanillaFileContext
 
     @staticmethod
     def get_block_context(node: GenericNode) -> type[NullContext]:
@@ -107,17 +107,31 @@ class ReadOnlyContext(ParadoxContext):
         return NullContext
 
 
+class VanillaFileContext(ParadoxFileContext):
+    @staticmethod
+    def get_actions(
+        app_controller: AppController, file: FileReference
+    ) -> ActionsResult:
+        from App.GUI.Forms.CopyFile import CopyFileForm
+        return [
+            Action("Copy File to source...",
+                   lambda:CopyFileForm(app_controller, file),
+                   True)
+        ]
+
+    def errors(app_controller: AppController, node_context: NodeContext) -> str:
+        return
+
 class NullContext:
     @staticmethod
     def get_actions(
         app_controller: AppController, block_context: BlockContext
     ) -> ActionsResult:
         return [Action("No Actions Available", dummy, False)]
-
-    def errors(app_controller: AppController, node_context: NodeContext) -> str:
-        return
-
-
+    
+    def errors(app_controller: AppController, node: GenericNode) -> str|None:
+        return None
+    
 class LocalisationFieldContext:
     @staticmethod
     def get_actions(

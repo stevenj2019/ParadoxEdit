@@ -23,7 +23,7 @@ from PyQt5.QtWidgets import (
 
 from App.Contracts import SearchResult
 from App.GUI.Enums import QtStorage
-from App.GUI.Widgets.CustomWidgets import CheckableComboBox, SearchLineEdit
+from App.GUI.Widgets.Custom.FormElements import CheckableComboBox, SearchLineEdit
 from ParadoxParser import ParadoxLocParser as PDXLocFile
 from ParadoxParser import ParadoxScriptParser as PDXScriptFile
 from ParadoxParser.ParadoxNodes import (

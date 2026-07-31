@@ -1,6 +1,7 @@
 import copy
 import sys
 import traceback
+from collections.abc import Generator
 from contextlib import contextmanager
 from pathlib import Path
 from types import TracebackType
@@ -40,7 +41,9 @@ class AppController(QObject):
     request_node_mutation = pyqtSignal(object)
     request_block_mutation = pyqtSignal(object)
     request_bulk_mutation = pyqtSignal(object)
-    request_file_change = pyqtSignal(object)
+    request_file_mutation = pyqtSignal(object)
+    request_file_unload = pyqtSignal(object)
+    request_registry_refresh = pyqtSignal()
     request_save = pyqtSignal(object)
 
     def __init__(self) -> None:
@@ -91,7 +94,9 @@ class AppController(QObject):
         self.request_node_mutation.connect(self._request_node_mutation)
         self.request_block_mutation.connect(self._request_block_mutation)
         self.request_bulk_mutation.connect(self._request_bulk_mutation)
-        self.request_file_change.connect(self._request_file_change)
+        self.request_file_mutation.connect(self._request_file_mutation)
+        self.request_file_unload.connect(self._request_file_unload)
+        self.request_registry_refresh.connect(self._request_registry_rebuild)
         self.request_save.connect(self._save_target)
         self.main.show()
 
@@ -120,7 +125,7 @@ class AppController(QObject):
 
         self.thread = QThread()
         self.loading_process = LoadProcess(
-            workspace, self.configuration.game_install_path
+            workspace, self.registry, self.configuration.game_install_path
         )
 
         self.loading_process.moveToThread(self.thread)
@@ -143,8 +148,6 @@ class AppController(QObject):
         self.thread.start()
 
     def workspace_loaded(self, result: ModLoaderResult) -> None:
-        self.registry.load_tokens(result.tokens)
-        self.registry.load_metadata(result.metadata)
         self.file_system.load_workspace(result.workspace, result.load_order)
 
         self.main.load_mod(result.load_order)
@@ -169,7 +172,7 @@ class AppController(QObject):
         self._batch_file.clear()
 
     @contextmanager
-    def batch_manager(self) -> None:
+    def batch_manager(self)-> Generator[None, None, None]:
         self._batch_depth += 1
         try:
             yield
@@ -251,13 +254,29 @@ class AppController(QObject):
         if self.file_system.open_file.file in files:
             self.main.load_file(self.file_system.open_file)
 
-    def _request_file_change(self, request: FileMutationRequest) -> None:
+    def _request_file_mutation(self, request: FileMutationRequest) -> None:
+        print("MUTATION HANDLER CALLED", id(request.file))
         file = request.file
         if request.state == ChangeState.ADDED:
             request.directory.add_file(file.file.filepath, file.file.filename, file)
+            self.registry.load_file_data(file.directory.source, file)
         self.file_system.change_tracker.set_file_state(request.file, request.state)
         self.main.mod_panel.add_file(request.directory, request.file)
         self.main.mod_panel.set_file_state(request.file, request.state)
+
+    def _request_file_unload(self, file:FileReference) -> None:
+        #if tree loaded, clear
+        if self.file_system.open_file is file:
+            self.main.contents_panel.script_view.unload_block()
+        #remove item from file tree
+        self.main.mod_panel.remove_file(file)
+        #delete reference in source tree
+        file.directory.delete_file(file)
+        self.file_system.change_tracker.clear_file_state(file)
+        self.registry.purge_file_data(file)
+
+    def _request_registry_rebuild(self) -> None:
+        self.registry._build_registry_cache()
 
     def _save_target(self, target: SaveTarget) -> None:
         def save_routine(file: FileReference) -> None:

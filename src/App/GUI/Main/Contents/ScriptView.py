@@ -71,14 +71,17 @@ class ScriptView(QWidget):
         item.setData(0, QtStorage.STATE, state)
         self.tree.update()
 
+    def unload_block(self) -> None:
+        self.node_to_item.clear()
+        self.tree.clear()
+
     def load_block(self, file: FileReference) -> None:
         """
         Load a GenericBlock into the tree for display.
         """
         block = file.file
         self.read_only = file.read_only
-        self.node_to_item.clear()
-        self.tree.clear()
+        self.unload_block()
         self.tree.blockSignals(True)
         self.tree.setUpdatesEnabled(False)
 
@@ -244,12 +247,14 @@ class ScriptView(QWidget):
             )
 
     def _request_context_menu(self, pos: QPoint) -> None:
+        #TODO should be passing through NullContext to these nodes on vanilla,
+        ##### we arent, and i am over it lol
+        if self.read_only:
+            return
         pos = self.tree.viewport().mapFrom(self, pos)
         column = self.tree.columnAt(pos.x())
         item = self.tree.itemAt(pos)
         if not item:
-            return
-        if item.data(0, QtStorage.READ_ONLY):
             return
 
         node = item.data(0, QtStorage.NODE)

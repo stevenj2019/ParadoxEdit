@@ -34,6 +34,8 @@ class ParadoxSource:
     ) -> None:
         self.source_name = name
         self.file_path = path
+        self.read_only = read_only_override
+
         self.context_override = context_override
         self.read_only_override = read_only_override
 
@@ -69,6 +71,16 @@ class ParadoxSource:
                 if file_path.suffix != ".bak":
                     parent.add_file(file_path, file_name)
 
+    def _ensure_directory(self, path:Path) -> None:
+        # relative = path.relative_to(self.file_path)
+        if path in self.directories:
+            return self.directories[path]
+        parent = self._ensure_directory(path.parent)
+        directory = self._create_directory(self.file_path / path)
+        parent.add_directory(directory)
+        self.directories[path] = directory
+        return directory
+    
     def _create_directory(self, path: Path) -> None:
         matches = []
         rel_path = path.relative_to(self.file_path)

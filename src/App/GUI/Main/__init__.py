@@ -157,7 +157,7 @@ class MainWindow(QMainWindow):
             self.contents_panel.load_file(file)
 
     def _preview_icon(self, icon: str) -> None:
-        icon_name = icon.value
+        icon_name = icon
         icon_registry = self.app_controller.registry.get_metadata(PDXMetadata.GFXIcon)
         if icon_name in icon_registry.keys():
             full_path = icon_registry[icon]

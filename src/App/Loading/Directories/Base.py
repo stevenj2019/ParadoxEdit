@@ -35,10 +35,10 @@ class GenericDirectory:
             if self.source.context_override
             else context.get("dir", ParadoxContext)
         )
-
+        self.parent:GenericDirectory = None
         self.parser = parser
         self.read_only = read_only
-        self.directories: dict[str, GenericDirectory] = {}
+        self.directories: dict[Path, GenericDirectory] = {}
         self.files: dict[str:FileReference] = {}
 
     def add_file(self, path: Path, name: str, file_ref: FileReference = None) -> None:
@@ -61,6 +61,7 @@ class GenericDirectory:
         self.files.pop(file, None)
 
     def add_directory(self, directory: GenericDirectory) -> None:
+        directory.parent = self
         self.directories[directory.path] = directory
 
     def delete_directory(self) -> None:

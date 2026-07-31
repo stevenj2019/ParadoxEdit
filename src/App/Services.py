@@ -4,6 +4,7 @@ from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
     from App.Loading.LoadOrder import ParadoxLoadOrder
+    from App.Loading.ParadoxSource import ParadoxSource
 
 import json
 import sys
@@ -195,7 +196,7 @@ class FilesystemMananger:
         except AttributeError:
             return deletions
 
-    def cleanup_deletion_nodes(self, file: PDXScriptFile | PDXLocFile) -> None:
+    def cleanup_deletion_nodes(self, file: FileReference) -> None:
         deletions = self.collect_deletion_nodes(file)
         try:
             for parent, index, node in sorted(
@@ -209,6 +210,7 @@ class FilesystemMananger:
     def save_file(self, file: FileReference = None) -> bool:
         self.cleanup_deletion_nodes(file.file)
         if self.change_tracker.file_is_dirty(file) and not file.read_only:
+            file.file.filepath.parent.mkdir(parents=True, exist_ok=True)
             self.change_tracker.clear_file_state(file)
             file.commit(self.configuration.safe_mode)
             return True
@@ -218,23 +220,64 @@ class FilesystemMananger:
 
 class ParadoxRegistry:
     def __init__(self) -> None:
-        self.tokens: dict[str, set] = {}
-        self.metadata: dict[str, dict] = {}
+        self.tokens: dict[PDXTokens, dict[FileReference, set]] = {}
+        self.metadata: dict[PDXMetadata, dict[FileReference, dict]] = {}
 
-    def load_tokens(self, tokens: dict) -> None:
-        self.tokens = tokens
+        self.tokens_cache: dict[PDXTokens, set] = {}
+        self.metadata_cache: dict[PDXTokens, dict] = {}
 
     def get_tokens(self, key: PDXTokens) -> None:
-        return self.tokens.get(key, set())
+        return self.tokens_cache.get(key, set())
 
     # def add_tokens(self, key, tokens:set):
     # def remove_tokens(self, key, tokens:set):
 
-    def load_metadata(self, metadata: dict) -> None:
-        self.metadata = metadata
-
     def get_metadata(self, key: PDXMetadata) -> None:
-        return self.metadata.get(key, dict())
-
+        return self.metadata_cache.get(key, dict())
     # def add_metadata():
     # def remove_metadata():
+
+    def invalidate(self) -> None:
+        self.tokens.clear()
+        self.metadata.clear()
+
+    def load_file_data(self, source:ParadoxSource, file:FileReference) -> None:
+        self._merge_registry(
+            self.tokens, file, file.directory.token_collection(source, file)
+        )
+        self._merge_registry(
+            self.metadata, file, file.directory.metadata_collection(source, file)
+        )
+
+    def _merge_registry(self, target: dict, file:FileReference, insertions: dict | set) -> None:
+        for key, value in insertions.items():
+            if key not in target:
+                target[key] = dict()
+            target[key][file] = value
+
+    def purge_file_data(self, file:FileReference) -> None:
+        for file_data in self.tokens.values():
+            file_data.pop(file, None)
+        for file_data in self.metadata.values():
+            file_data.pop(file, None)
+
+    def _build_registry_cache(self) -> None:
+        self.tokens_cache.clear()
+        self.metadata_cache.clear()
+
+        for key, token in self.tokens.items():
+            merged = set()
+            for data in token.values():
+                merged.update(data)
+            self.tokens_cache[key] = merged
+
+        for key, metadata in self.metadata.items():
+            merged = type(next(iter(metadata.values())))()
+
+            for data in metadata.values():
+                if isinstance(data, dict):
+                    merged.update(data)
+                else:
+                    merged.update(data)
+
+            self.metadata_cache[key] = merged

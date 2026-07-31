@@ -22,9 +22,15 @@ class QtStorage(IntEnum):
     PARENT_CONTEXT = auto()
     INDEX = auto()
     EDITABLE = auto()
-
+    TYPE = auto()
 
 class ExpansionMode(Enum):
     ALL = auto()
     DEPTH = auto()
     FROM_NODE = auto()
+
+class TreeItemType(Enum):
+    DESCRIPTOR = 0
+    DIRECTORY = 1
+    FILE = 2
+    SOURCE = 3

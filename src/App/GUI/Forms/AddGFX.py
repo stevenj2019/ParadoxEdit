@@ -22,7 +22,7 @@ from PyQt5.QtWidgets import (
 from App.Contexts.Base import ParadoxContext
 from App.Contracts import BlockMutationRequest, FileMutationRequest
 from App.Contracts.Enums import ChangeState
-from App.GUI.Widgets.CustomWidgets import FileFolderSelectorWidget
+from App.GUI.Widgets.Custom.FormElements import FileFolderSelectorWidget
 from App.GUI.Widgets.FileDialogues import gfx_save_folder_selector
 from App.GUI.Widgets.PopupModels import form_missing_value
 from App.Loading.Models import FileReference, IconFile
@@ -178,7 +178,7 @@ class AddNewGFXForm(QDialog):
                             self.save_file,
                         )
                     )
-                self.app_controller.request_file_change.emit(
+                self.app_controller.request_file_mutation.emit(
                     FileMutationRequest(icon.directory, icon, ChangeState.ADDED)
                 )
         self.accept()
