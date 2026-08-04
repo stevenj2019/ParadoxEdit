@@ -25,15 +25,11 @@ from App.Loading.ParadoxSource import ParadoxSource
 
 
 class ParadoxFileDelegate(QStyledItemDelegate):
-    def __init__(
-        self, app_controller: AppController, parent: QTreeWidget = None
-    ) -> None:
+    def __init__(self, app_controller: AppController, parent: QTreeWidget = None) -> None:
         super().__init__(parent)
         self.app_controller = app_controller
 
-    def paint(
-        self, painter: QPainter, option: QStyleOptionViewItem, index: QModelIndex
-    ) -> None:
+    def paint(self, painter: QPainter, option: QStyleOptionViewItem, index: QModelIndex) -> None:
         super().paint(painter, option, index)
 
         radius = 4
@@ -63,15 +59,11 @@ class ParadoxFileDelegate(QStyledItemDelegate):
 
 
 class NodeStateDelegate(QStyledItemDelegate):
-    def __init__(
-        self, app_controller: AppController, parent: QTreeWidget = None
-    ) -> None:
+    def __init__(self, app_controller: AppController, parent: QTreeWidget = None) -> None:
         super().__init__(parent)
         self.app_controller = app_controller
 
-    def paint(
-        self, painter: QPainter, option: QStyleOptionViewItem, index: QModelIndex
-    ) -> None:
+    def paint(self, painter: QPainter, option: QStyleOptionViewItem, index: QModelIndex) -> None:
         super().paint(painter, option, index)
         self.paint_change_state(painter, option, index)
         self.paint_error_icon(painter, option, index)
@@ -94,9 +86,7 @@ class NodeStateDelegate(QStyledItemDelegate):
             painter.save()
             painter.setPen(Qt.NoPen)
             painter.setBrush(QBrush(colour))
-            painter.drawRect(
-                viewport_rect.left(), rect.top(), stripe_width, rect.height()
-            )
+            painter.drawRect(viewport_rect.left(), rect.top(), stripe_width, rect.height())
             painter.restore()
 
     def paint_error_icon(

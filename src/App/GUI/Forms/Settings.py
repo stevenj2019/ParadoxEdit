@@ -62,9 +62,7 @@ class SettingsForm(QDialog):
         self.game_install_path_element_button = QPushButton("...")
         self.game_install_path_element.addWidget(self.game_install_path_element_text)
         self.game_install_path_element.addWidget(self.game_install_path_element_button)
-        self.game_install_path_element_button.clicked.connect(
-            self.browse_game_install_path
-        )
+        self.game_install_path_element_button.clicked.connect(self.browse_game_install_path)
         self.form.addRow(self.game_install_path_label, self.game_install_path_element)
 
         self.mod_install_path_label = QLabel("Paradox Mods Path:")
@@ -76,9 +74,7 @@ class SettingsForm(QDialog):
         self.mod_install_path_element_button = QPushButton("...")
         self.mod_install_path_element.addWidget(self.mod_install_path_element_text)
         self.mod_install_path_element.addWidget(self.mod_install_path_element_button)
-        self.mod_install_path_element_button.clicked.connect(
-            self.browse_mod_install_path
-        )
+        self.mod_install_path_element_button.clicked.connect(self.browse_mod_install_path)
         self.form.addRow(self.mod_install_path_label, self.mod_install_path_element)
 
         self.safe_mode_label = QLabel("Safe Mode:")
@@ -124,8 +120,7 @@ class SettingsForm(QDialog):
         game_dir_error = False
         mod_dir_error = False
         if not (
-            self.game_install_path.is_dir()
-            and (self.game_install_path / "pdx_launcher").is_dir()
+            self.game_install_path.is_dir() and (self.game_install_path / "pdx_launcher").is_dir()
         ):
             game_dir_error = True
         if not (
@@ -148,9 +143,7 @@ class SettingsForm(QDialog):
             self.app_controller.configuration.change_setting(
                 game_install_path=self.game_install_path
             )
-            self.app_controller.configuration.change_setting(
-                mod_file_path=self.mod_install_path
-            )
+            self.app_controller.configuration.change_setting(mod_file_path=self.mod_install_path)
             self.app_controller.configuration.write_file()
             self.accept()
         else:

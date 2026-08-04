@@ -8,44 +8,47 @@ if TYPE_CHECKING:
 from collections.abc import Iterator
 from pathlib import Path
 
-from App.Contexts.Base import ParadoxContext
+from App.Contexts.Base import NullContext, ParadoxContext
 from App.Enums import PDXMetadata, PDXTokens
 from App.Loading.Models import FileReference, UnloadedFile
 from ParadoxParser import ParadoxScriptParser as PDXScriptFile
 
-FILE_TYPES = {"dir":{"context":ParadoxContext, "model":PDXScriptFile},
-              ".txt":{"context":ParadoxContext, "model":PDXScriptFile}}
+FILE_TYPES = {
+    "dir": {"context": ParadoxContext, "class": PDXScriptFile},
+    ".txt": {"context": ParadoxContext, "class": PDXScriptFile},
+}
+
+NOT_IMPLEMENTED_FILE = {"context": NullContext, "class": None}
+
 
 class GenericDirectory:
     def __init__(
         self,
         source: ParadoxSource,
         file_path: Path,
-        compiler: dict = FILE_TYPES,
+        definitions: dict = FILE_TYPES,
         read_only: bool = True,
     ) -> None:
         self.source = source
         self.path = Path(file_path)
-        self.compiler = compiler
-        if not compiler:
-            self.compiler = FILE_TYPES
-        self.parent:GenericDirectory = None
-        self.context = self.compiler["dir"]["context"]
+        self.definitions = definitions
+        if not definitions:
+            self.definitions = FILE_TYPES
+        self.parent: GenericDirectory = None
+        self.context = self.definitions["dir"]["context"]
         self.read_only = read_only
         self.directories: dict[Path, GenericDirectory] = {}
         self.files: dict[str:FileReference] = {}
 
     def add_file(self, path: Path, name: str, file_ref: FileReference = None) -> None:
-        if path.suffix not in self.compiler.keys():
-            # AppLogger.warning(f"{path.absolute()} ignored: lacks context.")
-            return
+        definitions = self.definitions.get(path.suffix, NOT_IMPLEMENTED_FILE)
         if file_ref:
             self.files[name] = file_ref
         else:
             self.files[name] = FileReference(
                 self,
-                UnloadedFile(path, name, self.compiler[path.suffix]["model"]),
-                self.compiler[path.suffix]["context"],
+                UnloadedFile(path, name, definitions["class"]),
+                definitions["context"],
                 self.read_only,
             )
 
@@ -73,9 +76,7 @@ class GenericDirectory:
 
         return not self.directories and not self.files
 
-    def token_collection(
-        self, source: ParadoxSource, file: FileReference
-    ) -> dict[PDXTokens, set]:
+    def token_collection(self, source: ParadoxSource, file: FileReference) -> dict[PDXTokens, set]:
         return {}
 
     def metadata_collection(

@@ -103,46 +103,54 @@ class AppLogger:
 
     @classmethod
     def application_metadata_logger(cls) -> None:
-        cls.raw(dedent(
-            f"""
+        cls.raw(
+            dedent(
+                f"""
             ############################
             ##  Application Metadata  ##
             ############################
             Name:          {APPNAME}
             Version:       {VERSION}
             Commit:        {COMMIT}
-            """))
+            """
+            )
+        )
 
     @classmethod
     def runtime_metadata_logger(cls) -> None:
-        cls.raw(dedent(
-            f"""
+        cls.raw(
+            dedent(
+                f"""
             ########################
             ##  Runtime Metadata  ##
             ########################
             PythonVersion: {platform.python_version()}
             QtVersion:     {QT_VERSION_STR}
             PyQtVersion:   {PYQT_VERSION_STR}
-            DateTime:      {datetime.now().strftime('%Y-%m-%d_%H-%M-%S')}
+            DateTime:      {datetime.now().strftime("%Y-%m-%d_%H-%M-%S")}
             Platform:      {platform.platform()}
             Architecture:  {platform.architecture()[0]}
             CPUCores(P):   {psutil.cpu_count(logical=False)}
             CPUCores(L):   {psutil.cpu_count(logical=True)}
-            Memory:        {round(psutil.virtual_memory().total / (1024 ** 3), 2)}
-            ProcessMemory: {round(psutil.Process().memory_info().rss / (1024 ** 3), 2)} GiB
-            """))
+            Memory:        {round(psutil.virtual_memory().total / (1024**3), 2)}
+            ProcessMemory: {round(psutil.Process().memory_info().rss / (1024**3), 2)} GiB
+            """
+            )
+        )
 
     @classmethod
-    def workspace_metadata_logger(cls, workspace:Workspace, load_order:ParadoxLoadOrder) -> None:
-        cls.raw(dedent(
-            f"""
+    def workspace_metadata_logger(cls, workspace: Workspace, load_order: ParadoxLoadOrder) -> None:
+        cls.raw(
+            dedent(
+                f"""
             ##########################
             ##  Workspace Metadata  ##
             ##########################
             VanillaLoad:   {workspace.vanilla_loaded}
             Mods:          {len(workspace.mods)}
-            ProcessMemory: {round(psutil.Process().memory_info().rss / (1024 ** 3), 2)} GiB
+            ProcessMemory: {round(psutil.Process().memory_info().rss / (1024**3), 2)} GiB
             LoadOrder:"""
-        ))
+            )
+        )
         for index, source in enumerate(load_order.sources):
-            cls.raw(f"  {index+1}. {source.source_name}")
+            cls.raw(f"  {index + 1}. {source.source_name}")

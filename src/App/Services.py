@@ -75,6 +75,7 @@ class ConfigurationManager:
             json.dump(self.to_json(), CONFIG_FILE)
         self.initialised = True
 
+
 class ChangeTracker:
     def __init__(self) -> None:
         self.node_changes = {}
@@ -161,27 +162,21 @@ class FilesystemMananger:
 
         self.open_file: OpenFile = None
 
-    def load_workspace(
-        self, workspace: Workspace, load_order: ParadoxLoadOrder
-    ) -> None:
+    def load_workspace(self, workspace: Workspace, load_order: ParadoxLoadOrder) -> None:
         self.workspace = workspace
         self.load_order = load_order
 
     def load_file(self, file: OpenFile) -> None:
         self.open_file = file
 
-    def changed_file(
-        self, file: FileReference, node: GenericNode, status: ChangeState
-    ) -> None:
+    def changed_file(self, file: FileReference, node: GenericNode, status: ChangeState) -> None:
         self.change_tracker.set_file_state(file, status)
         self.change_tracker.set_node_state(node, status)
 
     def collect_deletion_nodes(self, file: PDXScriptFile | PDXLocFile) -> None:
         deletions = []
 
-        def recurse(
-            parent: PDXScriptFile | PDXLocFile | GenericBlock, node: GenericNode
-        ) -> None:
+        def recurse(parent: PDXScriptFile | PDXLocFile | GenericBlock, node: GenericNode) -> None:
             if self.change_tracker.get_node_state(node) == ChangeState.DELETED:
                 index = parent.nodes.index(node)
                 deletions.append((parent, index, node))
@@ -199,9 +194,7 @@ class FilesystemMananger:
     def cleanup_deletion_nodes(self, file: FileReference) -> None:
         deletions = self.collect_deletion_nodes(file)
         try:
-            for parent, index, node in sorted(
-                deletions, key=lambda x: x[1], reverse=True
-            ):
+            for parent, index, node in sorted(deletions, key=lambda x: x[1], reverse=True):
                 self.change_tracker.clear_node_state(node)
                 parent.nodes.pop(index)
         except TypeError:
@@ -234,6 +227,7 @@ class ParadoxRegistry:
 
     def get_metadata(self, key: PDXMetadata) -> None:
         return self.metadata_cache.get(key, dict())
+
     # def add_metadata():
     # def remove_metadata():
 
@@ -241,21 +235,21 @@ class ParadoxRegistry:
         self.tokens.clear()
         self.metadata.clear()
 
-    def load_file_data(self, source:ParadoxSource, file:FileReference) -> None:
-        self._merge_registry(
-            self.tokens, file, file.directory.token_collection(source, file)
-        )
-        self._merge_registry(
-            self.metadata, file, file.directory.metadata_collection(source, file)
-        )
+    def load_file_data(self, source: ParadoxSource, file: FileReference) -> None:
+        if isinstance(file.file, (PDXScriptFile, PDXLocFile)):
+            self._merge_registry(self.tokens, file, file.directory.token_collection(source, file))
+            self._merge_registry(
+                self.metadata, file, file.directory.metadata_collection(source, file)
+            )
 
-    def _merge_registry(self, target: dict, file:FileReference, insertions: dict | set) -> None:
-        for key, value in insertions.items():
-            if key not in target:
-                target[key] = dict()
-            target[key][file] = value
+    def _merge_registry(self, target: dict, file: FileReference, insertions: dict) -> None:
+        if isinstance(insertions, dict):
+            for key, value in insertions.items():
+                if key not in target:
+                    target[key] = dict()
+                target[key][file] = value
 
-    def purge_file_data(self, file:FileReference) -> None:
+    def purge_file_data(self, file: FileReference) -> None:
         for file_data in self.tokens.values():
             file_data.pop(file, None)
         for file_data in self.metadata.values():

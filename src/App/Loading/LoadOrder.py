@@ -30,16 +30,12 @@ class ParadoxLoadOrder:
         for source in self.sources:
             if not isinstance(source, ParadoxVanilla):
                 graph[source] = [
-                    source_by_name[name]
-                    for name in source.dependencies
-                    if name in source_by_name
+                    source_by_name[name] for name in source.dependencies if name in source_by_name
                 ]
 
         return graph
 
-    def _resolve_load_order(
-        self, graph: dict[ParadoxSource, str]
-    ) -> list[ParadoxSource]:
+    def _resolve_load_order(self, graph: dict[ParadoxSource, str]) -> list[ParadoxSource]:
         resolved = list()
         vanilla = next(
             (source for source in self.sources if isinstance(source, ParadoxVanilla)),

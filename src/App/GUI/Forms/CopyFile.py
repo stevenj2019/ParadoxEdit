@@ -16,7 +16,7 @@ from App.Loading.ParadoxSource import ParadoxVanilla
 
 
 class CopyFileForm(QDialog):
-    def __init__(self, app_controller: AppController, file:FileReference) -> None:
+    def __init__(self, app_controller: AppController, file: FileReference) -> None:
         super().__init__()
         self.app_controller = app_controller
         self.file = file
@@ -53,22 +53,19 @@ class CopyFileForm(QDialog):
 
         new_path = source.file_path / target_directory.path / self.file.file.filename
         if isinstance(self.file.file, IconFile):
-            new_file = IconFile.add(source_path = self.file.file.filepath, save_path = new_path)
+            new_file = IconFile.add(source_path=self.file.file.filepath, save_path=new_path)
         else:
             new_file = copy.deepcopy(self.file.file)
             new_file.filepath = new_path
-            
+
         new_file = FileReference(
-            directory=target_directory,
-            file=new_file,
-            context=self.file.context,
-            read_only=False
+            directory=target_directory, file=new_file, context=self.file.context, read_only=False
         )
-        
+
         self.app_controller.request_file_mutation.emit(
             FileMutationRequest(target_directory, new_file, ChangeState.ADDED)
         )
-        
+
         self.app_controller.request_file_unload.emit(self.file)
 
         self.app_controller.request_registry_refresh.emit()

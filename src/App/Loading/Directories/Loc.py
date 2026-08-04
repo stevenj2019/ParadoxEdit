@@ -14,8 +14,10 @@ from App.Loading.Directories.Base import GenericDirectory
 from ParadoxParser import ParadoxLocParser as PDXLocFile
 from ParadoxParser.ParadoxNodes import GenericLegacyLocKey, GenericLocKey
 
-FILE_TYPES = {"dir":{"context":LocalisationContext, "model":PDXLocFile},
-              ".yml":{"context":LocalisationContext, "model":PDXLocFile}}
+FILE_TYPES = {
+    "dir": {"context": LocalisationContext, "class": PDXLocFile},
+    ".yml": {"context": LocalisationContext, "class": PDXLocFile},
+}
 
 
 class LocDirectory(GenericDirectory):

@@ -6,6 +6,7 @@ from App.Loading.Directories.Icon import IconDirectory
 from App.Loading.Directories.IndustrialOrganisation import MIODirectory
 from App.Loading.Directories.Interface import InterfaceDirectory
 from App.Loading.Directories.Loc import LocDirectory
+from App.Loading.Directories.Music import MusicDirectory
 from App.Loading.Directories.Operations import IntelligenceOperationDirectory
 from App.Loading.Directories.Raids import RaidsDirectory
 from App.Loading.Directories.SpecialProjects import SpecialProjectsDirectory
@@ -24,4 +25,5 @@ DIRECTORY_REGISTRY = {
     "common/special_projects/projects": SpecialProjectsDirectory,
     "history/states": StatesDirectory,
     "common/national_focus": FocusTreeDirectory,
+    "music": MusicDirectory,
 }

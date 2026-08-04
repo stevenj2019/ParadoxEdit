@@ -86,9 +86,7 @@ class GenericDirectoryMenu(GenericContextMenu):
         self._build_menu()
 
     def _get_context_menu_options(self, file_context: FileContext) -> None:
-        return file_context.context.get_actions(
-            self.app_controller, file_context.target
-        )
+        return file_context.context.get_actions(self.app_controller, file_context.target)
 
 
 class ParadoxNodesContextMenu(GenericContextMenu):
@@ -117,9 +115,7 @@ class ParadoxNodesContextMenu(GenericContextMenu):
                     ),
                     Action(
                         "Collapse All",
-                        lambda: self.parent.set_expansion_rule(
-                            ExpansionMode.DEPTH, depth_limit=1
-                        ),
+                        lambda: self.parent.set_expansion_rule(ExpansionMode.DEPTH, depth_limit=1),
                         True,
                     ),
                     Action(
@@ -134,9 +130,7 @@ class ParadoxNodesContextMenu(GenericContextMenu):
                     ),
                     Action(
                         "Copy",
-                        lambda: QApplication.clipboard().setText(
-                            node_context.selected_node.value
-                        ),
+                        lambda: QApplication.clipboard().setText(node_context.selected_node.value),
                         True,
                     ),
                 ],
@@ -157,16 +151,12 @@ class ParadoxNodesContextMenu(GenericContextMenu):
                         ),
                         (not isinstance(block_context.parent, PDXScriptFile)),
                     ),
-                    # *block_context.parent_context.get_actions(self.app_controller, 
+                    # *block_context.parent_context.get_actions(self.app_controller,
                     #                                           block_context.parent)
                 ],
             ),
             ActionGroup(
                 "Node Options",
-                [
-                    *node_context.node_context.get_actions(
-                        self.app_controller, node_context
-                    )
-                ],
+                [*node_context.node_context.get_actions(self.app_controller, node_context)],
             ),
         ]

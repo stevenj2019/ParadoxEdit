@@ -67,9 +67,7 @@ class MainWindow(QMainWindow):
         self.contents_panel = ContentsPanel(self.app_controller)
         self.contents_panel.setMinimumWidth(300)
         self.splitter.addWidget(self.contents_panel)
-        self.contents_panel.script_view.edit_open_request.connect(
-            self.editor_session.open_request
-        )
+        self.contents_panel.script_view.edit_open_request.connect(self.editor_session.open_request)
 
         self.splitter.setSizes([200, 600])
         self.showMaximized()

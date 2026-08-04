@@ -55,9 +55,7 @@ class Topbar(QToolBar):
                         True,
                     ),
                     Action("Load Workspace", self.request_load_workspace.emit, True),
-                    Action(
-                        "Save Workspace as File", self.request_workspace_save.emit, True
-                    ),
+                    Action("Save Workspace as File", self.request_workspace_save.emit, True),
                 ],
             ),
             Action("Settings", self.request_settings_window.emit, True),

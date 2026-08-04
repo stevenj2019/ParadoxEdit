@@ -144,8 +144,7 @@ class ScriptView(QWidget):
         item = QTreeWidgetItem([str(node.key), ""])
         self.node_to_item[node] = item
         effective_state = (
-            inherited_state
-            or self.app_controller.file_system.change_tracker.get_node_state(node)
+            inherited_state or self.app_controller.file_system.change_tracker.get_node_state(node)
         )
         context = open_file_context.get_block_context(node)
 
@@ -208,9 +207,7 @@ class ScriptView(QWidget):
         ):
             effective_state = inherited_state
         else:
-            effective_state = (
-                self.app_controller.file_system.change_tracker.get_node_state(node)
-            )
+            effective_state = self.app_controller.file_system.change_tracker.get_node_state(node)
 
         node_context = open_file_context.get_node_context(parent_node, node)
         block_context = open_file_context.get_block_context(parent_node)
@@ -237,17 +234,13 @@ class ScriptView(QWidget):
         parent_item.addChild(item)
 
     def _on_item_double_click(self, item: QTreeWidgetItem, column: int) -> None:
-        if not item.data(0, QtStorage.READ_ONLY) and item.data(
-            column, QtStorage.EDITABLE
-        ):
+        if not item.data(0, QtStorage.READ_ONLY) and item.data(column, QtStorage.EDITABLE):
             target = TargetProperty.KEY if column == 0 else TargetProperty.VALUE
             node = item.data(column, QtStorage.NODE)
-            self.edit_open_request.emit(
-                InLineEditRequest(self.tree, item, node, target)
-            )
+            self.edit_open_request.emit(InLineEditRequest(self.tree, item, node, target))
 
     def _request_context_menu(self, pos: QPoint) -> None:
-        #TODO should be passing through NullContext to these nodes on vanilla,
+        # TODO should be passing through NullContext to these nodes on vanilla,
         ##### we arent, and i am over it lol
         if self.read_only:
             return

@@ -151,7 +151,7 @@ class CheckableComboBox(QComboBox):
         elidedText = metrics.elidedText(text, Qt.ElideRight, self.lineEdit().width())
         self.lineEdit().setText(elidedText)
 
-    def addItem(self, text: str, data: Any = None) -> None: # noqa: ANN401
+    def addItem(self, text: str, data: Any = None) -> None:  # noqa: ANN401
         item = QStandardItem()
         item.setText(text)
         if data is None:
@@ -202,8 +202,6 @@ class SearchLineEdit(QLineEdit):
             x -= spacing
             button.raise_()
         button_space = (
-            len(self.buttons) * button_width
-            + max(0, len(self.buttons) - 1) * spacing
-            + margin
+            len(self.buttons) * button_width + max(0, len(self.buttons) - 1) * spacing + margin
         )
         self.setTextMargins(0, 0, button_space, 0)

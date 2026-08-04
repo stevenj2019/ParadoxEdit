@@ -36,9 +36,7 @@ class EventContext(ParadoxContext):
         return EventRootContext
 
     @staticmethod
-    def get_node_context(
-        parent_node: GenericBlock, node: GenericNode
-    ) -> type[ParadoxNodeContext]:
+    def get_node_context(parent_node: GenericBlock, node: GenericNode) -> type[ParadoxNodeContext]:
         if isinstance(node, GenericKeyValue):
             if node.key in ("name", "title", "desc", "text"):
                 return LocalisationFieldContext
@@ -49,9 +47,7 @@ class EventContext(ParadoxContext):
 
 class EventFileContext(ParadoxFileContext):
     @staticmethod
-    def get_actions(
-        app_controller: AppController, file: FileReference
-    ) -> ActionsResult:
+    def get_actions(app_controller: AppController, file: FileReference) -> ActionsResult:
         return [
             *ParadoxFileContext.get_actions(app_controller, file),
             # Action("Inject Event Logs", dummy, False),
@@ -60,62 +56,65 @@ class EventFileContext(ParadoxFileContext):
 
 class EventRootContext(ParadoxBlockContext):
     @staticmethod
-    def get_actions(
-        app_controller: AppController, block_context: BlockContext
-    ) -> ActionsResult:
+    def get_actions(app_controller: AppController, block_context: BlockContext) -> ActionsResult:
         return [
             *ParadoxNodeContext.get_actions(app_controller, block_context),
-            Action("Add Namespace",
-                   lambda:app_controller.request_block_mutation.emit(
-                       BlockMutationRequest.add(block_context.parent, 
-                                                block_context.parent_index, 
-                                                Events.add_namespace_keyval)
-                   ),
-                   False
+            Action(
+                "Add Namespace",
+                lambda: app_controller.request_block_mutation.emit(
+                    BlockMutationRequest.add(
+                        block_context.parent,
+                        block_context.parent_index,
+                        Events.add_namespace_keyval,
+                    )
+                ),
+                False,
             ),
-            Action("Add Country Event",
-                   lambda:app_controller.request_block_mutation.emit(
-                       BlockMutationRequest.add(block_context.parent, 
-                                                block_context.parent_index, 
-                                                Events.country_event_block)
-                   ),
-                   False
+            Action(
+                "Add Country Event",
+                lambda: app_controller.request_block_mutation.emit(
+                    BlockMutationRequest.add(
+                        block_context.parent, block_context.parent_index, Events.country_event_block
+                    )
+                ),
+                False,
             ),
-            Action("Add News Event",
-                   lambda:app_controller.request_block_mutation.emit(
-                       BlockMutationRequest.add(block_context.parent, 
-                                                block_context.parent_index, 
-                                                Events.news_event_block)
-                   ),
-                   False
-            )
+            Action(
+                "Add News Event",
+                lambda: app_controller.request_block_mutation.emit(
+                    BlockMutationRequest.add(
+                        block_context.parent, block_context.parent_index, Events.news_event_block
+                    )
+                ),
+                False,
+            ),
         ]
 
 
 class EventBlockContext:
     @staticmethod
-    def get_actions(
-        app_controller: AppController, block_context: BlockContext
-    ) -> ActionsResult:
+    def get_actions(app_controller: AppController, block_context: BlockContext) -> ActionsResult:
         from App.GUI.Forms.LocaliseKey import LocaliseEventForm
 
         return [
             *ParadoxNodeContext.get_actions(app_controller, block_context),
-            Action("Add Immediate Block",
-                   lambda:app_controller.request_block_mutation.emit(
-                       BlockMutationRequest.add(block_context.parent, 
-                                                block_context.parent_index, 
-                                                Events.immediate_block)
-                   ),
-                   False
+            Action(
+                "Add Immediate Block",
+                lambda: app_controller.request_block_mutation.emit(
+                    BlockMutationRequest.add(
+                        block_context.parent, block_context.parent_index, Events.immediate_block
+                    )
+                ),
+                False,
             ),
-            Action("Add Option Block",
-                   lambda:app_controller.request_block_mutation.emit(
-                       BlockMutationRequest.add(block_context.parent, 
-                                                block_context.parent_index, 
-                                                Events.option_block)
-                   ),
-                   False
+            Action(
+                "Add Option Block",
+                lambda: app_controller.request_block_mutation.emit(
+                    BlockMutationRequest.add(
+                        block_context.parent, block_context.parent_index, Events.option_block
+                    )
+                ),
+                False,
             ),
             Action(
                 "Localise Event",
@@ -127,9 +126,7 @@ class EventBlockContext:
 
 class EventOptionContext:
     @staticmethod
-    def get_actions(
-        app_controller: AppController, block_context: BlockContext
-    ) -> ActionsResult:
+    def get_actions(app_controller: AppController, block_context: BlockContext) -> ActionsResult:
         return [
             *ParadoxNodeContext.get_actions(app_controller, block_context),
             # *TriggerBlockActions.get_actions(context),

@@ -4,9 +4,7 @@ from PyQt5.QtCore import Qt
 
 
 class QtStorage(IntEnum):
-    def _generate_next_value_(
-        name: str, start: int, count: int, last_values: list[int]
-    ) -> int:
+    def _generate_next_value_(name: str, start: int, count: int, last_values: list[int]) -> int:
         return Qt.UserRole + count
 
     READ_ONLY = auto()
@@ -24,10 +22,12 @@ class QtStorage(IntEnum):
     EDITABLE = auto()
     TYPE = auto()
 
+
 class ExpansionMode(Enum):
     ALL = auto()
     DEPTH = auto()
     FROM_NODE = auto()
+
 
 class TreeItemType(Enum):
     DESCRIPTOR = 0

@@ -54,7 +54,7 @@ class LoadProcess(QObject):
     finished = pyqtSignal(object)
     failed = pyqtSignal(Exception, str)
 
-    def __init__(self, workspace: Workspace, registry:ParadoxRegistry, game_path: Path) -> None:
+    def __init__(self, workspace: Workspace, registry: ParadoxRegistry, game_path: Path) -> None:
         super().__init__()
         self.workspace = workspace
         self.registry = registry
@@ -81,9 +81,7 @@ class LoadProcess(QObject):
 
             self.progress_message.emit("Finishing Up")
             self.registry._build_registry_cache()
-            self.finished.emit(
-                ModLoaderResult(self.workspace, load_order)
-            )
+            self.finished.emit(ModLoaderResult(self.workspace, load_order))
         except Exception as e:
             self.failed.emit(e, traceback.format_exc())
 

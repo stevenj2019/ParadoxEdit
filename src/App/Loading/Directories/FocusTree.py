@@ -12,8 +12,10 @@ from App.Contexts.Focus import FocusTreeContext
 from App.Loading.Directories.Base import GenericDirectory
 from ParadoxParser import ParadoxScriptParser as PDXScriptFile
 
-FILE_TYPES = {"dir":{"context":FocusTreeContext, "model":PDXScriptFile}, 
-              ".txt":{"context":FocusTreeContext, "model":PDXScriptFile}}
+FILE_TYPES = {
+    "dir": {"context": FocusTreeContext, "class": PDXScriptFile},
+    ".txt": {"context": FocusTreeContext, "class": PDXScriptFile},
+}
 
 
 class FocusTreeDirectory(GenericDirectory):

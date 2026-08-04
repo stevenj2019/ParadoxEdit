@@ -68,9 +68,7 @@ class SearchForm(QDialog):
         self.advanced_control_container_layout = QFormLayout()
         self.advanced_control_container_layout.setContentsMargins(0, 0, 0, 0)
 
-        self.advanced_control_container.setLayout(
-            self.advanced_control_container_layout
-        )
+        self.advanced_control_container.setLayout(self.advanced_control_container_layout)
 
         self.source_selector_widget = CheckableComboBox()
         for source in self.load_order.sources:
@@ -105,9 +103,7 @@ class SearchForm(QDialog):
         self.toggle_advanced_search.setArrowType(
             Qt.DownArrow if self.advanced_control_container.isVisible() else Qt.UpArrow
         )
-        self.advanced_control_container.setVisible(
-            not self.advanced_control_container.isVisible()
-        )
+        self.advanced_control_container.setVisible(not self.advanced_control_container.isVisible())
         self.toggle_advanced_search.setToolTip(
             f"{'Hide' if self.advanced_control_container.isVisible() else 'Show'} advanced options"
         )
@@ -152,9 +148,7 @@ class SearchForm(QDialog):
                     result.results.append(node)
 
         self.search_results = list()
-        search_sources = (
-            selected_sources if selected_sources else self.load_order.sources
-        )
+        search_sources = selected_sources if selected_sources else self.load_order.sources
         for source in search_sources:
             for file in source.root.iter_files():
                 if isinstance(file.file, (PDXScriptFile, PDXLocFile)):

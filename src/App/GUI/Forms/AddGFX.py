@@ -63,18 +63,10 @@ class AddNewGFXForm(QDialog):
         self.storage_folder_path_element = QHBoxLayout()
         self.storage_folder_path_element_text = QLineEdit()
         self.storage_folder_path_element_button = QPushButton("...")
-        self.storage_folder_path_element.addWidget(
-            self.storage_folder_path_element_text
-        )
-        self.storage_folder_path_element.addWidget(
-            self.storage_folder_path_element_button
-        )
-        self.storage_folder_path_element_button.clicked.connect(
-            self._select_save_folder
-        )
-        self.form.addRow(
-            self.storage_folder_path_label, self.storage_folder_path_element
-        )
+        self.storage_folder_path_element.addWidget(self.storage_folder_path_element_text)
+        self.storage_folder_path_element.addWidget(self.storage_folder_path_element_button)
+        self.storage_folder_path_element_button.clicked.connect(self._select_save_folder)
+        self.form.addRow(self.storage_folder_path_label, self.storage_folder_path_element)
 
         self.is_focus_type_label = QLabel("Focus Icon?")
         self.is_focus_type_check = QCheckBox()
@@ -110,16 +102,10 @@ class AddNewGFXForm(QDialog):
                     sprites.append(Path(path))
             return sprites
 
-        def generate_icon_files(
-            save_to: Path, sprites: list[Path]
-        ) -> list[FileReference]:
+        def generate_icon_files(save_to: Path, sprites: list[Path]) -> list[FileReference]:
             icons = list()
             for sprite in sprites:
-                new_name = (
-                    sprite.name
-                    if sprite.name.startswith("GFX_")
-                    else f"GFX_{sprite.name}"
-                )
+                new_name = sprite.name if sprite.name.startswith("GFX_") else f"GFX_{sprite.name}"
                 new_path = Path(os.path.join(save_to, new_name))
                 directory = new_path.relative_to(self.source.file_path).parent
                 directory = self.source.directories[directory]
@@ -149,9 +135,7 @@ class AddNewGFXForm(QDialog):
             sprite_block = next(
                 node
                 for node in self.save_file.file.nodes
-                if (
-                    isinstance(node, GenericBlock) and node.key.lower() == "spritetypes"
-                )
+                if (isinstance(node, GenericBlock) and node.key.lower() == "spritetypes")
             )
         except StopIteration:
             # TODO: warning

@@ -54,25 +54,30 @@ class ModPanel(QWidget):
         self.tree.setContextMenuPolicy(Qt.CustomContextMenu)
         self.tree.customContextMenuRequested.connect(self._request_context_menu)
 
-
     def populate_tree(self, load_order: ParadoxLoadOrder) -> None:
         self.tree.clear()
         for source in load_order.sources:
             self._load_source_tree(source)
 
     def _load_source_tree(self, source: ParadoxSource) -> None:
-        root = DirectoryTreeItem(name=source.source_name or "Unnamed Mod",
-                                 item=source,
-                                 item_type=TreeItemType.SOURCE,
-                                 icon=None)
+        root = DirectoryTreeItem(
+            name=source.source_name or "Unnamed Mod",
+            item=source,
+            item_type=TreeItemType.SOURCE,
+            icon=None,
+        )
         self.node_to_item[source] = root
         self.tree.addTopLevelItem(root)
 
         if isinstance(source, ParadoxMod):
-            item = DirectoryTreeItem(name = "Descriptor",
-                                     item=source.descriptor_object,
-                                     item_type=TreeItemType.DESCRIPTOR,
-                                     icon=self.app_controller.style_manager.get_icon(type(source.descriptor_object.file)))
+            item = DirectoryTreeItem(
+                name="Descriptor",
+                item=source.descriptor_object,
+                item_type=TreeItemType.DESCRIPTOR,
+                icon=self.app_controller.style_manager.get_icon(
+                    type(source.descriptor_object.file)
+                ),
+            )
             self.node_to_item[source.descriptor_object] = item
             root.addChild(item)
 
@@ -80,14 +85,16 @@ class ModPanel(QWidget):
             self._build_directory_item(root, entry, isinstance(source, ParadoxVanilla))
 
         # root.sortChildren(0, Qt.AscendingOrder)
-        
+
     def _build_directory_item(
         self, parent_item: QTreeWidgetItem, directory: GenericDirectory, read_only: bool
     ) -> None:
-        item = DirectoryTreeItem(name=directory.path.name,
-                                 item=directory, 
-                                 item_type=TreeItemType.DIRECTORY, 
-                                 icon=self.app_controller.style_manager.get_icon(GenericDirectory))
+        item = DirectoryTreeItem(
+            name=directory.path.name,
+            item=directory,
+            item_type=TreeItemType.DIRECTORY,
+            icon=self.app_controller.style_manager.get_icon(GenericDirectory),
+        )
         self.node_to_item[directory] = item
         parent_item.addChild(item)
 
@@ -102,10 +109,12 @@ class ModPanel(QWidget):
     def _build_file_item(
         self, parent_item: QTreeWidgetItem, file: FileReference, read_only: bool
     ) -> None:
-        item = DirectoryTreeItem(name=file.file.filename,
-                                 item=file, 
-                                 item_type=TreeItemType.FILE, 
-                                 icon=self.app_controller.style_manager.get_icon(type(file.file)))
+        item = DirectoryTreeItem(
+            name=file.file.filename,
+            item=file,
+            item_type=TreeItemType.FILE,
+            icon=self.app_controller.style_manager.get_icon(type(file.file)),
+        )
         self.node_to_item[file] = item
         parent_item.addChild(item)
 
@@ -115,20 +124,22 @@ class ModPanel(QWidget):
         self._propagate_state(file_item.parent())
         self.tree.update()
 
-    def add_folder(self, directory:GenericDirectory) -> None:
+    def add_folder(self, directory: GenericDirectory) -> None:
         print("ADDING FOLDER", directory.path)
         if directory in self.node_to_item.keys():
-            return 
+            return
         parent = directory.parent if directory.parent else directory.source
-    
+
         if parent not in self.node_to_item:
             print("ADDING PARENT", parent.path)
             self.add_folder(parent)
         parent_item = self.node_to_item[parent]
-        item = DirectoryTreeItem(name=directory.path.name,
-                                 item=directory,
-                                 item_type=TreeItemType.DIRECTORY,
-                                 icon=self.app_controller.style_manager.get_icon(GenericDirectory))
+        item = DirectoryTreeItem(
+            name=directory.path.name,
+            item=directory,
+            item_type=TreeItemType.DIRECTORY,
+            icon=self.app_controller.style_manager.get_icon(GenericDirectory),
+        )
         self.node_to_item[directory] = item
         parent_item.addChild(item)
         parent_item.sortChildren(0, Qt.AscendingOrder)
@@ -139,8 +150,8 @@ class ModPanel(QWidget):
         item = self.node_to_item[directory]
         self._build_file_item(item, file, file.read_only)
         item.sortChildren(0, Qt.AscendingOrder)
-        
-    def remove_file(self, obj:GenericDirectory|FileReference)-> None:
+
+    def remove_file(self, obj: GenericDirectory | FileReference) -> None:
         if isinstance(obj, GenericDirectory):
             obj_parent = obj.parent if obj.parent else obj.source
             # parent = self.node_to_item[obj.parent if obj.parent else obj.source]

@@ -14,11 +14,13 @@ from App.Loading.ParadoxSource import ParadoxSource
 
 
 class DirectoryTreeItem(QTreeWidgetItem):
-    def __init__(self,
-                 name:str,
-                 item:ParadoxSource|GenericDirectory|FileReference, 
-                 item_type:TreeItemType,
-                 icon:QIcon=None) -> None:
+    def __init__(
+        self,
+        name: str,
+        item: ParadoxSource | GenericDirectory | FileReference,
+        item_type: TreeItemType,
+        icon: QIcon = None,
+    ) -> None:
         super().__init__()
         self.setText(0, name)
         self.setData(0, QtStorage.NODE, item)
@@ -28,7 +30,7 @@ class DirectoryTreeItem(QTreeWidgetItem):
         if item.read_only:
             self.setForeground(0, QBrush(Qt.gray))
 
-    def __lt__(self, other:QTreeWidgetItem) -> bool:
+    def __lt__(self, other: QTreeWidgetItem) -> bool:
         self_type = self.data(0, QtStorage.TYPE)
         other_type = other.data(0, QtStorage.TYPE)
 
@@ -38,7 +40,8 @@ class DirectoryTreeItem(QTreeWidgetItem):
             else self.text(0).casefold() < other.text(0).casefold()
         )
 
-#re-use this for scriptview tree
+
+# re-use this for scriptview tree
 # class FileTreeItem(CustomTreeItem):
 #     def __init__(self, file:FileReference, icon:QIcon) -> None:
 #         super().__init__()

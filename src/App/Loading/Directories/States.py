@@ -15,17 +15,17 @@ from App.Loading.Models import FileReference
 from ParadoxParser import ParadoxScriptParser as PDXScriptFile
 from ParadoxParser.ParadoxNodes import GenericBlock
 
-FILE_TYPES = {"dir":{"context":ParadoxContext, "model":PDXScriptFile},
-              ".txt":{"context":ParadoxContext, "model":PDXScriptFile}}
+FILE_TYPES = {
+    "dir": {"context": ParadoxContext, "class": PDXScriptFile},
+    ".txt": {"context": ParadoxContext, "class": PDXScriptFile},
+}
 
 
 class StatesDirectory(GenericDirectory):
     def __init__(self, source: ParadoxSource, file_path: Path, read_only: bool) -> None:
         super().__init__(source, file_path, FILE_TYPES, read_only)
 
-    def token_collection(
-        self, source: ParadoxSource, file: FileReference
-    ) -> dict[PDXTokens, set]:
+    def token_collection(self, source: ParadoxSource, file: FileReference) -> dict[PDXTokens, set]:
         tokens = set()
         file = file.file
         for block in file.nodes:

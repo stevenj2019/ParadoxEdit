@@ -90,9 +90,7 @@ class AppController(QObject):
 
     def run(self) -> None:
         self.app.setStyleSheet(
-            qdarktheme.load_stylesheet(
-                "dark" if self.configuration.dark_mode else "light"
-            )
+            qdarktheme.load_stylesheet("dark" if self.configuration.dark_mode else "light")
         )
         self.request_node_mutation.connect(self._request_node_mutation)
         self.request_block_mutation.connect(self._request_block_mutation)
@@ -133,18 +131,10 @@ class AppController(QObject):
 
         self.loading_process.moveToThread(self.thread)
         self.thread.started.connect(self.loading_process.run)
-        self.loading_process.progress_message.connect(
-            self.loading_screen.update_message
-        )
-        self.loading_process.progress_bar_start.connect(
-            self.loading_screen.start_progress_bar
-        )
-        self.loading_process.progress_bar_update.connect(
-            self.loading_screen.update_progress_bar
-        )
-        self.loading_process.progress_bar_end.connect(
-            self.loading_screen.end_progress_bar
-        )
+        self.loading_process.progress_message.connect(self.loading_screen.update_message)
+        self.loading_process.progress_bar_start.connect(self.loading_screen.start_progress_bar)
+        self.loading_process.progress_bar_update.connect(self.loading_screen.update_progress_bar)
+        self.loading_process.progress_bar_end.connect(self.loading_screen.end_progress_bar)
         self.loading_process.finished.connect(self.workspace_loaded)
         self.loading_process.failed.connect(self.workspace_load_failed)
         self.loading_screen.show()
@@ -174,7 +164,7 @@ class AppController(QObject):
         self._batch_file.clear()
 
     @contextmanager
-    def batch_manager(self)-> Generator[None, None, None]:
+    def batch_manager(self) -> Generator[None, None, None]:
         self._batch_depth += 1
         try:
             yield
@@ -227,9 +217,7 @@ class AppController(QObject):
             node = parent.nodes[index]
         self.file_system.changed_file(file, node, state)
         self.main.request_propagation.emit(
-            PropagationRequest(
-                type=PropagationType.NODE, file=file, node=node, state=state
-            )
+            PropagationRequest(type=PropagationType.NODE, file=file, node=node, state=state)
         )
         self._batch_file.add(file)
         if self._batch_depth == 0:
@@ -266,13 +254,13 @@ class AppController(QObject):
         self.main.mod_panel.add_file(request.directory, request.file)
         self.main.mod_panel.set_file_state(request.file, request.state)
 
-    def _request_file_unload(self, file:FileReference) -> None:
-        #if tree loaded, clear
+    def _request_file_unload(self, file: FileReference) -> None:
+        # if tree loaded, clear
         if self.file_system.open_file is file:
             self.main.contents_panel.script_view.unload_block()
-        #remove item from file tree
+        # remove item from file tree
         self.main.mod_panel.remove_file(file)
-        #delete reference in source tree
+        # delete reference in source tree
         file.directory.delete_file(file)
         self.file_system.change_tracker.clear_file_state(file)
         self.registry.purge_file_data(file)
@@ -285,9 +273,7 @@ class AppController(QObject):
             saved = self.file_system.save_file(file)
             if saved:
                 self.main.request_propagation.emit(
-                    PropagationRequest(
-                        type=PropagationType.FILE, file=file, node=None, state=None
-                    )
+                    PropagationRequest(type=PropagationType.FILE, file=file, node=None, state=None)
                 )
 
         if target is SaveTarget.ALL:

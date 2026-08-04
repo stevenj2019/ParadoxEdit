@@ -77,17 +77,13 @@ class InLineEditManager(QObject):
         self._create()
 
     def complete_request(self, new_value: str) -> None:
-        self.mutate_callback.emit(
-            NodeMutationRequest(None, self.node, self.target, new_value)
-        )
+        self.mutate_callback.emit(NodeMutationRequest(None, self.node, self.target, new_value))
         self._destroy(new_value)
         self._clear()
 
     def cancel_request(self, reason: str) -> None:
         if self.active:
-            value = (
-                self.node.key if self.target is TargetProperty.KEY else self.node.value
-            )
+            value = self.node.key if self.target is TargetProperty.KEY else self.node.value
             AppLogger.info(f"{self.editor} cancelled due to {reason}, value: {value}")
             self._destroy(value)
         self._clear()
@@ -101,9 +97,7 @@ class InLineEditManager(QObject):
         except Exception as e:
             AppLogger.exception(e)
             return None
-        value = (
-            self.node.value if self.target is TargetProperty.VALUE else self.node.key
-        )
+        value = self.node.value if self.target is TargetProperty.VALUE else self.node.key
         return editor_fn(self, self.node, emit, value)
 
     def _create(self) -> None:
@@ -125,9 +119,7 @@ class InLineEditManager(QObject):
         self.editor = None
 
 
-def text_editor(
-    editor: QObject, node: GenericNode, emit: Callable, value: str
-) -> QLineEdit:
+def text_editor(editor: QObject, node: GenericNode, emit: Callable, value: str) -> QLineEdit:
     widget = QLineEdit(str(value))
     width = QFontMetrics(widget.font()).horizontalAdvance(widget.text()) + 20
     widget.setFixedWidth(max(60, min(width, 500)))
@@ -139,9 +131,7 @@ def text_editor(
     return widget
 
 
-def bool_dropdown(
-    editor: QObject, node: GenericNode, emit: Callable, value: str
-) -> QComboBox:
+def bool_dropdown(editor: QObject, node: GenericNode, emit: Callable, value: str) -> QComboBox:
     widget = QComboBox()
     widget.addItems(["yes", "no"])
     widget.setCurrentIndex(0 if value else 1)
@@ -154,9 +144,7 @@ def bool_dropdown(
     return widget
 
 
-def int_editor(
-    editor: QObject, node: GenericNode, emit: Callable, value: str
-) -> QLineEdit:
+def int_editor(editor: QObject, node: GenericNode, emit: Callable, value: str) -> QLineEdit:
     widget = QLineEdit(str(value))
     width = QFontMetrics(widget.font()).horizontalAdvance(widget.text()) + 20
     widget.setFixedWidth(max(60, min(width, 500)))
@@ -176,9 +164,7 @@ def int_editor(
     return widget
 
 
-def float_editor(
-    editor: QObject, node: GenericNode, emit: Callable, value: str
-) -> QLineEdit:
+def float_editor(editor: QObject, node: GenericNode, emit: Callable, value: str) -> QLineEdit:
     widget = QLineEdit(str(value))
     width = QFontMetrics(widget.font()).horizontalAdvance(widget.text()) + 20
     widget.setFixedWidth(max(60, min(width, 500)))

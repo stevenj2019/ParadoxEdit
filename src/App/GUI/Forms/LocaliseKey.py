@@ -32,8 +32,10 @@ from ParadoxParser.ParadoxNodes import (
 )
 
 UNSORTED_COMMENT = "#### unsorted keys ####"
+
+
 class BaseLocaliseForm(QDialog):
-    def __init__(self, app_controller:AppController, node:GenericNode, name:str) -> None:
+    def __init__(self, app_controller: AppController, node: GenericNode, name: str) -> None:
         super().__init__()
         self.setWindowTitle(name)
         self.app_controller = app_controller
@@ -48,7 +50,7 @@ class BaseLocaliseForm(QDialog):
         self.setLayout(QFormLayout())
         self.form = self.layout()
 
-    def _loc_key_widget(self, node:GenericLocKey|GenericLegacyLocKey, exists:bool) -> QTextEdit:
+    def _loc_key_widget(self, node: GenericLocKey | GenericLegacyLocKey, exists: bool) -> QTextEdit:
         label = QLabel(node.key)
         text_edit = QTextEdit()
         text_edit.setProperty("node", node)
@@ -67,7 +69,7 @@ class BaseLocaliseForm(QDialog):
         self.file_dropdown.setMaxVisibleItems(10)
         self.file_dropdown.setSizeAdjustPolicy(QComboBox.AdjustToContents)
         self.file_dropdown.view().setVerticalScrollBarPolicy(Qt.ScrollBarAsNeeded)
-        #A really silly hack, to force the popup to obey the above
+        # A really silly hack, to force the popup to obey the above
         self.file_dropdown.setStyleSheet("QComboBox {combobox-popup: 0;}")
 
         for index, _file in enumerate(self.localisation_directory.files.values()):
@@ -86,10 +88,10 @@ class BaseLocaliseForm(QDialog):
         self.form.addRow(self.submit_button)
         self.submit_button.clicked.connect(self._submit)
 
-    def _change_save_file(self, index:int) -> None:
+    def _change_save_file(self, index: int) -> None:
         self.save_file = self.file_dropdown.currentData()
 
-    def _get_localisation_node(self, key:str) -> tuple[GenericLocKey|GenericLegacyLocKey, bool]:
+    def _get_localisation_node(self, key: str) -> tuple[GenericLocKey | GenericLegacyLocKey, bool]:
         if key in self.localisation_meta.keys():
             loc_node = self.localisation_meta[key]["l_english"]["node"]
             file = self.localisation_meta[key]["l_english"]["file"]
@@ -106,7 +108,7 @@ class BaseLocaliseForm(QDialog):
             exists = False
         return loc_node, exists
 
-    def _handle_localisation_field(self, text_edit:QTextEdit) -> None:
+    def _handle_localisation_field(self, text_edit: QTextEdit) -> None:
         text = self._decode_pdx_string(text_edit.toPlainText())
         if text != text_edit.toPlainText():
             text_edit.blockSignals(True)
@@ -115,41 +117,36 @@ class BaseLocaliseForm(QDialog):
 
         self._resize_localisation_field(text_edit)
 
-    def _resize_localisation_field(self, text_edit:QTextEdit) -> None:
+    def _resize_localisation_field(self, text_edit: QTextEdit) -> None:
         doc_height = text_edit.document().size().height()
-        new_height = max(30, int(doc_height+1))
+        new_height = max(30, int(doc_height + 1))
         new_height = min(new_height, 250)
 
         text_edit.setFixedHeight(new_height)
 
         self.adjustSize()
 
-    def showEvent(self, event:QShowEvent) -> None:
+    def showEvent(self, event: QShowEvent) -> None:
         super().showEvent(event)
 
         for field in self.localisation_fields:
             self._resize_localisation_field(field)
 
-    def _decode_pdx_string(self, value:str) -> str:
-        return (
-            value
-            .replace('\\n', '\n')
-            .replace('\\"', '"')
-            .replace('\\\\', '\\')
-        )
+    def _decode_pdx_string(self, value: str) -> str:
+        return value.replace("\\n", "\n").replace('\\"', '"').replace("\\\\", "\\")
 
-    def _encode_pdx_string(self, value:str) -> str:
-        return (
-            value
-            .replace("\\", "\\\\")
-            .replace('"', '\\"')
-            .replace("\n", "\\n")
-        )
+    def _encode_pdx_string(self, value: str) -> str:
+        return value.replace("\\", "\\\\").replace('"', '\\"').replace("\n", "\\n")
 
     def _save_file_unsorted_comment(self) -> tuple[GenericComment, bool]:
-        unsorted_comment = next((node for node in self.save_file 
-                                 if isinstance(node, GenericComment) 
-                                 and node.value == UNSORTED_COMMENT), None)
+        unsorted_comment = next(
+            (
+                node
+                for node in self.save_file
+                if isinstance(node, GenericComment) and node.value == UNSORTED_COMMENT
+            ),
+            None,
+        )
         if unsorted_comment:
             return unsorted_comment, True
         return GenericComment(UNSORTED_COMMENT), False
@@ -175,7 +172,7 @@ class BaseLocaliseForm(QDialog):
                         file=self.save_file,
                         node=node,
                         target=TargetProperty.VALUE,
-                        value=self._encode_pdx_string(localisation.toPlainText())
+                        value=self._encode_pdx_string(localisation.toPlainText()),
                     )
                 )
             else:
@@ -188,8 +185,8 @@ class BaseLocaliseForm(QDialog):
                     BlockMutationRequest.add(
                         file=self.save_file,
                         parent=self.save_file,
-                        index=len(self.save_file.nodes)+1,
-                        payload=comment
+                        index=len(self.save_file.nodes) + 1,
+                        payload=comment,
                     )
                 )
             for localisation in missing_generated:
@@ -197,13 +194,14 @@ class BaseLocaliseForm(QDialog):
                     BlockMutationRequest.add(
                         file=self.save_file,
                         parent=self.save_file,
-                        index=len(self.save_file.nodes)+1,
-                        payload=localisation.property("node")
+                        index=len(self.save_file.nodes) + 1,
+                        payload=localisation.property("node"),
                     )
                 )
 
+
 class LocaliseNodeForm(BaseLocaliseForm):
-    def __init__(self, app_controller:AppController, node:GenericKeyValue) -> None:
+    def __init__(self, app_controller: AppController, node: GenericKeyValue) -> None:
         super().__init__(app_controller, node, "Localise Key")
         loc_node, exists = self._get_localisation_node(node.value.value)
         self.localisation_fields.append(self._loc_key_widget(loc_node, exists))
@@ -212,9 +210,10 @@ class LocaliseNodeForm(BaseLocaliseForm):
             self._lock_form()
         self.exec_()
 
-#TODO doesnt get option names right now
+
+# TODO doesnt get option names right now
 class LocaliseEventForm(BaseLocaliseForm):
-    def __init__(self, app_controller:AppController, node:GenericBlock) -> None:
+    def __init__(self, app_controller: AppController, node: GenericBlock) -> None:
         super().__init__(app_controller, node, "Localise Event")
         localisation_nodes = [
             *self._get_localisation_nodes("title", "text"),
@@ -233,32 +232,40 @@ class LocaliseEventForm(BaseLocaliseForm):
             self._lock_form()
         self.exec_()
 
-    def _get_localisation_nodes(self, node_key:str, loc_key:str) -> list[GenericKeyValue]:
+    def _get_localisation_nodes(self, node_key: str, loc_key: str) -> list[GenericKeyValue]:
         loc_nodes = list()
-        loc_entries = [node for node in self.node.nodes 
-                       if isinstance(node, GenericKeyValue) and node.key == node_key]
+        loc_entries = [
+            node
+            for node in self.node.nodes
+            if isinstance(node, GenericKeyValue) and node.key == node_key
+        ]
         for entry in loc_entries:
             if isinstance(entry, GenericBlock):
                 text_node = next(
-                    (node for node in entry.nodes 
-                     if isinstance(node, GenericKeyValue) 
-                     and node.key == loc_key), 
-                     None)
+                    (
+                        node
+                        for node in entry.nodes
+                        if isinstance(node, GenericKeyValue) and node.key == loc_key
+                    ),
+                    None,
+                )
                 if text_node:
                     loc_nodes.append(text_node)
             else:
                 loc_nodes.append(entry)
         return loc_nodes
 
+
 class LocaliseFocusForm(BaseLocaliseForm):
-    def __init__(self, app_controller:AppController, node:GenericBlock) -> None:
+    def __init__(self, app_controller: AppController, node: GenericBlock) -> None:
         super().__init__(app_controller, node, "Localise National Focus")
         self.localisation_fields = list()
-        focus_id_node = next((node for node in node.nodes
-                              if isinstance(node, GenericKeyValue)
-                              and node.key == "id"), None)
+        focus_id_node = next(
+            (node for node in node.nodes if isinstance(node, GenericKeyValue) and node.key == "id"),
+            None,
+        )
         if not focus_id_node:
-            return #error
+            return  # error
         id_key = focus_id_node.value.value
         id_loc_node, id_exists = self._get_localisation_node(id_key)
         id_text_edit = self._loc_key_widget(id_loc_node, id_exists)

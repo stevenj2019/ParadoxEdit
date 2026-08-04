@@ -30,17 +30,13 @@ class ParadoxContext:
         return ParadoxBlockContext
 
     @staticmethod
-    def get_node_context(
-        parent_node: GenericBlock, node: GenericNode
-    ) -> type[ParadoxNodeContext]:
+    def get_node_context(parent_node: GenericBlock, node: GenericNode) -> type[ParadoxNodeContext]:
         return ParadoxNodeContext
 
 
 class ParadoxFileContext:
     @staticmethod
-    def get_actions(
-        app_controller: AppController, file: FileReference
-    ) -> ActionsResult:
+    def get_actions(app_controller: AppController, file: FileReference) -> ActionsResult:
         return [
             Action(
                 "Remove Comments",
@@ -61,9 +57,7 @@ class ParadoxFileContext:
 
 class ParadoxBlockContext:
     @staticmethod
-    def get_actions(
-        app_controller: AppController, block_context: BlockContext
-    ) -> ActionsResult:
+    def get_actions(app_controller: AppController, block_context: BlockContext) -> ActionsResult:
         return
 
     def errors(app_controller: AppController, node_context: NodeContext) -> str:
@@ -72,9 +66,7 @@ class ParadoxBlockContext:
 
 class ParadoxNodeContext:
     @staticmethod
-    def get_actions(
-        app_controller: AppController, block_context: BlockContext
-    ) -> ActionsResult:
+    def get_actions(app_controller: AppController, block_context: BlockContext) -> ActionsResult:
         return [
             #     Action(
             #         "Add Comment",
@@ -101,42 +93,33 @@ class ReadOnlyContext(ParadoxContext):
         return NullContext
 
     @staticmethod
-    def get_node_context(
-        parent_node: GenericBlock, node: GenericNode
-    ) -> type[NullContext]:
+    def get_node_context(parent_node: GenericBlock, node: GenericNode) -> type[NullContext]:
         return NullContext
 
 
 class VanillaFileContext(ParadoxFileContext):
     @staticmethod
-    def get_actions(
-        app_controller: AppController, file: FileReference
-    ) -> ActionsResult:
+    def get_actions(app_controller: AppController, file: FileReference) -> ActionsResult:
         from App.GUI.Forms.CopyFile import CopyFileForm
-        return [
-            Action("Copy File to source...",
-                   lambda:CopyFileForm(app_controller, file),
-                   True)
-        ]
+
+        return [Action("Copy File to source...", lambda: CopyFileForm(app_controller, file), True)]
 
     def errors(app_controller: AppController, node_context: NodeContext) -> str:
         return
 
+
 class NullContext:
     @staticmethod
-    def get_actions(
-        app_controller: AppController, block_context: BlockContext
-    ) -> ActionsResult:
+    def get_actions(app_controller: AppController, block_context: BlockContext) -> ActionsResult:
         return [Action("No Actions Available", dummy, False)]
-    
-    def errors(app_controller: AppController, node: GenericNode) -> str|None:
+
+    def errors(app_controller: AppController, node: GenericNode) -> str | None:
         return None
-    
+
+
 class LocalisationFieldContext:
     @staticmethod
-    def get_actions(
-        app_controller: AppController, node_context: NodeContext
-    ) -> ActionsResult:
+    def get_actions(app_controller: AppController, node_context: NodeContext) -> ActionsResult:
         from App.GUI.Forms.LocaliseKey import LocaliseNodeForm
 
         return [
@@ -148,18 +131,13 @@ class LocalisationFieldContext:
         ]
 
     def errors(app_controller: AppController, node: GenericNode) -> str:
-        if (
-            node.value
-            not in app_controller.registry.get_metadata(PDXMetadata.LocKey).keys()
-        ):
+        if node.value not in app_controller.registry.get_metadata(PDXMetadata.LocKey).keys():
             return "Localisation does not exist"
 
 
 class GFXFieldContext:
     @staticmethod
-    def get_actions(
-        app_controller: AppController, node_context: NodeContext
-    ) -> ActionsResult:
+    def get_actions(app_controller: AppController, node_context: NodeContext) -> ActionsResult:
         return [
             Action(
                 "Preview Icon",
@@ -171,10 +149,7 @@ class GFXFieldContext:
         ]
 
     def errors(app_controller: AppController, node: GenericNode) -> str:
-        if (
-            node.value
-            not in app_controller.registry.get_metadata(PDXMetadata.GFXIcon).keys()
-        ):
+        if node.value not in app_controller.registry.get_metadata(PDXMetadata.GFXIcon).keys():
             return "Icon does not exist"
         else:
             return

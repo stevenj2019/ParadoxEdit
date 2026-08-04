@@ -28,17 +28,13 @@ class LocalisationContext(ParadoxContext):
         return ParadoxNodeContext
 
     @staticmethod
-    def get_node_context(
-        parent_node: GenericBlock, node: GenericNode
-    ) -> type[ParadoxNodeContext]:
+    def get_node_context(parent_node: GenericBlock, node: GenericNode) -> type[ParadoxNodeContext]:
         return ParadoxNodeContext
 
 
 class LocalisationFileContext(ParadoxFileContext):
     @staticmethod
-    def get_actions(
-        app_controller: AppController, file: FileReference
-    ) -> ActionsResult:
+    def get_actions(app_controller: AppController, file: FileReference) -> ActionsResult:
         return [
             *ParadoxFileContext.get_actions(app_controller, file),
             Action(

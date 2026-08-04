@@ -7,9 +7,7 @@ from App.AppData import APPNAME
 from App.AppLogger import AppLogger
 
 
-def could_not_load_mod_critical(
-    parent: QWidget, exc: Exception, traceback: str
-) -> None:
+def could_not_load_mod_critical(parent: QWidget, exc: Exception, traceback: str) -> None:
     msg = QMessageBox(parent)
     msg.setIcon(QMessageBox.Critical)
     msg.setWindowTitle("Mod Could not be loaded")
@@ -19,22 +17,24 @@ def could_not_load_mod_critical(
     msg.exec_()
     AppLogger.exception(traceback)
 
-def unhandled_exception_popup(
-    parent: QWidget, exc:Exception, traceback:str
-) -> None:
+
+def unhandled_exception_popup(parent: QWidget, exc: Exception, traceback: str) -> None:
     user_log_dir(APPNAME)
     msg = QMessageBox(parent)
     msg.setIcon(QMessageBox.Critical)
     msg.setWindowTitle("Unhandlec Exception")
-    msg.setText(dedent(
-    f"""ParadoxEdit has encountered an unhandled exception, 
+    msg.setText(
+        dedent(
+            f"""ParadoxEdit has encountered an unhandled exception, 
     you may continue, but it is reccomended to restart\n
     you can report this issue on the github.
-    log located at {user_log_dir(APPNAME)}"""))
+    log located at {user_log_dir(APPNAME)}"""
+        )
+    )
 
     msg.setDetailedText(traceback)
     msg.exec_()
-    
+
 
 def setup_process_cancelled(parent: QWidget) -> None:
     QMessageBox.critical(
@@ -42,9 +42,7 @@ def setup_process_cancelled(parent: QWidget) -> None:
     )
 
 
-def settings_error_critical(
-    parent: QWidget, game_dir_error: bool, mod_dir_error: bool
-) -> None:
+def settings_error_critical(parent: QWidget, game_dir_error: bool, mod_dir_error: bool) -> None:
     text = "The following Problems prevent saving:"
     if game_dir_error:
         text += "\nGame install directory could not find pdx_launcher, is invalid"
@@ -54,9 +52,7 @@ def settings_error_critical(
 
 
 def form_missing_value(parent: QWidget) -> None:
-    QMessageBox.warning(
-        parent, "Missing Value", "Form is missing essential values", QMessageBox.Ok
-    )
+    QMessageBox.warning(parent, "Missing Value", "Form is missing essential values", QMessageBox.Ok)
 
 
 # TODO: this should be used to make sure that GFX process doesnt copy into self
@@ -89,20 +85,19 @@ def no_icon_available_warning(parent: QWidget, message: str) -> None:
 
 
 def file_is_unsupported(parent: QWidget) -> None:
-    QMessageBox.warning(
-        parent, "Warning", "This File is currently unsupported", QMessageBox.Ok
-    )
+    QMessageBox.warning(parent, "Warning", "This File is currently unsupported", QMessageBox.Ok)
 
-def form_is_read_only(parent:QWidget) -> None:
+
+def form_is_read_only(parent: QWidget) -> None:
     QMessageBox.warning(
-        parent, "Warning", 
+        parent,
+        "Warning",
         "This form is in read-only mode, localisation file belongs to a different source",
-        QMessageBox.Ok
+        QMessageBox.Ok,
     )
 
-def split_loc_file(parent:QWidget) -> None:
+
+def split_loc_file(parent: QWidget) -> None:
     QMessageBox.warning(
-        parent, "Error",
-        "localisation keys split across multiple files, exiting.",
-        QMessageBox.Ok
+        parent, "Error", "localisation keys split across multiple files, exiting.", QMessageBox.Ok
     )

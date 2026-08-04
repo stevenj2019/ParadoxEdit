@@ -16,9 +16,11 @@ from App.Loading.Directories.Base import GenericDirectory
 from ParadoxParser import ParadoxScriptParser as PDXScriptFile
 from ParadoxParser.ParadoxNodes import GenericBlock, GenericKeyValue
 
-FILE_TYPES = {"dir":{"context":ParadoxContext, "model":PDXScriptFile},
-              ".gfx":{"context":GFXContext, "model": PDXScriptFile}, 
-              ".gui":{"context":ParadoxContext, "model":PDXScriptFile}}
+FILE_TYPES = {
+    "dir": {"context": ParadoxContext, "class": PDXScriptFile},
+    ".gfx": {"context": GFXContext, "class": PDXScriptFile},
+    ".gui": {"context": ParadoxContext, "class": PDXScriptFile},
+}
 
 
 class InterfaceDirectory(GenericDirectory):
@@ -34,10 +36,7 @@ class InterfaceDirectory(GenericDirectory):
                 file = file.file
                 if isinstance(file, PDXScriptFile):
                     for node in file.nodes:
-                        if (
-                            isinstance(node, GenericBlock)
-                            and node.key.lower() == "spritetypes"
-                        ):
+                        if isinstance(node, GenericBlock) and node.key.lower() == "spritetypes":
                             for node in node.nodes:
                                 if (
                                     isinstance(node, GenericBlock)

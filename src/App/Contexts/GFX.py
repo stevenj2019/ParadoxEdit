@@ -34,38 +34,28 @@ class GFXContext(ParadoxContext):
         return GFXRootContext
 
     @staticmethod
-    def get_node_context(
-        parent_node: GenericBlock, node: GenericNode
-    ) -> type[ParadoxNodeContext]:
+    def get_node_context(parent_node: GenericBlock, node: GenericNode) -> type[ParadoxNodeContext]:
         return ParadoxNodeContext
 
 
 class GFXFileContext(ParadoxFileContext):
     @staticmethod
-    def get_actions(
-        app_controller: AppController, file: FileReference
-    ) -> ActionsResult:
+    def get_actions(app_controller: AppController, file: FileReference) -> ActionsResult:
         # from App.GUI.Forms.AddGFX import AddNewGFXForm
         return [
             *ParadoxFileContext.get_actions(app_controller, file),
-            Action("Bulk-Upload Sprites",
-                   lambda:AddNewGFXForm(app_controller, file),
-                   True)
+            Action("Bulk-Upload Sprites", lambda: AddNewGFXForm(app_controller, file), True),
         ]
 
 
 class GFXRootContext(ParadoxBlockContext):
     @staticmethod
-    def get_actions(
-        app_controller: AppController, block_context: BlockContext
-    ) -> ActionsResult:
+    def get_actions(app_controller: AppController, block_context: BlockContext) -> ActionsResult:
         return [*ParadoxNodeContext.get_actions(app_controller, block_context)]
 
 
 class GFXSpriteTypesContext(ParadoxBlockContext):
-    def get_actions(
-        app_controller: AppController, block_context: BlockContext
-    ) -> ActionsResult:
+    def get_actions(app_controller: AppController, block_context: BlockContext) -> ActionsResult:
         return [
             *ParadoxNodeContext.get_actions(app_controller, block_context),
             # Action(

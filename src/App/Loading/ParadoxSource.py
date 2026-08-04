@@ -22,6 +22,7 @@ PARADOX_ROOT_DIRECTORIES = [
     "sound",
 ]
 
+
 class ParadoxSource:
     def __init__(
         self,
@@ -37,9 +38,7 @@ class ParadoxSource:
         self.context_override = context_override
         self.read_only_override = read_only_override
 
-        self.context = (
-            self.context_override if self.context_override else ParadoxContext
-        )
+        self.context = self.context_override if self.context_override else ParadoxContext
         self.root = GenericDirectory(self, self.file_path, {})
         self.directories = {Path("."): self.root}
         self._build_tree()
@@ -57,9 +56,7 @@ class ParadoxSource:
             files.sort()
             for directory_name in dirs:
                 directory_path = relative_root / directory_name
-                directory = self._create_directory(
-                    Path(os.path.join(root, directory_name))
-                )
+                directory = self._create_directory(Path(os.path.join(root, directory_name)))
 
                 parent.add_directory(directory)
                 self.directories[directory_path] = directory
@@ -69,7 +66,7 @@ class ParadoxSource:
                 if file_path.suffix != ".bak":
                     parent.add_file(file_path, file_name)
 
-    def _ensure_directory(self, path:Path) -> None:
+    def _ensure_directory(self, path: Path) -> None:
         # relative = path.relative_to(self.file_path)
         if path in self.directories:
             return self.directories[path]
@@ -78,7 +75,7 @@ class ParadoxSource:
         parent.add_directory(directory)
         self.directories[path] = directory
         return directory
-    
+
     def _create_directory(self, path: Path) -> None:
         matches = []
         rel_path = path.relative_to(self.file_path)
@@ -93,9 +90,7 @@ class ParadoxSource:
 
         directory = max(matches, default=(0, GenericDirectory))[1]
 
-        return directory(
-            source=self, file_path=path, read_only=isinstance(self, ParadoxVanilla)
-        )
+        return directory(source=self, file_path=path, read_only=isinstance(self, ParadoxVanilla))
 
     def apply_replace_path(self, path: Path) -> None:
         try:
@@ -123,11 +118,7 @@ class ParadoxVanilla(ParadoxSource):
         dlc_path = self.file_path / "dlc"
         # dlc_path = Path(os.path.join(self.file_path, "dlc"))
         print(dlc_path)
-        dlcs = sorted(
-            path
-            for path in dlc_path.iterdir()
-            if path.is_dir()
-        )
+        dlcs = sorted(path for path in dlc_path.iterdir() if path.is_dir())
         for dlc in dlcs:
             AppLogger.info(f"loading {str(dlc.name)}")
             for root, dirs, files in os.walk(dlc):

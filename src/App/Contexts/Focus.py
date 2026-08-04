@@ -34,9 +34,7 @@ class FocusTreeContext(ParadoxContext):
         return FocusRootContext
 
     @staticmethod
-    def get_node_context(
-        parent_node: GenericBlock, node: GenericNode
-    ) -> type[ParadoxNodeContext]:
+    def get_node_context(parent_node: GenericBlock, node: GenericNode) -> type[ParadoxNodeContext]:
         if isinstance(node, GenericKeyValue):
             if parent_node.key == "focus" and node.key == "id":
                 return LocalisationFieldContext
@@ -47,31 +45,29 @@ class FocusTreeContext(ParadoxContext):
 
 class FocusFileContext(ParadoxFileContext):
     @staticmethod
-    def get_actions(
-        app_controller: AppController, file: FileReference
-    ) -> ActionsResult:
+    def get_actions(app_controller: AppController, file: FileReference) -> ActionsResult:
         return [*ParadoxFileContext.get_actions(app_controller, file)]
 
 
 class FocusRootContext(ParadoxBlockContext):
     @staticmethod
-    def get_actions(
-        app_controller: AppController, block_context: BlockContext
-    ) -> ActionsResult:
+    def get_actions(app_controller: AppController, block_context: BlockContext) -> ActionsResult:
         return [*ParadoxNodeContext.get_actions(app_controller, block_context)]
+
 
 class FocusTreeBlockContext(ParadoxBlockContext):
     @staticmethod
-    def get_actions(app_controller:AppController, block_context:BlockContext) -> ActionsResult:
-        return [
+    def get_actions(app_controller: AppController, block_context: BlockContext) -> ActionsResult:
+        return []
 
-        ]
+
 class FocusBlockContext(ParadoxBlockContext):
     @staticmethod
-    def get_actions(app_controller:AppController, block_context:BlockContext) -> ActionsResult:
+    def get_actions(app_controller: AppController, block_context: BlockContext) -> ActionsResult:
         return [
-            Action("Localise Focus",
-                   lambda:LocaliseFocusForm(app_controller, block_context.key_node),
-                   True,
+            Action(
+                "Localise Focus",
+                lambda: LocaliseFocusForm(app_controller, block_context.key_node),
+                True,
             ),
         ]

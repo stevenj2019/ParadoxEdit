@@ -41,21 +41,13 @@ class StyleManager:
 
     # NOTE: Icons sourced from lucide (in case i need more, ever?)
     def reload_icons(self) -> None:
-        colour = (
-            QColour("#FFFFFF") if self.configuration.dark_mode else QColour("#000000")
-        )
+        colour = QColour("#FFFFFF") if self.configuration.dark_mode else QColour("#000000")
         self._icons = {
-            GenericDirectory: self.load_icon(
-                self.icon_directory / "folder.svg", colour
-            ),
+            GenericDirectory: self.load_icon(self.icon_directory / "folder.svg", colour),
             UnloadedFile: self.load_icon(self.icon_directory / "file-x.svg", colour),
             IconFile: self.load_icon(self.icon_directory / "file-image.svg", colour),
-            ParadoxScriptParser: self.load_icon(
-                self.icon_directory / "file-code.svg", colour
-            ),
-            ParadoxLocParser: self.load_icon(
-                self.icon_directory / "file-text.svg", colour
-            ),
+            ParadoxScriptParser: self.load_icon(self.icon_directory / "file-code.svg", colour),
+            ParadoxLocParser: self.load_icon(self.icon_directory / "file-text.svg", colour),
         }
 
     def load_icon(self, path: Path, colour: QColour) -> QIcon:
