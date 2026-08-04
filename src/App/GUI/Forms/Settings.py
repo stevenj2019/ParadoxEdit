@@ -143,14 +143,7 @@ class SettingsForm(QDialog):
             self.appdata_path_element_text.setText(path)
 
     def toggle_dark_mode(self) -> None:
-        self.app_controller.configuration.change_setting(
-            dark_mode=not (self.app_controller.configuration.dark_mode)
-        )
-        self.app_controller.app.setStyleSheet(
-            qdarktheme.load_stylesheet(
-                "dark" if self.app_controller.configuration.dark_mode else "light"
-            )
-        )
+        self.app_controller.toggle_dark_mode()
 
     def submit_form(self) -> None:
         game_dir_error = False

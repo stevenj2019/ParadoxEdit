@@ -7,8 +7,9 @@ from PyQt5.QtGui import QIcon, QPainter, QPixmap
 from PyQt5.QtSvg import QSvgRenderer
 
 from App.Contracts.Enums import ChangeState
+from App.Loading.ParadoxSource import ParadoxSource
 from App.Loading.Directories.Base import GenericDirectory
-from App.Loading.Models import IconFile, UnloadedFile
+from App.Loading.Models import IconFile, UnloadedFile, FileReference
 from App.Services import ConfigurationManager
 from ParadoxParser import ParadoxLocParser, ParadoxScriptParser
 
@@ -43,6 +44,7 @@ class StyleManager:
     def reload_icons(self) -> None:
         colour = QColour("#FFFFFF") if self.configuration.dark_mode else QColour("#000000")
         self._icons = {
+            ParadoxSource: self.load_icon(self.icon_directory / "package.svg", colour),
             GenericDirectory: self.load_icon(self.icon_directory / "folder.svg", colour),
             UnloadedFile: self.load_icon(self.icon_directory / "file-x.svg", colour),
             IconFile: self.load_icon(self.icon_directory / "file-image.svg", colour),
@@ -74,5 +76,14 @@ class StyleManager:
 
         return QIcon(coloured)
 
-    def get_icon(self, cls: type) -> QIcon:
-        return self._icons[cls]
+    # def get_icon(self, cls: type) -> QIcon:
+    #     return self._icons[cls]
+
+    def icon_for(self, entry:GenericDirectory|FileReference) -> QIcon:
+        match entry:
+            case ParadoxSource():
+                return self._icons[ParadoxSource]
+            case GenericDirectory():
+                return self._icons[GenericDirectory]
+            case _:
+                return self._icons[type(entry.file)]

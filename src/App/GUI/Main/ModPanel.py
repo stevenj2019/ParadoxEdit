@@ -64,7 +64,7 @@ class ModPanel(QWidget):
             name=source.source_name or "Unnamed Mod",
             item=source,
             item_type=TreeItemType.SOURCE,
-            icon=None,
+            icon=self.app_controller.style_manager.icon_for(source),
         )
         self.node_to_item[source] = root
         self.tree.addTopLevelItem(root)
@@ -74,9 +74,7 @@ class ModPanel(QWidget):
                 name="Descriptor",
                 item=source.descriptor_object,
                 item_type=TreeItemType.DESCRIPTOR,
-                icon=self.app_controller.style_manager.get_icon(
-                    type(source.descriptor_object.file)
-                ),
+                icon=self.app_controller.style_manager.icon_for(source.descriptor_object)
             )
             self.node_to_item[source.descriptor_object] = item
             root.addChild(item)
@@ -84,7 +82,6 @@ class ModPanel(QWidget):
         for entry in source.root.directories.values():
             self._build_directory_item(root, entry, isinstance(source, ParadoxVanilla))
 
-        # root.sortChildren(0, Qt.AscendingOrder)
 
     def _build_directory_item(
         self, parent_item: QTreeWidgetItem, directory: GenericDirectory, read_only: bool
@@ -93,7 +90,7 @@ class ModPanel(QWidget):
             name=directory.path.name,
             item=directory,
             item_type=TreeItemType.DIRECTORY,
-            icon=self.app_controller.style_manager.get_icon(GenericDirectory),
+            icon=self.app_controller.style_manager.icon_for(directory),
         )
         self.node_to_item[directory] = item
         parent_item.addChild(item)
@@ -104,7 +101,6 @@ class ModPanel(QWidget):
         for file in directory.files.values():
             self._build_file_item(item, file, read_only)
 
-        # item.sortChildren(0, Qt.AscendingOrder)
 
     def _build_file_item(
         self, parent_item: QTreeWidgetItem, file: FileReference, read_only: bool
@@ -113,7 +109,7 @@ class ModPanel(QWidget):
             name=file.file.filename,
             item=file,
             item_type=TreeItemType.FILE,
-            icon=self.app_controller.style_manager.get_icon(type(file.file)),
+            icon=self.app_controller.style_manager.icon_for(file),
         )
         self.node_to_item[file] = item
         parent_item.addChild(item)
@@ -123,6 +119,10 @@ class ModPanel(QWidget):
         file_item.setData(0, QtStorage.STATE, status)
         self._propagate_state(file_item.parent())
         self.tree.update()
+
+    def refresh_icons(self) -> None:
+        for entry, item in self.node_to_item.items():
+            item.setIcon(0, self.app_controller.style_manager.icon_for(entry))
 
     def add_folder(self, directory: GenericDirectory) -> None:
         print("ADDING FOLDER", directory.path)
@@ -138,7 +138,7 @@ class ModPanel(QWidget):
             name=directory.path.name,
             item=directory,
             item_type=TreeItemType.DIRECTORY,
-            icon=self.app_controller.style_manager.get_icon(GenericDirectory),
+            icon=self.app_controller.style_manager.icon_for(directory),
         )
         self.node_to_item[directory] = item
         parent_item.addChild(item)
