@@ -28,7 +28,6 @@ class MIODirectory(GenericDirectory):
     def token_collection(self, source: ParadoxSource, file: FileReference) -> dict[PDXTokens, set]:
         tokens = set()
         file = file.file
-        # for file in self.files:
         for block in file.nodes:
             if isinstance(block, GenericBlock):
                 tokens.add(block.key)
