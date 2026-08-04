@@ -14,7 +14,8 @@ from App.Contexts.GFX import GFXContext
 from App.Enums import PDXMetadata
 from App.Loading.Directories.Base import GenericDirectory
 from ParadoxParser import ParadoxScriptParser as PDXScriptFile
-from ParadoxParser.ParadoxNodes import GenericBlock, GenericKeyValue
+from ParadoxParser.ParadoxNodes import GenericBlock
+from ParadoxParser.queries import find_keyvalue
 
 FILE_TYPES = {
     "dir": {"context": ParadoxContext, "class": PDXScriptFile},
@@ -31,37 +32,21 @@ class InterfaceDirectory(GenericDirectory):
         self, source: ParadoxSource, file: FileReference
     ) -> dict[PDXMetadata, dict]:
         metadata = dict()
-        for file in self.files.values():
-            if file.context is GFXContext:
-                file = file.file
-                if isinstance(file, PDXScriptFile):
-                    for node in file.nodes:
-                        if isinstance(node, GenericBlock) and node.key.lower() == "spritetypes":
-                            for node in node.nodes:
-                                if (
-                                    isinstance(node, GenericBlock)
-                                    and node.key.lower() == "spritetype"
-                                ):
-                                    name = next(
-                                        (
-                                            node.value.value
-                                            for node in node.nodes
-                                            if isinstance(node, GenericKeyValue)
-                                            and node.key.lower() == "name"
-                                        ),
-                                        None,
+        if file.context is GFXContext:
+            file = file.file
+            if isinstance(file, PDXScriptFile):
+                for node in file.nodes:
+                    if isinstance(node, GenericBlock) and node.key.lower() == "spritetypes":
+                        for node in node.nodes:
+                            if (
+                                isinstance(node, GenericBlock)
+                                and node.key.lower() == "spritetype"
+                            ):
+                                name = find_keyvalue(node, "name")
+                                texture = find_keyvalue(node, "texturefile")
+                                
+                                if name and texture:
+                                    metadata[name.value.value] = Path(
+                                        os.path.join(source.file_path, texture.value.value)
                                     )
-                                    texture = next(
-                                        (
-                                            node.value.value
-                                            for node in node.nodes
-                                            if isinstance(node, GenericKeyValue)
-                                            and node.key.lower() == "texturefile"
-                                        ),
-                                        None,
-                                    )
-                                    if name and texture:
-                                        metadata[name] = Path(
-                                            os.path.join(source.file_path, texture)
-                                        )
         return {PDXMetadata.GFXIcon: metadata}

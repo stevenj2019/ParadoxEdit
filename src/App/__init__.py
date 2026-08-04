@@ -43,7 +43,8 @@ class AppController(QObject):
     request_bulk_mutation = pyqtSignal(object)
     request_file_mutation = pyqtSignal(object)
     request_file_unload = pyqtSignal(object)
-    request_registry_refresh = pyqtSignal()
+    request_registry_insert = pyqtSignal(object)
+    request_registry_cache_rebuild = pyqtSignal()
     request_save = pyqtSignal(object)
 
     def __init__(self) -> None:
@@ -97,7 +98,8 @@ class AppController(QObject):
         self.request_bulk_mutation.connect(self._request_bulk_mutation)
         self.request_file_mutation.connect(self._request_file_mutation)
         self.request_file_unload.connect(self._request_file_unload)
-        self.request_registry_refresh.connect(self._request_registry_rebuild)
+        # self.request_registry_insert.connect(self._request_registry_insertion)
+        self.request_registry_cache_rebuild.connect(self._request_registry_rebuild)
         self.request_save.connect(self._save_target)
         self.main.show()
 
@@ -159,6 +161,8 @@ class AppController(QObject):
 
     def _refresh_file(self) -> None:
         for file in self._batch_file:
+            self.registry.purge_file_data(file)
+            self.registry.load_file_data(file.directory.source, file)
             if file is self.file_system.open_file:
                 self.main.load_file(self.file_system.open_file)
         self._batch_file.clear()
@@ -245,22 +249,19 @@ class AppController(QObject):
             self.main.load_file(self.file_system.open_file)
 
     def _request_file_mutation(self, request: FileMutationRequest) -> None:
-        print("MUTATION HANDLER CALLED", id(request.file))
         file = request.file
         if request.state == ChangeState.ADDED:
             request.directory.add_file(file.file.filepath, file.file.filename, file)
+            self.registry.purge_file_data(file)
             self.registry.load_file_data(file.directory.source, file)
         self.file_system.change_tracker.set_file_state(request.file, request.state)
         self.main.mod_panel.add_file(request.directory, request.file)
         self.main.mod_panel.set_file_state(request.file, request.state)
 
     def _request_file_unload(self, file: FileReference) -> None:
-        # if tree loaded, clear
         if self.file_system.open_file is file:
             self.main.contents_panel.script_view.unload_block()
-        # remove item from file tree
         self.main.mod_panel.remove_file(file)
-        # delete reference in source tree
         file.directory.delete_file(file)
         self.file_system.change_tracker.clear_file_state(file)
         self.registry.purge_file_data(file)

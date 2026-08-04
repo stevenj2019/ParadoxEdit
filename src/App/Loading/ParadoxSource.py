@@ -7,7 +7,7 @@ from App.Loading.Directories import DIRECTORY_REGISTRY
 from App.Loading.Directories.Base import GenericDirectory
 from App.Loading.Models import FileReference
 from ParadoxParser import ParadoxScriptParser
-from ParadoxParser.ParadoxNodes import GenericBlock, GenericKeyValue
+from ParadoxParser.queries import all_keyvalues, find_block, find_keyvalue
 
 PARADOX_ROOT_DIRECTORIES = [
     "common",
@@ -96,7 +96,6 @@ class ParadoxSource:
         try:
             removed = self.directories[Path(path)]
             removed.delete_directory()
-            # AppLogger.info(f"{self.source_name} {path} removed {removed}")
         except KeyError:
             pass
 
@@ -104,7 +103,6 @@ class ParadoxSource:
         try:
             removed = self.directories[path.parent]
             removed.delete_file(path.name)
-            # AppLogger.info(f"{self.source_name} {path} removed")
         except KeyError:
             pass
 
@@ -140,30 +138,22 @@ class ParadoxMod(ParadoxSource):
 
     def _collect_mod_info(self) -> None:
         descriptor_file = self.descriptor_object.file
-        self.mod_name = next(
-            (
-                node.value.value
-                for node in descriptor_file.nodes
-                if isinstance(node, GenericKeyValue) and node.key == "name"
-            ),
-            None,
-        )
-        self.file_path = next(
-            (
-                Path(node.value.value.strip('"'))
-                for node in descriptor_file.nodes
-                if isinstance(node, GenericKeyValue) and node.key == "path"
-            ),
-            None,
-        )
-        self.replace_paths = [
-            node.value.value
-            for node in descriptor_file.nodes
-            if isinstance(node, GenericKeyValue) and node.key.lower() == "replace_path"
-        ]
-        self.dependencies = []
-        for node in descriptor_file.nodes:
-            if isinstance(node, GenericBlock) and node.key == "dependencies":
-                self.dependencies = [node.value for node in node.nodes]
 
-        # AppLogger.info(f"loading {self.mod_name}@{self.file_path}")
+        mod_name = find_keyvalue(descriptor_file, "name")
+        self.mod_name = mod_name.value.value if mod_name else "Unnamed Mod"
+
+        file_path = find_keyvalue(descriptor_file, "path")
+        self.file_path = Path(file_path.value.value) if file_path else None 
+
+        self.replace_paths = []
+        # replace_paths = find_keyvalue(descriptor_file, "replace_path")
+        # if replace_paths:
+        #     self.replace_paths = [node.value.value for node in replace_paths]
+        for node in all_keyvalues(descriptor_file, "replace_path"):
+            self.replace_paths.append(node.value.value)
+
+        self.dependencies = []
+        dependency_block = find_block(descriptor_file, "dependencies")
+        if dependency_block:
+            self.dependencies = [node.value for node in dependency_block]
+        AppLogger.info(f"loading {self.mod_name}@{self.file_path}")

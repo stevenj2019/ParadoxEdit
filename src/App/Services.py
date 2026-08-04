@@ -12,6 +12,7 @@ from pathlib import Path
 
 from platformdirs import user_config_dir
 
+from App.AppData import APPNAME
 from App.AppLogger import AppLogger
 from App.Contracts import OpenFile
 from App.Contracts.Enums import ChangeState
@@ -20,7 +21,6 @@ from App.Loading.Models import FileReference
 from ParadoxParser import ParadoxLocParser as PDXLocFile
 from ParadoxParser import ParadoxScriptParser as PDXScriptFile
 from ParadoxParser.ParadoxNodes import GenericBlock, GenericNode
-from App.AppData import APPNAME
 
 
 class ConfigurationManager:
@@ -139,13 +139,11 @@ class Workspace:
             config = json.load(FILE)
 
         self.vanilla_loaded = config["vanilla_loaded"]
-        # self.mods = config["mods"]
         for mod in config["mods"]:
             mod_path = Path(mod)
             self.mods.append(mod_path)
 
     def write_file(self, path: Path) -> None:
-        # file_path = Path(path)
         path.touch()
         with path.open("w", encoding="UTF-8") as CONFIG_FILE:
             json.dump(self._to_json(), CONFIG_FILE)
@@ -221,20 +219,11 @@ class ParadoxRegistry:
     def get_tokens(self, key: PDXTokens) -> None:
         return self.tokens_cache.get(key, set())
 
-    # def add_tokens(self, key, tokens:set):
-    # def remove_tokens(self, key, tokens:set):
-
     def get_metadata(self, key: PDXMetadata) -> None:
         return self.metadata_cache.get(key, dict())
 
-    # def add_metadata():
-    # def remove_metadata():
-
-    def invalidate(self) -> None:
-        self.tokens.clear()
-        self.metadata.clear()
-
     def load_file_data(self, source: ParadoxSource, file: FileReference) -> None:
+        AppLogger.info(f"Registry building {file.file.filename} refs")
         if isinstance(file.file, (PDXScriptFile, PDXLocFile)):
             self._merge_registry(self.tokens, file, file.directory.token_collection(source, file))
             self._merge_registry(
@@ -249,12 +238,14 @@ class ParadoxRegistry:
                 target[key][file] = value
 
     def purge_file_data(self, file: FileReference) -> None:
+        AppLogger.info(f"Registry purged of {file.file.filename} refs")
         for file_data in self.tokens.values():
             file_data.pop(file, None)
         for file_data in self.metadata.values():
             file_data.pop(file, None)
 
     def _build_registry_cache(self) -> None:
+        AppLogger.info("Rebuilding Registry cache")
         self.tokens_cache.clear()
         self.metadata_cache.clear()
 

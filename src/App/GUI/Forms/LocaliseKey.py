@@ -30,6 +30,7 @@ from ParadoxParser.ParadoxNodes import (
     GenericLocKey,
     GenericNode,
 )
+from ParadoxParser.queries import find_keyvalue
 
 UNSORTED_COMMENT = "#### unsorted keys ####"
 
@@ -198,6 +199,8 @@ class BaseLocaliseForm(QDialog):
                         payload=localisation.property("node"),
                     )
                 )
+        self.app_controller.request_registry_cache_rebuild.emit()
+        self.accept()
 
 
 class LocaliseNodeForm(BaseLocaliseForm):
@@ -211,7 +214,6 @@ class LocaliseNodeForm(BaseLocaliseForm):
         self.exec_()
 
 
-# TODO doesnt get option names right now
 class LocaliseEventForm(BaseLocaliseForm):
     def __init__(self, app_controller: AppController, node: GenericBlock) -> None:
         super().__init__(app_controller, node, "Localise Event")
@@ -237,18 +239,11 @@ class LocaliseEventForm(BaseLocaliseForm):
         loc_entries = [
             node
             for node in self.node.nodes
-            if isinstance(node, GenericKeyValue) and node.key == node_key
+            if isinstance(node, (GenericBlock, GenericKeyValue)) and node.key == node_key
         ]
         for entry in loc_entries:
             if isinstance(entry, GenericBlock):
-                text_node = next(
-                    (
-                        node
-                        for node in entry.nodes
-                        if isinstance(node, GenericKeyValue) and node.key == loc_key
-                    ),
-                    None,
-                )
+                text_node = find_keyvalue(entry, loc_key)
                 if text_node:
                     loc_nodes.append(text_node)
             else:
@@ -260,10 +255,7 @@ class LocaliseFocusForm(BaseLocaliseForm):
     def __init__(self, app_controller: AppController, node: GenericBlock) -> None:
         super().__init__(app_controller, node, "Localise National Focus")
         self.localisation_fields = list()
-        focus_id_node = next(
-            (node for node in node.nodes if isinstance(node, GenericKeyValue) and node.key == "id"),
-            None,
-        )
+        focus_id_node = find_keyvalue(node, "id")
         if not focus_id_node:
             return  # error
         id_key = focus_id_node.value.value

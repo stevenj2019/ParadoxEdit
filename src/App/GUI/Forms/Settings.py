@@ -6,8 +6,9 @@ if TYPE_CHECKING:
     from App import AppController
 
 import sys
-import qdarktheme
 from pathlib import Path
+
+import qdarktheme
 from PyQt5.QtWidgets import (
     QCheckBox,
     QDialog,

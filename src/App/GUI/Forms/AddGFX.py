@@ -165,4 +165,5 @@ class AddNewGFXForm(QDialog):
                 self.app_controller.request_file_mutation.emit(
                     FileMutationRequest(icon.directory, icon, ChangeState.ADDED)
                 )
+        self.app_controller.request_registry_cache_rebuild.emit()
         self.accept()

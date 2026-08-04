@@ -68,5 +68,5 @@ class CopyFileForm(QDialog):
 
         self.app_controller.request_file_unload.emit(self.file)
 
-        self.app_controller.request_registry_refresh.emit()
+        self.app_controller.request_registry_cache_rebuild.emit()
         self.close()
