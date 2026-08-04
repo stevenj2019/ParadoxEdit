@@ -5,7 +5,9 @@ from typing import TYPE_CHECKING
 if TYPE_CHECKING:
     from App import AppController
 
+import sys
 import qdarktheme
+from pathlib import Path
 from PyQt5.QtWidgets import (
     QCheckBox,
     QDialog,
@@ -38,13 +40,22 @@ class SettingsForm(QDialog):
             if self.app_controller.configuration.initialised
             else True
         )
+
         dark_mode_checked = (
             self.app_controller.configuration.dark_mode
             if self.app_controller.configuration.initialised
             else False
         )
-        self.game_install_path = None
-        self.mod_install_path = None
+
+        if self.app_controller.configuration.game_install_path:
+            self.game_install_path = self.app_controller.configuration.game_install_path
+        else:
+            self.game_install_path = ""
+
+        if self.app_controller.configuration.appdata_path:
+            self.appdata_path = self.app_controller.configuration.appdata_path
+        else:
+            self.appdata_path = self._get_paradox_appdata()
 
         self.config_file_label = QLabel(
             f"""
@@ -56,26 +67,22 @@ class SettingsForm(QDialog):
         self.game_install_path_label = QLabel("Paradox Game Path:")
         self.game_install_path_element = QHBoxLayout()
         self.game_install_path_element_text = QLineEdit()
-        self.game_install_path_element_text.setText(
-            str(self.app_controller.configuration.game_install_path)
-        )
+        self.game_install_path_element_text.setText(str(self.game_install_path))
         self.game_install_path_element_button = QPushButton("...")
         self.game_install_path_element.addWidget(self.game_install_path_element_text)
         self.game_install_path_element.addWidget(self.game_install_path_element_button)
         self.game_install_path_element_button.clicked.connect(self.browse_game_install_path)
         self.form.addRow(self.game_install_path_label, self.game_install_path_element)
 
-        self.mod_install_path_label = QLabel("Paradox Mods Path:")
-        self.mod_install_path_element = QHBoxLayout()
-        self.mod_install_path_element_text = QLineEdit()
-        self.mod_install_path_element_text.setText(
-            str(self.app_controller.configuration.mod_file_path)
-        )
-        self.mod_install_path_element_button = QPushButton("...")
-        self.mod_install_path_element.addWidget(self.mod_install_path_element_text)
-        self.mod_install_path_element.addWidget(self.mod_install_path_element_button)
-        self.mod_install_path_element_button.clicked.connect(self.browse_mod_install_path)
-        self.form.addRow(self.mod_install_path_label, self.mod_install_path_element)
+        self.appdata_path_label = QLabel("Paradox User Data:")
+        self.appdata_path_element = QHBoxLayout()
+        self.appdata_path_element_text = QLineEdit()
+        self.appdata_path_element_text.setText(str(self.appdata_path))
+        self.appdata_path_element_button = QPushButton("...")
+        self.appdata_path_element.addWidget(self.appdata_path_element_text)
+        self.appdata_path_element.addWidget(self.appdata_path_element_button)
+        self.appdata_path_element_button.clicked.connect(self.browse_mod_install_path)
+        self.form.addRow(self.appdata_path_label, self.appdata_path_element)
 
         self.safe_mode_label = QLabel("Safe Mode:")
         self.safe_mode_check = QCheckBox()
@@ -94,6 +101,34 @@ class SettingsForm(QDialog):
         self.form.addRow(self.button)
         self.button.accepted.connect(self.submit_form)
 
+    def _get_paradox_appdata(self) -> None:
+        match sys.platform:
+            case "win32":
+                return (
+                    Path.home()
+                    / "Documents"
+                    / "Paradox Interactive"
+                    / "Hearts of Iron IV"
+                )
+            case "darwin":
+                return (
+                    Path.home()
+                    / "Documents"
+                    / "Paradox Interactive"
+                    / "Hearts of Iron IV"
+                )
+            case "linux":
+                return (
+                    Path.home()
+                    / ".local"
+                    / "share"
+                    / "Paradox Interactive"
+                    / "Hearts of Iron IV"
+                )
+            case _:
+                #flash error
+                return None
+
     def browse_game_install_path(self) -> None:
         path = select_hoi4_install_directory(self.app_controller.main)
         if path:
@@ -103,8 +138,8 @@ class SettingsForm(QDialog):
     def browse_mod_install_path(self) -> None:
         path = select_mod_directory(self.app_controller.main)
         if path:
-            self.mod_install_path = path
-            self.mod_install_path_element_text.setText(path)
+            self.appdata_path = path
+            self.appdata_path_element_text.setText(path)
 
     def toggle_dark_mode(self) -> None:
         self.app_controller.configuration.change_setting(
@@ -124,11 +159,8 @@ class SettingsForm(QDialog):
         ):
             game_dir_error = True
         if not (
-            self.mod_install_path.is_dir()
-            and any(
-                mod_file.name != "descriptor.mod"
-                for mod_file in self.mod_install_path.glob("*.mod")
-            )
+            self.appdata_path.is_dir() and
+            (self.appdata_path / "mod").is_dir()
         ):
             mod_dir_error = True
 
@@ -143,8 +175,8 @@ class SettingsForm(QDialog):
             self.app_controller.configuration.change_setting(
                 game_install_path=self.game_install_path
             )
-            self.app_controller.configuration.change_setting(mod_file_path=self.mod_install_path)
+            self.app_controller.configuration.change_setting(appdata_path=self.appdata_path)
             self.app_controller.configuration.write_file()
             self.accept()
         else:
-            settings_error_critical(game_dir_error, mod_dir_error)
+            settings_error_critical(self.app_controller.main, game_dir_error, mod_dir_error)

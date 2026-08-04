@@ -7,7 +7,7 @@ from PyQt5.QtWidgets import QFileDialog, QMainWindow
 def select_hoi4_install_directory(parent: QMainWindow) -> Path | None:
     options = QFileDialog.Options()
     options |= QFileDialog.ReadOnly
-    filepath, _ = QFileDialog.getExistingDirectory(
+    filepath = QFileDialog.getExistingDirectory(
         parent, "Select Paradox Game install directory", "", QFileDialog.ShowDirsOnly
     )
     return Path(filepath) if filepath else None
@@ -16,7 +16,7 @@ def select_hoi4_install_directory(parent: QMainWindow) -> Path | None:
 def select_mod_directory(parent: QMainWindow) -> Path | None:
     options = QFileDialog.Option()
     options |= QFileDialog.ReadOnly
-    filepath, _ = QFileDialog.getExistingDirectory(
+    filepath = QFileDialog.getExistingDirectory(
         parent, "Select Paradox game mod directory", "", QFileDialog.ShowDirsOnly
     )
     return Path(filepath) if filepath else None
@@ -25,12 +25,12 @@ def select_mod_directory(parent: QMainWindow) -> Path | None:
 def select_mod_file(parent: QMainWindow) -> Path | None:
     options = QFileDialog.Options()
     options |= QFileDialog.ReadOnly
-    filepath, _ = QFileDialog.getOpenFileName(
+    filepath = QFileDialog.getOpenFileName(
         parent,
         "Select Paradox descriptor.mod file",
         ""
-        if not parent.app_controller.configuration.mod_file_path
-        else str(parent.app_controller.configuration.mod_file_path),
+        if not parent.app_controller.configuration.appdata_path 
+        else str(parent.app_controller.configuration.appdata_path / "mod"),
         "Paradox Mod Files (*.mod);;All Files (*)",
         options=options,
     )
@@ -77,8 +77,8 @@ def workspace_selector(parent: QMainWindow) -> Path | None:
         parent,
         "Open Workspace",
         ""
-        if not parent.app_controller.configuration.mod_file_path
-        else str(parent.app_controller.configuration.mod_file_path),
+        if not parent.app_controller.configuration.appdata_path
+        else str(parent.app_controller.configuration.appdata_path / "mod"),
         "PDXEdit Workspace Files(*.json);;All Files (*)",
         options=options,
     )
@@ -90,8 +90,8 @@ def workspace_save_selector(parent: QMainWindow) -> Path | None:
         parent,
         "Save Workspace",
         ""
-        if not parent.app_controller.configuration.mod_file_path
-        else str(parent.app_controller.configuration.mod_file_path),
+        if not parent.app_controller.configuration.appdata_path
+        else str(parent.app_controller.configuration.appdata_path / "mod"),
         "PDXEdit Workspace Files(*.json);;All Files (*)",
     )
     if not filepath:

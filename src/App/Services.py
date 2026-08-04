@@ -20,15 +20,14 @@ from App.Loading.Models import FileReference
 from ParadoxParser import ParadoxLocParser as PDXLocFile
 from ParadoxParser import ParadoxScriptParser as PDXScriptFile
 from ParadoxParser.ParadoxNodes import GenericBlock, GenericNode
-
-app_name = "PDXEdit"
+from App.AppData import APPNAME
 
 
 class ConfigurationManager:
     def __init__(self) -> None:
-        self.file_path: Path = Path(user_config_dir(app_name), "configuration.json")
+        self.file_path: Path = Path(user_config_dir(APPNAME), "configuration.json")
         self.game_install_path: Path = ""
-        self.mod_file_path: Path = ""
+        self.appdata_path: Path = ""
         self.safe_mode: bool = True
         self.dark_mode: bool = False
         self.initialised = False
@@ -47,7 +46,7 @@ class ConfigurationManager:
         return {
             "safe_mode": self.safe_mode,
             "game_install_path": str(self.game_install_path),
-            "mod_file_path": str(self.mod_file_path),
+            "appdata_path": str(self.appdata_path),
             "dark_mode": self.dark_mode,
         }
 
@@ -61,7 +60,7 @@ class ConfigurationManager:
 
         self.safe_mode = settings["safe_mode"]
         self.game_install_path = Path(settings["game_install_path"])
-        self.mod_file_path = Path(settings["mod_file_path"])
+        self.appdata_path = Path(settings["appdata_path"])
         self.dark_mode = settings["dark_mode"]
 
     def create_file(self) -> None:

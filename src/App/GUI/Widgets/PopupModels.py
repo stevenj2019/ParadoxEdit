@@ -47,7 +47,7 @@ def settings_error_critical(parent: QWidget, game_dir_error: bool, mod_dir_error
     if game_dir_error:
         text += "\nGame install directory could not find pdx_launcher, is invalid"
     if mod_dir_error:
-        text += "\nMod folder does not contain any .mod files, is invalid"
+        text += "\nappdata has no mod folder, is invalid"
     QMessageBox.critical(parent, "Error(s) in settings", text, QMessageBox.Ok)
 
 
