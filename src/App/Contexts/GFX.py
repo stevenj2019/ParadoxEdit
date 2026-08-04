@@ -14,9 +14,9 @@ from App.Contexts.Base import (
     ParadoxFileContext,
     ParadoxNodeContext,
 )
-from App.GUI.Actions import ActionsResult
+from App.GUI.Actions import Action, ActionsResult
+from App.GUI.Forms.AddGFX import AddNewGFXForm
 
-# from App.GUI.Forms.AddGFX import AddNewGFXForm
 # from App.PDXFactory.Blocks.Sprites import GFX_icon, GFX_shine_icon
 from ParadoxParser.ParadoxNodes import GenericBlock, GenericNode
 
@@ -48,9 +48,9 @@ class GFXFileContext(ParadoxFileContext):
         # from App.GUI.Forms.AddGFX import AddNewGFXForm
         return [
             *ParadoxFileContext.get_actions(app_controller, file),
-            # Action("Bulk-Upload Sprites",
-            #        lambda:AddNewGFXForm(app_controller, file),
-            #        True)
+            Action("Bulk-Upload Sprites",
+                   lambda:AddNewGFXForm(app_controller, file),
+                   True)
         ]
 
 

@@ -13,15 +13,17 @@ from App.Contexts.Base import ParadoxContext
 from App.Contexts.GFX import GFXContext
 from App.Enums import PDXMetadata
 from App.Loading.Directories.Base import GenericDirectory
-from ParadoxParser import ParadoxScriptParser as PDXFile
+from ParadoxParser import ParadoxScriptParser as PDXScriptFile
 from ParadoxParser.ParadoxNodes import GenericBlock, GenericKeyValue
 
-FILE_TYPES = {".gfx": GFXContext, ".gui": ParadoxContext}
+FILE_TYPES = {"dir":{"context":ParadoxContext, "model":PDXScriptFile},
+              ".gfx":{"context":GFXContext, "model": PDXScriptFile}, 
+              ".gui":{"context":ParadoxContext, "model":PDXScriptFile}}
 
 
 class InterfaceDirectory(GenericDirectory):
     def __init__(self, source: ParadoxSource, file_path: Path, read_only: bool) -> None:
-        super().__init__(source, file_path, FILE_TYPES, PDXFile, read_only)
+        super().__init__(source, file_path, FILE_TYPES, read_only)
 
     def metadata_collection(
         self, source: ParadoxSource, file: FileReference
@@ -30,7 +32,7 @@ class InterfaceDirectory(GenericDirectory):
         for file in self.files.values():
             if file.context is GFXContext:
                 file = file.file
-                if isinstance(file, PDXFile):
+                if isinstance(file, PDXScriptFile):
                     for node in file.nodes:
                         if (
                             isinstance(node, GenericBlock)

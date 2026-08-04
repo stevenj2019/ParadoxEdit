@@ -117,20 +117,24 @@ class ParadoxSource:
 class ParadoxVanilla(ParadoxSource):
     def __init__(self, path: Path) -> None:
         super().__init__("Vanilla", path, ReadOnlyContext, True)
+        self._apply_dlc_files()
 
     def _apply_dlc_files(self) -> None:
-        dlc_path = Path(os.path.join(self.file_path, "dlc"))
-        dlcs = [
-            Path(os.path.join(dlc_path, f))
-            for f in os.listdir(dlc_path)
-            if os.path.ispath(os.path.join(dlc_path, f))
-        ]
+        dlc_path = self.file_path / "dlc"
+        # dlc_path = Path(os.path.join(self.file_path, "dlc"))
+        print(dlc_path)
+        dlcs = sorted(
+            path
+            for path in dlc_path.iterdir()
+            if path.is_dir()
+        )
         for dlc in dlcs:
+            AppLogger.info(f"loading {str(dlc.name)}")
             for root, dirs, files in os.walk(dlc):
                 for file in files:
                     path = Path(os.path.join(root, file))
                     relative_path = path.relative_to(dlc)
-                    directory = self.directories[relative_path.parent]
+                    directory = self._ensure_directory(relative_path.parent)
                     directory.add_file(path, file)
 
 
@@ -171,4 +175,4 @@ class ParadoxMod(ParadoxSource):
             if isinstance(node, GenericBlock) and node.key == "dependencies":
                 self.dependencies = [node.value for node in node.nodes]
 
-        AppLogger.info(f"loading {self.mod_name}@{self.file_path}")
+        # AppLogger.info(f"loading {self.mod_name}@{self.file_path}")

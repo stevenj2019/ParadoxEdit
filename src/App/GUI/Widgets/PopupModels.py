@@ -1,10 +1,11 @@
-from PyQt5.QtWidgets import QMessageBox, QWidget
-
-from App.AppLogger import AppLogger
 from textwrap import dedent
 
 from platformdirs import user_log_dir
+from PyQt5.QtWidgets import QMessageBox, QWidget
+
 from App.AppData import APPNAME
+from App.AppLogger import AppLogger
+
 
 def could_not_load_mod_critical(
     parent: QWidget, exc: Exception, traceback: str

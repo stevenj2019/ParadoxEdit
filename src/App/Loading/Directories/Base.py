@@ -11,49 +11,41 @@ from pathlib import Path
 from App.Contexts.Base import ParadoxContext
 from App.Enums import PDXMetadata, PDXTokens
 from App.Loading.Models import FileReference, UnloadedFile
-from App.Services import AppLogger
-from ParadoxParser import ParadoxLocParser as PDXLocFile
 from ParadoxParser import ParadoxScriptParser as PDXScriptFile
 
-FILE_TYPES = {".txt": ParadoxContext}
-
+FILE_TYPES = {"dir":{"context":ParadoxContext, "model":PDXScriptFile},
+              ".txt":{"context":ParadoxContext, "model":PDXScriptFile}}
 
 class GenericDirectory:
     def __init__(
         self,
         source: ParadoxSource,
         file_path: Path,
-        context: dict = FILE_TYPES,
-        parser: PDXScriptFile | PDXLocFile = PDXScriptFile,
+        compiler: dict = FILE_TYPES,
         read_only: bool = True,
     ) -> None:
         self.source = source
         self.path = Path(file_path)
-        self.context_resolver = context
-        self.context = (
-            self.source.context_override
-            if self.source.context_override
-            else context.get("dir", ParadoxContext)
-        )
+        self.compiler = compiler
+        if not compiler:
+            self.compiler = FILE_TYPES
         self.parent:GenericDirectory = None
-        self.parser = parser
+        self.context = self.compiler["dir"]["context"]
         self.read_only = read_only
         self.directories: dict[Path, GenericDirectory] = {}
         self.files: dict[str:FileReference] = {}
 
     def add_file(self, path: Path, name: str, file_ref: FileReference = None) -> None:
-        if path.suffix not in self.context_resolver.keys():
-            AppLogger.warning(f"{path.absolute()} ignored: lacks context.")
+        if path.suffix not in self.compiler.keys():
+            # AppLogger.warning(f"{path.absolute()} ignored: lacks context.")
             return
         if file_ref:
             self.files[name] = file_ref
         else:
             self.files[name] = FileReference(
                 self,
-                UnloadedFile(path, name, self.parser),
-                self.source.context_override
-                if self.source.context_override
-                else self.context_resolver[path.suffix],
+                UnloadedFile(path, name, self.compiler[path.suffix]["model"]),
+                self.compiler[path.suffix]["context"],
                 self.read_only,
             )
 

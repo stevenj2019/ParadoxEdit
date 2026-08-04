@@ -8,21 +8,21 @@ if TYPE_CHECKING:
 
 
 import logging
+import platform
 import sys
 from datetime import datetime
 from pathlib import Path
 from textwrap import dedent
-import platform
 
-from platformdirs import user_log_dir
-from PyQt5.QtCore import QT_VERSION_STR, PYQT_VERSION_STR
 import psutil
+from platformdirs import user_log_dir
+from PyQt5.QtCore import PYQT_VERSION_STR, QT_VERSION_STR
 
+from App.AppData import APPNAME, COMMIT, VERSION
 from App.Contracts.Enums import ChangeState
 from ParadoxParser import ParadoxLocParser as PDXLocFile
 from ParadoxParser import ParadoxScriptParser as PDXScriptFile
 from ParadoxParser.ParadoxNodes import GenericBlock, GenericKeyValue, GenericNode
-from App.AppData import APPNAME, VERSION, COMMIT
 
 
 class AppLogger:

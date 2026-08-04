@@ -14,12 +14,13 @@ from App.Loading.Directories.Base import GenericDirectory
 from ParadoxParser import ParadoxLocParser as PDXLocFile
 from ParadoxParser.ParadoxNodes import GenericLegacyLocKey, GenericLocKey
 
-FILE_TYPES = {".yml": LocalisationContext}
+FILE_TYPES = {"dir":{"context":LocalisationContext, "model":PDXLocFile},
+              ".yml":{"context":LocalisationContext, "model":PDXLocFile}}
 
 
 class LocDirectory(GenericDirectory):
     def __init__(self, source: ParadoxSource, file_path: Path, read_only: bool) -> None:
-        super().__init__(source, file_path, FILE_TYPES, PDXLocFile, read_only)
+        super().__init__(source, file_path, FILE_TYPES, read_only)
 
     def metadata_collection(
         self, source: ParadoxSource, file: FileReference

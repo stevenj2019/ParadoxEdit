@@ -14,12 +14,13 @@ from App.Loading.Directories.Base import GenericDirectory
 from ParadoxParser import ParadoxScriptParser as PDXScriptFile
 from ParadoxParser.ParadoxNodes import GenericBlock, GenericKeyValue
 
-FILE_TYPES = {"dir": EventContext, ".txt": EventContext}
+FILE_TYPES = {"dir":{"context":EventContext, "model":PDXScriptFile}, 
+              ".txt":{"context":EventContext, "model":PDXScriptFile}}
 
 
 class EventDirectory(GenericDirectory):
     def __init__(self, source: ParadoxSource, file_path: Path, read_only: bool) -> None:
-        super().__init__(source, file_path, FILE_TYPES, PDXScriptFile, read_only)
+        super().__init__(source, file_path, FILE_TYPES, read_only)
 
     def token_collection(
         self, source: ParadoxSource, file: FileReference
