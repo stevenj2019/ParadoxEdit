@@ -25,7 +25,7 @@ def select_mod_directory(parent: QMainWindow) -> Path | None:
 def select_mod_file(parent: QMainWindow) -> Path | None:
     options = QFileDialog.Options()
     options |= QFileDialog.ReadOnly
-    filepath = QFileDialog.getOpenFileName(
+    filepath, _ = QFileDialog.getOpenFileName(
         parent,
         "Select Paradox descriptor.mod file",
         ""

@@ -155,5 +155,5 @@ class ParadoxMod(ParadoxSource):
         self.dependencies = []
         dependency_block = find_block(descriptor_file, "dependencies")
         if dependency_block:
-            self.dependencies = [node.value for node in dependency_block]
+            self.dependencies = [node.value for node in dependency_block.nodes]
         AppLogger.info(f"loading {self.mod_name}@{self.file_path}")
