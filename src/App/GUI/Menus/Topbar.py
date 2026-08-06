@@ -19,6 +19,7 @@ class Topbar(QToolBar):
     request_workspace_save = pyqtSignal()
     request_settings_window = pyqtSignal()
     request_dlc_change = pyqtSignal()
+
     def __init__(self, app_controller: AppController) -> None:
         super().__init__()
         self.app_controller = app_controller
@@ -82,4 +83,6 @@ class Topbar(QToolBar):
     def _enable_actions(self) -> None:
         self.actions["Save Open"].setEnabled(True)
         self.actions["Save All"].setEnabled(True)
-        self.actions["Configure Loaded DLC"].setEnabled(True) #this is a lie, should be checking if vanilla is loaded....
+        self.actions["Configure Loaded DLC"].setEnabled(
+            True
+        )  # this is a lie, should be checking if vanilla is loaded....

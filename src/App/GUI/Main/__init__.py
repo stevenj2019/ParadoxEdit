@@ -14,9 +14,9 @@ from App.AppLogger import AppLogger
 from App.Contracts import PropagationRequest
 from App.Contracts.Enums import ChangeState, PropagationType
 from App.Enums import PDXMetadata
+from App.GUI.Forms.DLCConfig import ConfigureLoadedDLCForm
 from App.GUI.Forms.Search import SearchForm
 from App.GUI.Forms.Settings import SettingsForm
-from App.GUI.Forms.DLCConfig import ConfigureLoadedDLCForm
 from App.GUI.Main.Contents import ContentsPanel
 from App.GUI.Main.InlineEdit import InLineEditManager
 from App.GUI.Main.SourceDirectoryPanel import SourceDirectoryTree

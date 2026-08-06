@@ -7,13 +7,14 @@ if TYPE_CHECKING:
 
 import copy
 
-from PyQt5.QtWidgets import QDialog, QFormLayout, QGridLayout, QCheckBox, QPushButton
+from PyQt5.QtWidgets import QCheckBox, QDialog, QFormLayout, QGridLayout, QPushButton
+
 
 class ConfigureLoadedDLCForm(QDialog):
     def __init__(self, app_controller: AppController) -> None:
         super().__init__()
         self.app_controller = app_controller
-        self.vanilla_source = self.app_controller.file_system.load_order.sources[0] #this can be safely assumed
+        self.vanilla_source = self.app_controller.file_system.load_order.sources[0]
         self.workspace = self.app_controller.file_system.workspace
 
         self.setWindowTitle("Configure Loaded DLC")
@@ -41,9 +42,6 @@ class ConfigureLoadedDLCForm(QDialog):
     def _submit(self) -> None:
         workspace_candidate = copy.deepcopy(self.workspace)
         for checkbox in self.dlc_elements:
-            workspace_candidate.set_dlc_status(
-                checkbox.dlc.identifier, 
-                checkbox.isChecked()
-            )
+            workspace_candidate.set_dlc_status(checkbox.dlc.identifier, checkbox.isChecked())
         self.accept()
         self.app_controller.reload_workspace(workspace_candidate)
