@@ -7,7 +7,7 @@ from App.AppData import APPNAME
 from App.AppLogger import AppLogger
 
 
-def could_not_load_mod_critical(parent: QWidget, exc: Exception, traceback: str) -> None:
+def could_not_load_workspace_critical(parent: QWidget, exc: Exception, traceback: str) -> None:
     msg = QMessageBox(parent)
     msg.setIcon(QMessageBox.Critical)
     msg.setWindowTitle("Mod Could not be loaded")

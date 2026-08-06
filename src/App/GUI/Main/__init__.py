@@ -16,9 +16,10 @@ from App.Contracts.Enums import ChangeState, PropagationType
 from App.Enums import PDXMetadata
 from App.GUI.Forms.Search import SearchForm
 from App.GUI.Forms.Settings import SettingsForm
+from App.GUI.Forms.DLCConfig import ConfigureLoadedDLCForm
 from App.GUI.Main.Contents import ContentsPanel
 from App.GUI.Main.InlineEdit import InLineEditManager
-from App.GUI.Main.ModPanel import ModPanel
+from App.GUI.Main.SourceDirectoryPanel import SourceDirectoryTree
 from App.GUI.Menus.Topbar import Topbar
 from App.GUI.Widgets.FileDialogues import (
     select_mod_file,
@@ -27,7 +28,7 @@ from App.GUI.Widgets.FileDialogues import (
 )
 from App.GUI.Widgets.IconPreview import IconPreviewDialog
 from App.GUI.Widgets.PopupModels import (
-    could_not_load_mod_critical,
+    could_not_load_workspace_critical,
     file_is_unsupported,
     no_icon_available_warning,
 )
@@ -52,17 +53,18 @@ class MainWindow(QMainWindow):
         self.addToolBar(self.topbar)
         self.topbar.request_load_mod.connect(self.load_mod_requested)
         self.topbar.request_load_vanilla.connect(self.app_controller.load_vanilla_files)
-        self.topbar.request_load_workspace.connect(self.load_workspace)
+        self.topbar.request_load_workspace.connect(self.load_workspace_requested)
         self.topbar.request_workspace_save.connect(self.save_workspace_as_file)
         self.topbar.request_settings_window.connect(self.settings_window_requested)
+        self.topbar.request_dlc_change.connect(lambda: ConfigureLoadedDLCForm(self.app_controller))
 
         self.splitter = QSplitter(Qt.Horizontal)
         self.setCentralWidget(self.splitter)
 
-        self.mod_panel = ModPanel(self.app_controller)
-        self.mod_panel.setMinimumWidth(150)
-        self.splitter.addWidget(self.mod_panel)
-        self.mod_panel.request_load_block.connect(self.load_file)
+        self.directory_tree = SourceDirectoryTree(self.app_controller)
+        self.directory_tree.setMinimumWidth(150)
+        self.splitter.addWidget(self.directory_tree)
+        self.directory_tree.request_load_block.connect(self.load_file)
 
         self.contents_panel = ContentsPanel(self.app_controller)
         self.contents_panel.setMinimumWidth(300)
@@ -92,10 +94,10 @@ class MainWindow(QMainWindow):
 
         match type:
             case PropagationType.NODE:
-                self.mod_panel.set_file_state(file, ChangeState.MODIFIED)
+                self.directory_tree.set_file_state(file, ChangeState.MODIFIED)
                 recurse(node)
             case PropagationType.FILE:
-                self.mod_panel.set_file_state(file, state)
+                self.directory_tree.set_file_state(file, state)
                 if file is self.app_controller.file_system.open_file:
                     try:
                         for node in file.file.nodes:
@@ -125,17 +127,17 @@ class MainWindow(QMainWindow):
         path = select_mod_file(self)
         self.app_controller.add_mod_to_workspace(path)
 
-    def load_workspace(self) -> None:
+    def load_workspace_requested(self) -> None:
         path = workspace_selector(self)
         if path:
             self.app_controller.load_workspace(path)
 
-    def load_mod(self, source: ParadoxSource) -> None:
-        self.mod_panel.populate_tree(source)
+    def load_workspace(self, source: ParadoxSource) -> None:
+        self.directory_tree.populate_tree(source)
         self.topbar._enable_actions()
 
     def load_workspace_failed(self, exc: Exception, tb: str) -> None:
-        could_not_load_mod_critical(self, exc, tb)
+        could_not_load_workspace_critical(self, exc, tb)
 
     def save_workspace_as_file(self) -> None:
         path = workspace_save_selector(self)

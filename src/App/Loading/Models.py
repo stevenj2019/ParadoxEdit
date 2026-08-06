@@ -65,6 +65,7 @@ class FileReference:
 
 @dataclass
 class ParadoxDLC:
+    identifier: str
     name: str
     path: Path
     enabled: bool = True

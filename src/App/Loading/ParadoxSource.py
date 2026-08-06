@@ -120,7 +120,7 @@ class ParadoxVanilla(ParadoxSource):
         self._process_dlcs()
 
     def _process_dlcs(self) -> None:
-        def _read_dlc_descriptor(directory: Path) -> tuple[str, ParadoxDLC]:
+        def _read_dlc_descriptor(directory: Path) -> ParadoxDLC|None:
             def _extract_dlc_archive(dlc_identifier: str, archive_path: Path) -> Path:
                 extract_path = Path(self.dlc_cache.name) / dlc_identifier
                 extract_path.mkdir()
@@ -132,7 +132,7 @@ class ParadoxVanilla(ParadoxSource):
             descriptor = next(directory.glob("*.dlc"), None)
 
             if not descriptor:
-                return None, None
+                return None
 
             descriptor_object = ParadoxScriptParser(str(descriptor))
             dlc_identifier = descriptor.stem
@@ -153,10 +153,10 @@ class ParadoxVanilla(ParadoxSource):
                 archive_path = self.file_path / dlc_archive.value.value
                 dlc_path = _extract_dlc_archive(dlc_identifier, archive_path)
 
-            return (
-                dlc_identifier,
-                ParadoxDLC(name=dlc_name.value.value, path=dlc_path, enabled=enabled),
-            )
+            return ParadoxDLC(identifier=dlc_identifier, 
+                              name=dlc_name.value.value, 
+                              path=dlc_path, 
+                              enabled=enabled)
 
         def _load_dlc_files(directory: Path) -> None:
             for root, _, files in os.walk(directory):
@@ -169,10 +169,10 @@ class ParadoxVanilla(ParadoxSource):
         dlc_path = self.file_path / "dlc"
         for directory in sorted(path for path in dlc_path.iterdir() if path.is_dir()):
             AppLogger.info(f"loading {str(directory.name)}")
-            dlc_id, dlc_obj = _read_dlc_descriptor(directory)
-            if not dlc_id:
+            dlc_obj = _read_dlc_descriptor(directory)
+            if not dlc_obj:
                 continue
-            self.dlcs[dlc_id] = dlc_obj
+            self.dlcs[dlc_obj.identifier] = dlc_obj
             if dlc_obj.enabled:
                 _load_dlc_files(dlc_obj.path)
 

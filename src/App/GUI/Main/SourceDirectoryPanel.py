@@ -26,7 +26,7 @@ from App.Loading.Models import FileReference
 from App.Loading.ParadoxSource import ParadoxMod, ParadoxSource, ParadoxVanilla
 
 
-class ModPanel(QWidget):
+class SourceDirectoryTree(QWidget):
     request_load_block = pyqtSignal(object, bool)
     load_file = pyqtSignal()
 
