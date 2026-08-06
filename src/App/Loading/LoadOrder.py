@@ -14,13 +14,12 @@ class ParadoxLoadOrder:
         vanilla = ParadoxVanilla(path, self.workspace.vanilla)
         self.sources.append(vanilla)
         self.workspace.vanilla.loaded = True
-        self.workspace.vanilla.dlcs = {key: obj.enabled for key, obj in vanilla.dlcs.items()}
+        self.workspace.vanilla.dlcs = {obj.identifier: obj.enabled for obj in vanilla.dlcs}
 
     def load_mod(self, path: Path) -> None:
         self.sources.append(ParadoxMod(path))
 
     def resolve(self) -> None:
-        # self._resolve_dependencies()
         dependency_graph = self._build_dependency_graph()
         self.sources = self._resolve_load_order(dependency_graph)
         self._resolve_file_overrides()

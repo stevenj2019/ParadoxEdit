@@ -114,7 +114,7 @@ class ParadoxSource:
 class ParadoxVanilla(ParadoxSource):
     def __init__(self, path: Path, workspace: Workspace._VanillaWorkspace) -> None:
         super().__init__("Vanilla", path, ReadOnlyContext, True)
-        self.dlcs: dict[str, ParadoxDLC] = dict()
+        self.dlcs: list[ParadoxDLC] = list()
         self.vanilla_workspace = workspace
         self.dlc_cache = TemporaryDirectory("paradoxedit_dlc_")
         self._process_dlcs()
@@ -172,7 +172,8 @@ class ParadoxVanilla(ParadoxSource):
             dlc_obj = _read_dlc_descriptor(directory)
             if not dlc_obj:
                 continue
-            self.dlcs[dlc_obj.identifier] = dlc_obj
+            self.dlcs.append(dlc_obj)
+            # self.dlcs[dlc_obj.identifier] = dlc_obj
             if dlc_obj.enabled:
                 _load_dlc_files(dlc_obj.path)
 
