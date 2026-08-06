@@ -51,11 +51,11 @@ class MainWindow(QMainWindow):
 
         self.topbar = Topbar(self.app_controller)
         self.addToolBar(self.topbar)
-        self.topbar.request_load_mod.connect(self.load_mod_requested)
-        self.topbar.request_load_vanilla.connect(self.app_controller.load_vanilla_files)
-        self.topbar.request_load_workspace.connect(self.load_workspace_requested)
-        self.topbar.request_workspace_save.connect(self.save_workspace_as_file)
-        self.topbar.request_settings_window.connect(self.settings_window_requested)
+        self.topbar.request_load_mod.connect(self._load_mod_requested)
+        self.topbar.request_load_vanilla.connect(self.app_controller.load_vanilla_source)
+        self.topbar.request_load_workspace.connect(self._load_workspace_requested)
+        self.topbar.request_workspace_save.connect(self._save_workspace_as_file)
+        self.topbar.request_settings_window.connect(self._settings_window_requested)
         self.topbar.request_dlc_change.connect(lambda: ConfigureLoadedDLCForm(self.app_controller))
 
         self.splitter = QSplitter(Qt.Horizontal)
@@ -115,7 +115,7 @@ class MainWindow(QMainWindow):
                 widget = widget.parent()
             self.search_window_requested()
 
-    def settings_window_requested(self) -> None:
+    def _settings_window_requested(self) -> None:
         settings = SettingsForm("PDXEdit Settings", self.app_controller)
         settings.exec_()
 
@@ -123,11 +123,11 @@ class MainWindow(QMainWindow):
         self.search = SearchForm(self.app_controller)
         self.search.show()
 
-    def load_mod_requested(self) -> None:
+    def _load_mod_requested(self) -> None:
         path = select_mod_file(self)
         self.app_controller.add_mod_to_workspace(path)
 
-    def load_workspace_requested(self) -> None:
+    def _load_workspace_requested(self) -> None:
         path = workspace_selector(self)
         if path:
             self.app_controller.load_workspace(path)
@@ -139,7 +139,7 @@ class MainWindow(QMainWindow):
     def load_workspace_failed(self, exc: Exception, tb: str) -> None:
         could_not_load_workspace_critical(self, exc, tb)
 
-    def save_workspace_as_file(self) -> None:
+    def _save_workspace_as_file(self) -> None:
         path = workspace_save_selector(self)
         if path:
             self.app_controller.save_workspace(path)
