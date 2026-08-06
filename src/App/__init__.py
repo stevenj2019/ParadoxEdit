@@ -105,7 +105,7 @@ class AppController(QObject):
 
         self.app.exec_()
 
-    def load_vanilla_files(self) -> None:
+    def load_vanilla_source(self) -> None:
         workspace_candidate = copy.deepcopy(self.file_system.workspace)
         workspace_candidate.set_vanilla_status(True)
 
@@ -144,7 +144,7 @@ class AppController(QObject):
 
     def workspace_loaded(self, result: ModLoaderResult) -> None:
         self.file_system.load_workspace(result.workspace, result.load_order)
-        self.main.load_mod(result.load_order)
+        self.main.load_workspace(result.load_order)
         AppLogger.workspace_metadata_logger(result.workspace, result.load_order)
         self.loading_screen.close()
         self.thread.quit()
@@ -165,7 +165,7 @@ class AppController(QObject):
             qdarktheme.load_stylesheet("dark" if self.configuration.dark_mode else "light")
         )
         self.style_manager.reload_icons()
-        self.main.mod_panel.refresh_icons()
+        self.main.directory_tree.refresh_icons()
 
     def _refresh_file(self) -> None:
         for file in self._batch_file:
@@ -263,13 +263,13 @@ class AppController(QObject):
             self.registry.purge_file_data(file)
             self.registry.load_file_data(file.directory.source, file)
         self.file_system.change_tracker.set_file_state(request.file, request.state)
-        self.main.mod_panel.add_file(request.directory, request.file)
-        self.main.mod_panel.set_file_state(request.file, request.state)
+        self.main.directory_tree.add_file(request.directory, request.file)
+        self.main.directory_tree.set_file_state(request.file, request.state)
 
     def _request_file_unload(self, file: FileReference) -> None:
         if self.file_system.open_file is file:
             self.main.contents_panel.script_view.unload_block()
-        self.main.mod_panel.remove_file(file)
+        self.main.directory_tree.remove_file(file)
         file.directory.delete_file(file)
         self.file_system.change_tracker.clear_file_state(file)
         self.registry.purge_file_data(file)
