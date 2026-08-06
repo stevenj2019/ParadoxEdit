@@ -8,7 +8,6 @@ if TYPE_CHECKING:
 import sys
 from pathlib import Path
 
-import qdarktheme
 from PyQt5.QtWidgets import (
     QCheckBox,
     QDialog,
@@ -105,29 +104,15 @@ class SettingsForm(QDialog):
     def _get_paradox_appdata(self) -> None:
         match sys.platform:
             case "win32":
-                return (
-                    Path.home()
-                    / "Documents"
-                    / "Paradox Interactive"
-                    / "Hearts of Iron IV"
-                )
+                return Path.home() / "Documents" / "Paradox Interactive" / "Hearts of Iron IV"
             case "darwin":
-                return (
-                    Path.home()
-                    / "Documents"
-                    / "Paradox Interactive"
-                    / "Hearts of Iron IV"
-                )
+                return Path.home() / "Documents" / "Paradox Interactive" / "Hearts of Iron IV"
             case "linux":
                 return (
-                    Path.home()
-                    / ".local"
-                    / "share"
-                    / "Paradox Interactive"
-                    / "Hearts of Iron IV"
+                    Path.home() / ".local" / "share" / "Paradox Interactive" / "Hearts of Iron IV"
                 )
             case _:
-                #flash error
+                # flash error
                 return None
 
     def browse_game_install_path(self) -> None:
@@ -152,10 +137,7 @@ class SettingsForm(QDialog):
             self.game_install_path.is_dir() and (self.game_install_path / "pdx_launcher").is_dir()
         ):
             game_dir_error = True
-        if not (
-            self.appdata_path.is_dir() and
-            (self.appdata_path / "mod").is_dir()
-        ):
+        if not (self.appdata_path.is_dir() and (self.appdata_path / "mod").is_dir()):
             mod_dir_error = True
 
         if not (game_dir_error or mod_dir_error):

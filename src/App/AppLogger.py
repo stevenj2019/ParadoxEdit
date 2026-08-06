@@ -146,7 +146,8 @@ class AppLogger:
             ##########################
             ##  Workspace Metadata  ##
             ##########################
-            VanillaLoad:   {workspace.vanilla_loaded}
+            VanillaLoad:   {workspace.vanilla.loaded}
+            DLCS:          {len(workspace.vanilla.dlcs)}
             Mods:          {len(workspace.mods)}
             ProcessMemory: {round(psutil.Process().memory_info().rss / (1024**3), 2)} GiB
             LoadOrder:"""

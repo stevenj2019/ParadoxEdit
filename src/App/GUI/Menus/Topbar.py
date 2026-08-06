@@ -33,40 +33,33 @@ class Topbar(QToolBar):
             ActionGroup(
                 "File",
                 [
-                    Action("Save Open",
-                           lambda: self.app_controller.request_save.emit(SaveTarget.OPEN),
-                           False,
+                    Action(
+                        "Save Open",
+                        lambda: self.app_controller.request_save.emit(SaveTarget.OPEN),
+                        False,
                     ),
-                    Action("Save All",
-                           lambda: self.app_controller.request_save.emit(SaveTarget.ALL),
-                           False,
+                    Action(
+                        "Save All",
+                        lambda: self.app_controller.request_save.emit(SaveTarget.ALL),
+                        False,
                     ),
                 ],
             ),
             ActionGroup(
                 "Workspace",
                 [
-                    Action("Load Vanilla to Workspace",
-                           self.request_load_vanilla.emit,
-                           True,
+                    Action(
+                        "Load Vanilla to Workspace",
+                        self.request_load_vanilla.emit,
+                        True,
                     ),
-                    Action("Load Mod to Workspace", 
-                           self.request_load_mod.emit, 
-                           True),
-                    Action("Load Workspace", 
-                           self.request_load_workspace.emit, 
-                           True),
-                    Action("Save Workspace as File", 
-                           self.request_workspace_save.emit, 
-                           True),
+                    Action("Load Mod to Workspace", self.request_load_mod.emit, True),
+                    Action("Load Workspace", self.request_load_workspace.emit, True),
+                    Action("Save Workspace as File", self.request_workspace_save.emit, True),
                 ],
             ),
-            Action("Settings", 
-                   self.request_settings_window.emit, 
-                   True),
-            Action("Help", 
-                   HelpDialog, 
-                   True),
+            Action("Settings", self.request_settings_window.emit, True),
+            Action("Help", HelpDialog, True),
         ]
 
     def _build_toolbar(self) -> None:

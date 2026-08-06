@@ -62,8 +62,8 @@ class LoadProcess(QObject):
 
     def run(self) -> None:
         try:
-            load_order = ParadoxLoadOrder(True)
-            if self.workspace.vanilla_loaded:
+            load_order = ParadoxLoadOrder(self.workspace)
+            if self.workspace.vanilla.loaded:
                 self.progress_message.emit("Loading Vanilla Files")
                 load_order.load_vanilla(self.game_path)
 

@@ -61,3 +61,10 @@ class FileReference:
                 self.file.to_pdx_file()
             case IconFile():
                 shutil.copyfile(self.file.source_path, self.file.filepath)
+
+
+@dataclass
+class ParadoxDLC:
+    name: str
+    path: Path
+    enabled: bool = True

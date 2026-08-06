@@ -160,13 +160,9 @@ class AppController(QObject):
         self.file_system.workspace.write_file(file_path)
 
     def toggle_dark_mode(self) -> None:
-        self.configuration.change_setting(
-            dark_mode=not (self.configuration.dark_mode)
-        )
+        self.configuration.change_setting(dark_mode=not (self.configuration.dark_mode))
         self.app.setStyleSheet(
-            qdarktheme.load_stylesheet(
-                "dark" if self.configuration.dark_mode else "light"
-            )
+            qdarktheme.load_stylesheet("dark" if self.configuration.dark_mode else "light")
         )
         self.style_manager.reload_icons()
         self.main.mod_panel.refresh_icons()

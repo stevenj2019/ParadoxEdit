@@ -8,7 +8,9 @@ if TYPE_CHECKING:
 
 import json
 import sys
+from dataclasses import dataclass, field
 from pathlib import Path
+from typing import Self
 
 from platformdirs import user_config_dir
 
@@ -119,34 +121,53 @@ class ChangeTracker:
                 pass
 
 
+# TODO needs updates
 class Workspace:
+    @dataclass
+    class _VanillaWorkspace:
+        loaded: bool = False
+        dlcs: dict[str, bool] = field(default_factory=dict)
+
+        def _to_json(self) -> dict:
+            return {
+                "loaded": self.loaded,
+                "dlcs": dict(sorted(self.dlcs.items())),
+            }
+
+        @classmethod
+        def from_json(cls, data: dict) -> Self:
+            return cls(loaded=data["loaded"], dlcs=data["dlcs"])
+
     def __init__(self) -> None:
-        self.vanilla_loaded: bool = False
-        self.mods: list[str] = []
+        self.vanilla = self._VanillaWorkspace()
+        self.mods: list[Path] = []
 
     def set_vanilla_status(self, enabled: bool) -> None:
-        self.vanilla_loaded = enabled
+        self.vanilla.loaded = enabled
+
+    def set_dlc_status(self, dlc: str, enabled: bool) -> None:
+        self.vanilla.dlcs[dlc] = enabled
 
     def add_mod_to_workspace(self, descriptor_path: Path) -> None:
         if descriptor_path not in self.mods:
             self.mods.append(descriptor_path)
 
     def _to_json(self) -> dict:
-        return {"vanilla_loaded": self.vanilla_loaded, "mods": [str(mod) for mod in self.mods]}
+        return {"vanilla": self.vanilla._to_json(), "mods": [str(mod) for mod in self.mods]}
 
     def read_file(self, path: Path) -> None:
         with path.open("r", encoding="UTF-8") as FILE:
             config = json.load(FILE)
 
-        self.vanilla_loaded = config["vanilla_loaded"]
+        # self.vanilla = config["vanilla"]
+        self.vanilla = self._VanillaWorkspace.from_json(config["vanilla"])
         for mod in config["mods"]:
             mod_path = Path(mod)
             self.mods.append(mod_path)
 
     def write_file(self, path: Path) -> None:
-        path.touch()
         with path.open("w", encoding="UTF-8") as CONFIG_FILE:
-            json.dump(self._to_json(), CONFIG_FILE)
+            json.dump(self._to_json(), CONFIG_FILE, indent=4)
 
 
 class FilesystemMananger:

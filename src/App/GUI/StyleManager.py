@@ -7,9 +7,9 @@ from PyQt5.QtGui import QIcon, QPainter, QPixmap
 from PyQt5.QtSvg import QSvgRenderer
 
 from App.Contracts.Enums import ChangeState
-from App.Loading.ParadoxSource import ParadoxSource
 from App.Loading.Directories.Base import GenericDirectory
-from App.Loading.Models import IconFile, UnloadedFile, FileReference
+from App.Loading.Models import FileReference, IconFile, UnloadedFile
+from App.Loading.ParadoxSource import ParadoxSource
 from App.Services import ConfigurationManager
 from ParadoxParser import ParadoxLocParser, ParadoxScriptParser
 
@@ -79,7 +79,7 @@ class StyleManager:
     # def get_icon(self, cls: type) -> QIcon:
     #     return self._icons[cls]
 
-    def icon_for(self, entry:GenericDirectory|FileReference) -> QIcon:
+    def icon_for(self, entry: ParadoxSource | GenericDirectory | FileReference) -> QIcon:
         match entry:
             case ParadoxSource():
                 return self._icons[ParadoxSource]

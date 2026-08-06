@@ -1,12 +1,16 @@
 import os
 from pathlib import Path
+from tempfile import TemporaryDirectory
+from zipfile import ZipFile
 
 from App.AppLogger import AppLogger
 from App.Contexts.Base import ParadoxContext, ReadOnlyContext
 from App.Loading.Directories import DIRECTORY_REGISTRY
 from App.Loading.Directories.Base import GenericDirectory
-from App.Loading.Models import FileReference
+from App.Loading.Models import FileReference, ParadoxDLC
+from App.Services import Workspace
 from ParadoxParser import ParadoxScriptParser
+from ParadoxParser.ParadoxNodes import GenericKeyValue
 from ParadoxParser.queries import all_keyvalues, find_block, find_keyvalue
 
 PARADOX_ROOT_DIRECTORIES = [
@@ -108,23 +112,69 @@ class ParadoxSource:
 
 
 class ParadoxVanilla(ParadoxSource):
-    def __init__(self, path: Path) -> None:
+    def __init__(self, path: Path, workspace: Workspace._VanillaWorkspace) -> None:
         super().__init__("Vanilla", path, ReadOnlyContext, True)
-        self._apply_dlc_files()
+        self.dlcs: dict[str, ParadoxDLC] = dict()
+        self.vanilla_workspace = workspace
+        self.dlc_cache = TemporaryDirectory("paradoxedit_dlc_")
+        self._process_dlcs()
 
-    def _apply_dlc_files(self) -> None:
-        dlc_path = self.file_path / "dlc"
-        # dlc_path = Path(os.path.join(self.file_path, "dlc"))
-        print(dlc_path)
-        dlcs = sorted(path for path in dlc_path.iterdir() if path.is_dir())
-        for dlc in dlcs:
-            AppLogger.info(f"loading {str(dlc.name)}")
-            for root, dirs, files in os.walk(dlc):
+    def _process_dlcs(self) -> None:
+        def _read_dlc_descriptor(directory: Path) -> tuple[str, ParadoxDLC]:
+            def _extract_dlc_archive(dlc_identifier: str, archive_path: Path) -> Path:
+                extract_path = Path(self.dlc_cache.name) / dlc_identifier
+                extract_path.mkdir()
+                with ZipFile(archive_path, "r") as archive:
+                    archive.extractall(extract_path)
+
+                return extract_path
+
+            descriptor = next(directory.glob("*.dlc"), None)
+
+            if not descriptor:
+                return None, None
+
+            descriptor_object = ParadoxScriptParser(str(descriptor))
+            dlc_identifier = descriptor.stem
+            dlc_name = find_keyvalue(descriptor_object, "name")
+            dlc_rel_path = find_keyvalue(descriptor_object, "path")
+            dlc_archive = find_keyvalue(descriptor_object, "archive")
+            enabled = self.vanilla_workspace.dlcs.setdefault(dlc_identifier, True)
+
+            assert isinstance(dlc_name, GenericKeyValue), f"{dlc_identifier} has no 'name' value"
+            has_content = isinstance(dlc_rel_path, GenericKeyValue) or isinstance(
+                dlc_archive, GenericKeyValue
+            )
+            assert has_content, f"{dlc_identifier} has no 'path' or 'archive' value"
+
+            if dlc_rel_path:
+                dlc_path = self.file_path / dlc_rel_path.value.value
+            else:
+                archive_path = self.file_path / dlc_archive.value.value
+                dlc_path = _extract_dlc_archive(dlc_identifier, archive_path)
+
+            return (
+                dlc_identifier,
+                ParadoxDLC(name=dlc_name.value.value, path=dlc_path, enabled=enabled),
+            )
+
+        def _load_dlc_files(directory: Path) -> None:
+            for root, _, files in os.walk(directory):
                 for file in files:
                     path = Path(os.path.join(root, file))
-                    relative_path = path.relative_to(dlc)
-                    directory = self._ensure_directory(relative_path.parent)
-                    directory.add_file(path, file)
+                    relative_path = path.relative_to(directory)
+                    target_directory = self._ensure_directory(relative_path.parent)
+                    target_directory.add_file(path, file)
+
+        dlc_path = self.file_path / "dlc"
+        for directory in sorted(path for path in dlc_path.iterdir() if path.is_dir()):
+            AppLogger.info(f"loading {str(directory.name)}")
+            dlc_id, dlc_obj = _read_dlc_descriptor(directory)
+            if not dlc_id:
+                continue
+            self.dlcs[dlc_id] = dlc_obj
+            if dlc_obj.enabled:
+                _load_dlc_files(dlc_obj.path)
 
 
 class ParadoxMod(ParadoxSource):
@@ -143,7 +193,7 @@ class ParadoxMod(ParadoxSource):
         self.mod_name = mod_name.value.value if mod_name else "Unnamed Mod"
 
         file_path = find_keyvalue(descriptor_file, "path")
-        self.file_path = Path(file_path.value.value) if file_path else None 
+        self.file_path = Path(file_path.value.value) if file_path else None
 
         self.replace_paths = []
         # replace_paths = find_keyvalue(descriptor_file, "replace_path")

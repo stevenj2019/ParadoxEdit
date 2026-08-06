@@ -74,14 +74,13 @@ class ModPanel(QWidget):
                 name="Descriptor",
                 item=source.descriptor_object,
                 item_type=TreeItemType.DESCRIPTOR,
-                icon=self.app_controller.style_manager.icon_for(source.descriptor_object)
+                icon=self.app_controller.style_manager.icon_for(source.descriptor_object),
             )
             self.node_to_item[source.descriptor_object] = item
             root.addChild(item)
 
         for entry in source.root.directories.values():
             self._build_directory_item(root, entry, isinstance(source, ParadoxVanilla))
-
 
     def _build_directory_item(
         self, parent_item: QTreeWidgetItem, directory: GenericDirectory, read_only: bool
@@ -100,7 +99,6 @@ class ModPanel(QWidget):
 
         for file in directory.files.values():
             self._build_file_item(item, file, read_only)
-
 
     def _build_file_item(
         self, parent_item: QTreeWidgetItem, file: FileReference, read_only: bool

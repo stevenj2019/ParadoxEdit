@@ -9,6 +9,7 @@ if TYPE_CHECKING:
 from pathlib import Path
 
 from App.Contexts.Base import ParadoxContext, ReadOnlyContext
+from App.Contexts.GFX import GFXContext
 from App.Loading.Directories.Base import GenericDirectory
 from App.Loading.Models import IconFile
 from ParadoxParser import ParadoxScriptParser as PDXScriptFile
@@ -18,6 +19,7 @@ FILE_TYPES = {
     ".dds": {"context": ReadOnlyContext, "class": IconFile},
     ".png": {"context": ReadOnlyContext, "class": IconFile},
     ".asset": {"context": ParadoxContext, "class": PDXScriptFile},
+    ".gfx": {"context": GFXContext, "class": PDXScriptFile},
 }
 
 

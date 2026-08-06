@@ -29,7 +29,7 @@ def select_mod_file(parent: QMainWindow) -> Path | None:
         parent,
         "Select Paradox descriptor.mod file",
         ""
-        if not parent.app_controller.configuration.appdata_path 
+        if not parent.app_controller.configuration.appdata_path
         else str(parent.app_controller.configuration.appdata_path / "mod"),
         "Paradox Mod Files (*.mod);;All Files (*)",
         options=options,

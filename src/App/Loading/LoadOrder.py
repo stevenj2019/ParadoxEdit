@@ -2,15 +2,19 @@ from pathlib import Path
 
 from App.Loading.Directories.Base import GenericDirectory
 from App.Loading.ParadoxSource import ParadoxMod, ParadoxSource, ParadoxVanilla
+from App.Services import Workspace
 
 
 class ParadoxLoadOrder:
-    def __init__(self, vanilla_loaded: bool) -> None:
-        self.vanilla_loaded = vanilla_loaded
+    def __init__(self, workspace: Workspace) -> None:
+        self.workspace = workspace
         self.sources: list[ParadoxSource] = []
 
     def load_vanilla(self, path: Path) -> None:
-        self.sources.append(ParadoxVanilla(path))
+        vanilla = ParadoxVanilla(path, self.workspace.vanilla)
+        self.sources.append(vanilla)
+        self.workspace.vanilla.loaded = True
+        self.workspace.vanilla.dlcs = {key: obj.enabled for key, obj in vanilla.dlcs.items()}
 
     def load_mod(self, path: Path) -> None:
         self.sources.append(ParadoxMod(path))
