@@ -22,7 +22,7 @@ class ConfigureLoadedDLCForm(QDialog):
         self.dlc_elements = list()
 
         self.dlc_grid = QGridLayout()
-        for index, dlc in enumerate(self.vanilla_source.dlcs.values()):
+        for index, dlc in enumerate(self.vanilla_source.dlcs):
             checkbox = QCheckBox(dlc.name)
             checkbox.setChecked(dlc.enabled)
             checkbox.dlc = dlc
