@@ -12,14 +12,13 @@ if TYPE_CHECKING:
     from App.Loading.ParadoxSource import ParadoxSource
 from dataclasses import dataclass
 
-from ParadoxParser import ParadoxLocParser as PDXLocFile
-from ParadoxParser import ParadoxScriptParser as PDXScriptFile
+from App.Loading.Models import FileReference
 from ParadoxParser.ParadoxNodes import GenericBlock, GenericKeyValue, GenericNode
 
 
 @dataclass
 class FileContext:
-    target: ParadoxSource | GenericDirectory | PDXScriptFile | PDXLocFile
+    target: ParadoxSource | GenericDirectory | FileReference
     context: ParadoxFileContext
 
 

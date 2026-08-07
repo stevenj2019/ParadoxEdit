@@ -9,6 +9,7 @@ import copy
 
 from PyQt5.QtWidgets import QComboBox, QDialog, QFormLayout, QLineEdit, QPushButton
 
+from ParadoxParser.queries import all_nodes
 from App.Contracts import FileMutationRequest
 from App.Contracts.Enums import ChangeState
 from App.Loading.Models import FileReference, IconFile
@@ -94,17 +95,19 @@ class AddReplacePathForm(QDialog):
         self.form.addRow("📦", self.copy_to_source_combo)
 
         self.submit_button = QPushButton("Copy")
-        self.submit_button.clicked.connect(self._submit)
+        # self.submit_button.clicked.connect(self._submit)
         self.form.addRow(self.submit_button)
         self.exec_()
 
-    def _submit(self) -> None:
-        directory_key = next(
-            key
-            for key, directory in self.file.directory.source.directories.items()
-            if directory is self.file.directory
-        )
-        source = self.copy_to_source_combo.currentData()
+    # def _submit(self) -> None:
+    #     def _mutate_source_descriptor() -> None:
+
+    #     directory_key = next(
+    #         key
+    #         for key, directory in self.file.directory.source.directories.items()
+    #         if directory is self.file.directory
+    #     )
+    #     source = self.copy_to_source_combo.currentData()
         #TODO: complete
         #mutate source.descriptor_object
         #unload everything within directory_key, and prune

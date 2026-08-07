@@ -21,10 +21,10 @@ from App.Contracts.Enums import ChangeState
 from App.GUI.Actions import Action, ActionGroup, ActionsResult, ActionSubMenu
 from App.GUI.Enums import ExpansionMode
 from App.GUI.Forms.DLCConfig import ConfigureLoadedDLCForm
-from App.GUI.Forms.LoadOrderForms import AddReplacePathForm, CopyFileForm
+from App.GUI.Forms.LoadOrderForms import CopyFileForm, AddReplacePathForm
 from App.Loading.Directories.Base import GenericDirectory
 from App.Loading.ParadoxSource import ParadoxMod, ParadoxVanilla
-from ParadoxParser import ParadoxLocParser as PDXLocFile
+from App.Loading.Models import FileReference
 from ParadoxParser import ParadoxScriptParser as PDXScriptFile
 from ParadoxParser.ParadoxNodes import GenericBlock
 
@@ -92,7 +92,7 @@ class GenericDirectoryMenu(GenericContextMenu):
                 self.menu_def = self._build_mod_source_menu(file_context)
             case GenericDirectory():
                 self.menu_def = self._build_directory_menu(file_context)
-            case PDXScriptFile()|PDXLocFile():
+            case FileReference():
                 self.menu_def = self._build_file_menu(file_context)
             case _:
                 pass

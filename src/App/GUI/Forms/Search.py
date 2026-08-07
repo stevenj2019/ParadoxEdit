@@ -144,7 +144,7 @@ class SearchForm(QDialog):
                 for child in node.nodes:
                     recurse(result, child)
             else:
-                if matches(search_text, node._to_string_literal().strip()):
+                if matches(search_text, node.get_display_value().strip()):
                     result.results.append(node)
 
         self.search_results = list()
@@ -173,7 +173,7 @@ class SearchForm(QDialog):
                     if isinstance(instance, GenericBlock):
                         text = f"{instance.key} = {{"
                     else:
-                        text = instance._to_string_literal().strip()
+                        text = instance.get_display_value().strip()
 
                     item = QTreeWidgetItem([text])
                     item.setData(0, QtStorage.FILE, result.file)

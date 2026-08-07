@@ -140,7 +140,7 @@ class GFXFieldContext:
             Action(
                 "Preview Icon",
                 lambda: app_controller.main.request_icon_preview.emit(
-                    node_context.key_node.value.value
+                    node_context.key_node.get_value()
                 ),
                 True,
             )

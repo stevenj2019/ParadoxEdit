@@ -11,8 +11,8 @@ from App.Loading.Directories.Base import GenericDirectory
 from App.Loading.Models import FileReference, ParadoxDLC
 from App.Services import Workspace
 from ParadoxParser import ParadoxScriptParser
-from ParadoxParser.ParadoxNodes import GenericKeyValue
-from ParadoxParser.queries import all_keyvalues, find_block, find_keyvalue
+from ParadoxParser.ParadoxNodes import GenericBlock, GenericKeyValue
+from ParadoxParser.queries import find_node, all_nodes
 
 PARADOX_ROOT_DIRECTORIES = [
     "common",
@@ -140,9 +140,9 @@ class ParadoxVanilla(ParadoxSource):
 
             descriptor_object = ParadoxScriptParser(str(descriptor))
             dlc_identifier = descriptor.stem
-            dlc_name = find_keyvalue(descriptor_object, "name")
-            dlc_rel_path = find_keyvalue(descriptor_object, "path")
-            dlc_archive = find_keyvalue(descriptor_object, "archive")
+            dlc_name = find_node(descriptor_object, GenericKeyValue, "name")
+            dlc_rel_path = find_node(descriptor_object, GenericKeyValue, "path")
+            dlc_archive = find_node(descriptor_object, GenericKeyValue, "archive")
             enabled = self.vanilla_workspace.dlcs.setdefault(dlc_identifier, True)
 
             assert isinstance(dlc_name, GenericKeyValue), f"{dlc_identifier} has no 'name' value"
@@ -152,13 +152,13 @@ class ParadoxVanilla(ParadoxSource):
             assert has_content, f"{dlc_identifier} has no 'path' or 'archive' value"
 
             if dlc_rel_path:
-                dlc_path = self.file_path / dlc_rel_path.value.value
+                dlc_path = self.file_path / dlc_rel_path.get_value()
             else:
-                archive_path = self.file_path / dlc_archive.value.value
+                archive_path = self.file_path / dlc_archive.get_value()
                 dlc_path = _extract_dlc_archive(dlc_identifier, archive_path)
 
             return ParadoxDLC(
-                identifier=dlc_identifier, name=dlc_name.value.value, path=dlc_path, enabled=enabled
+                identifier=dlc_identifier, name=dlc_name.get_value(), path=dlc_path, enabled=enabled
             )
 
         def _load_dlc_files(directory: Path) -> None:
@@ -192,18 +192,18 @@ class ParadoxMod(ParadoxSource):
     def _collect_mod_info(self) -> None:
         descriptor_file = self.descriptor_object.file
 
-        mod_name = find_keyvalue(descriptor_file, "name")
-        self.mod_name = mod_name.value.value if mod_name else "Unnamed Mod"
+        mod_name = find_node(descriptor_file, GenericKeyValue, "name")
+        self.mod_name = mod_name.get_value() if mod_name else "Unnamed Mod"
 
-        file_path = find_keyvalue(descriptor_file, "path")
-        self.file_path = Path(file_path.value.value) if file_path else None
+        file_path = find_node(descriptor_file, GenericKeyValue, "path")
+        self.file_path = Path(file_path.get_value()) if file_path else None
 
         self.replace_paths = []
-        for node in all_keyvalues(descriptor_file, "replace_path"):
-            self.replace_paths.append(node.value.value)
+        for node in all_nodes(descriptor_file, GenericKeyValue, "replace_path"):
+            self.replace_paths.append(node.get_value())
 
         self.dependencies = []
-        dependency_block = find_block(descriptor_file, "dependencies")
+        dependency_block = find_node(descriptor_file, GenericBlock, "dependencies")
         if dependency_block:
             self.dependencies = [node.value for node in dependency_block.nodes]
         AppLogger.info(f"loading {self.mod_name}@{self.file_path}")

@@ -32,7 +32,7 @@ class EventDirectory(GenericDirectory):
                 if isinstance(block, GenericBlock):
                     token = next(
                         (
-                            node.value.value
+                            node.get_value()
                             for node in block.nodes
                             if isinstance(node, GenericKeyValue) and node.key.lower() == "id"
                         ),

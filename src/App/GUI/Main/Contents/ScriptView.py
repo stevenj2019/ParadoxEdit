@@ -179,6 +179,11 @@ class ScriptView(QWidget):
         open_file_context: ParadoxContext,
         inherited_state: ChangeState = None,
     ) -> None:
+        def _display_value(value:str|int|float|bool) -> str:
+            if isinstance(value, bool): 
+                return "yes" if value else "no"
+            return str(value)
+
         match node:
             case GenericKeyValue():
                 key_editable = True
@@ -197,7 +202,12 @@ class ScriptView(QWidget):
                 value_label = ""
                 value_node = node
 
-        item = QTreeWidgetItem([value_label, str(value_node._get_value())])
+        def _display_value(value:str|int|float|bool) -> str:
+            if isinstance(value, bool): 
+                return "yes" if value else "no"
+            return str(value)
+
+        item = QTreeWidgetItem([value_label, value_node.get_display_value()])
         self.node_to_item[node] = item
         self.node_to_item[value_node] = item
 
@@ -329,4 +339,4 @@ class ScriptView(QWidget):
         if isinstance(node, GenericBlock):
             clipboard.setText(node.key)
         else:
-            clipboard.setText(node._to_string_literal().strip())
+            clipboard.setText(node.get_display_value())

@@ -4,16 +4,15 @@ from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
     from App.Loading.Directories.Base import GenericDirectory
+    from App.Contexts.Base import ParadoxContext
 
 import shutil
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Optional
 
-from App.Contexts.Base import ParadoxContext
 from ParadoxParser import ParadoxLocParser as PDXLocFile
 from ParadoxParser import ParadoxScriptParser as PDXScriptFile
-
 
 @dataclass(frozen=True)
 class UnloadedFile:

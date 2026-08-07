@@ -14,8 +14,8 @@ from App.Contexts.GFX import GFXContext
 from App.Enums import PDXMetadata
 from App.Loading.Directories.Base import GenericDirectory
 from ParadoxParser import ParadoxScriptParser as PDXScriptFile
-from ParadoxParser.ParadoxNodes import GenericBlock
-from ParadoxParser.queries import find_keyvalue
+from ParadoxParser.ParadoxNodes import GenericBlock, GenericKeyValue
+from ParadoxParser.queries import find_node
 
 FILE_TYPES = {
     "dir": {"context": ParadoxContext, "class": PDXScriptFile},
@@ -39,11 +39,11 @@ class InterfaceDirectory(GenericDirectory):
                     if isinstance(node, GenericBlock) and node.key.lower() == "spritetypes":
                         for node in node.nodes:
                             if isinstance(node, GenericBlock) and node.key.lower() == "spritetype":
-                                name = find_keyvalue(node, "name")
-                                texture = find_keyvalue(node, "texturefile")
+                                name = find_node(node, GenericKeyValue, "name")
+                                texture = find_node(node, GenericKeyValue, "texturefile")
 
                                 if name and texture:
-                                    metadata[name.value.value] = Path(
-                                        os.path.join(source.file_path, texture.value.value)
+                                    metadata[name.get_value()] = Path(
+                                        os.path.join(source.file_path, texture.get_value())
                                     )
         return {PDXMetadata.GFXIcon: metadata}

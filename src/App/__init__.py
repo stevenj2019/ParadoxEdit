@@ -25,7 +25,7 @@ from App.GUI.Forms.Settings import SettingsForm
 from App.GUI.Main import MainWindow
 from App.GUI.StyleManager import StyleManager
 from App.GUI.Widgets.PopupModels import setup_process_cancelled, unhandled_exception_popup
-from App.Loading import LoadingDialog, LoadProcess
+from App.Loading.Process import LoadingDialog, LoadProcess
 from App.Loading.Directories.Base import GenericDirectory
 from App.Loading.Models import FileReference, UnloadedFile
 from App.Loading.ParadoxSource import ParadoxMod, ParadoxSource

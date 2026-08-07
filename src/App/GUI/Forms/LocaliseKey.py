@@ -30,7 +30,7 @@ from ParadoxParser.ParadoxNodes import (
     GenericLocKey,
     GenericNode,
 )
-from ParadoxParser.queries import find_keyvalue
+from ParadoxParser.queries import find_node
 
 UNSORTED_COMMENT = "#### unsorted keys ####"
 
@@ -206,7 +206,7 @@ class BaseLocaliseForm(QDialog):
 class LocaliseNodeForm(BaseLocaliseForm):
     def __init__(self, app_controller: AppController, node: GenericKeyValue) -> None:
         super().__init__(app_controller, node, "Localise Key")
-        loc_node, exists = self._get_localisation_node(node.value.value)
+        loc_node, exists = self._get_localisation_node(node.get_value())
         self.localisation_fields.append(self._loc_key_widget(loc_node, exists))
         self._lower_form_body()
         if self.read_only:
@@ -223,7 +223,7 @@ class LocaliseEventForm(BaseLocaliseForm):
             *self._get_localisation_nodes("option", "name"),
         ]
         for node in localisation_nodes:
-            loc_node, exists = self._get_localisation_node(node.value.value)
+            loc_node, exists = self._get_localisation_node(node.get_value())
             text_edit = self._loc_key_widget(loc_node, exists)
             self.localisation_fields.append(text_edit)
 
@@ -255,10 +255,10 @@ class LocaliseFocusForm(BaseLocaliseForm):
     def __init__(self, app_controller: AppController, node: GenericBlock) -> None:
         super().__init__(app_controller, node, "Localise National Focus")
         self.localisation_fields = list()
-        focus_id_node = find_keyvalue(node, "id")
+        focus_id_node = find_node(node, GenericKeyValue, "id")
         if not focus_id_node:
             return  # error
-        id_key = focus_id_node.value.value
+        id_key = focus_id_node.get_value()
         id_loc_node, id_exists = self._get_localisation_node(id_key)
         id_text_edit = self._loc_key_widget(id_loc_node, id_exists)
         self.localisation_fields.append(id_text_edit)
