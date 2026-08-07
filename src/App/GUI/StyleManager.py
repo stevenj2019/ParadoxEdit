@@ -76,9 +76,6 @@ class StyleManager:
 
         return QIcon(coloured)
 
-    # def get_icon(self, cls: type) -> QIcon:
-    #     return self._icons[cls]
-
     def icon_for(self, entry: ParadoxSource | GenericDirectory | FileReference) -> QIcon:
         match entry:
             case ParadoxSource():

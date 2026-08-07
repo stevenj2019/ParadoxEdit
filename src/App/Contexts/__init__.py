@@ -9,6 +9,7 @@ if TYPE_CHECKING:
         ParadoxNodeContext,
     )
     from App.Loading.Directories.Base import GenericDirectory
+    from App.Loading.ParadoxSource import ParadoxSource
 from dataclasses import dataclass
 
 from ParadoxParser import ParadoxLocParser as PDXLocFile
@@ -18,7 +19,7 @@ from ParadoxParser.ParadoxNodes import GenericBlock, GenericKeyValue, GenericNod
 
 @dataclass
 class FileContext:
-    target: GenericDirectory | PDXScriptFile | PDXLocFile
+    target: ParadoxSource | GenericDirectory | PDXScriptFile | PDXLocFile
     context: ParadoxFileContext
 
 

@@ -70,3 +70,43 @@ class CopyFileForm(QDialog):
 
         self.app_controller.request_registry_cache_rebuild.emit()
         self.close()
+
+class AddReplacePathForm(QDialog):
+    def __init__(self, app_controller:AppController, file_reference:FileReference) -> None:
+        super().__init__()
+        self.app_controller = app_controller
+        self.directory = file_reference.target
+        self.load_order = self.app_controller.file_system.load_order
+        self.setWindowTitle("Add replace_path to source.")
+
+        self.resize(250, 100)
+        self.setLayout(QFormLayout())
+        self.form = self.layout()
+
+        self.file_to_copy = QLineEdit(str(self.directory.path))
+        self.file_to_copy.setEnabled(False)
+        self.form.addRow("📁", self.file_to_copy)
+
+        self.copy_to_source_combo = QComboBox()
+        for source in self.load_order.sources:
+            if not isinstance(source, ParadoxVanilla):
+                self.copy_to_source_combo.addItem(source.source_name, source)
+        self.form.addRow("📦", self.copy_to_source_combo)
+
+        self.submit_button = QPushButton("Copy")
+        self.submit_button.clicked.connect(self._submit)
+        self.form.addRow(self.submit_button)
+        self.exec_()
+
+    def _submit(self) -> None:
+        directory_key = next(
+            key
+            for key, directory in self.file.directory.source.directories.items()
+            if directory is self.file.directory
+        )
+        source = self.copy_to_source_combo.currentData()
+        #TODO: complete
+        #mutate source.descriptor_object
+        #unload everything within directory_key, and prune
+        #update UI 
+        #complete.

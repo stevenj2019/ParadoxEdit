@@ -58,10 +58,10 @@ class ParadoxFileContext:
 class ParadoxBlockContext:
     @staticmethod
     def get_actions(app_controller: AppController, block_context: BlockContext) -> ActionsResult:
-        return
+        return []
 
     def errors(app_controller: AppController, node_context: NodeContext) -> str:
-        return
+        return 
 
 
 class ParadoxNodeContext:
@@ -100,10 +100,8 @@ class ReadOnlyContext(ParadoxContext):
 class VanillaFileContext(ParadoxFileContext):
     @staticmethod
     def get_actions(app_controller: AppController, file: FileReference) -> ActionsResult:
-        from App.GUI.Forms.CopyFile import CopyFileForm
-
-        return [Action("Copy File to source...", lambda: CopyFileForm(app_controller, file), True)]
-
+        return [Action("No Actions Available", dummy, False)]
+    
     def errors(app_controller: AppController, node_context: NodeContext) -> str:
         return
 

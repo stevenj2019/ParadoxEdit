@@ -27,7 +27,7 @@ from App.GUI.StyleManager import StyleManager
 from App.GUI.Widgets.PopupModels import setup_process_cancelled, unhandled_exception_popup
 from App.Loading import LoadingDialog, LoadProcess
 from App.Loading.Directories.Base import GenericDirectory
-from App.Loading.Models import FileReference
+from App.Loading.Models import FileReference, UnloadedFile
 from App.Loading.ParadoxSource import ParadoxMod, ParadoxSource
 from App.Services import (
     ConfigurationManager,
@@ -36,6 +36,8 @@ from App.Services import (
     Workspace,
 )
 
+from ParadoxParser import ParadoxScriptParser as PDXScriptFile
+from ParadoxParser import ParadoxLocParser as PDXLocFile
 
 class AppController(QObject):
     request_node_mutation = pyqtSignal(object)
@@ -43,7 +45,6 @@ class AppController(QObject):
     request_bulk_mutation = pyqtSignal(object)
     request_file_mutation = pyqtSignal(object)
     request_file_unload = pyqtSignal(object)
-    request_registry_insert = pyqtSignal(object)
     request_registry_cache_rebuild = pyqtSignal()
     request_save = pyqtSignal(object)
 
@@ -98,7 +99,6 @@ class AppController(QObject):
         self.request_bulk_mutation.connect(self._request_bulk_mutation)
         self.request_file_mutation.connect(self._request_file_mutation)
         self.request_file_unload.connect(self._request_file_unload)
-        # self.request_registry_insert.connect(self._request_registry_insertion)
         self.request_registry_cache_rebuild.connect(self._request_registry_rebuild)
         self.request_save.connect(self._save_target)
         self.main.show()
@@ -244,17 +244,19 @@ class AppController(QObject):
             files = [target]
 
         for file in files:
-            action(file, self)
-            self.main.request_propagation.emit(
-                PropagationRequest(
-                    type=PropagationType.FILE,
-                    file=file,
-                    node=None,
-                    state=ChangeState.MODIFIED,
+            if isinstance(file.file, (PDXScriptFile, PDXLocFile)):
+                action(file, self)
+                self.main.request_propagation.emit(
+                    PropagationRequest(
+                        type=PropagationType.FILE,
+                        file=file,
+                        node=None,
+                        state=ChangeState.MODIFIED,
+                    )
                 )
-            )
-        if self.file_system.open_file.file in files:
-            self.main.load_file(self.file_system.open_file)
+        if self.file_system.open_file:
+            if self.file_system.open_file.file in files:
+                self.main.load_file(self.file_system.open_file)
 
     def _request_file_mutation(self, request: FileMutationRequest) -> None:
         file = request.file

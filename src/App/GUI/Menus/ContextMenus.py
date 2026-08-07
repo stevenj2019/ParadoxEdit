@@ -20,13 +20,16 @@ from App.Contracts import BlockMutationRequest
 from App.Contracts.Enums import ChangeState
 from App.GUI.Actions import Action, ActionGroup, ActionsResult, ActionSubMenu
 from App.GUI.Enums import ExpansionMode
+from App.GUI.Forms.DLCConfig import ConfigureLoadedDLCForm
+from App.GUI.Forms.LoadOrderForms import AddReplacePathForm, CopyFileForm
+from App.Loading.Directories.Base import GenericDirectory
+from App.Loading.ParadoxSource import ParadoxMod, ParadoxVanilla
+from ParadoxParser import ParadoxLocParser as PDXLocFile
 from ParadoxParser import ParadoxScriptParser as PDXScriptFile
 from ParadoxParser.ParadoxNodes import GenericBlock
 
 
-def dummy() -> None:
-    pass
-
+def dummy() -> None: return 
 
 class GenericContextMenu(QMenu):
     def __init__(self, parent: QTreeWidgetItem, app_controller: AppController) -> None:
@@ -82,9 +85,88 @@ class GenericDirectoryMenu(GenericContextMenu):
 
     def call(self, file_context: FileContext) -> None:
         self.clear()
-        self.menu_def = self._get_context_menu_options(file_context)
+        match file_context.target:
+            case ParadoxVanilla():
+                self.menu_def = self._build_vanilla_source_menu(file_context)
+            case ParadoxMod():
+                self.menu_def = self._build_mod_source_menu(file_context)
+            case GenericDirectory():
+                self.menu_def = self._build_directory_menu(file_context)
+            case PDXScriptFile()|PDXLocFile():
+                self.menu_def = self._build_file_menu(file_context)
+            case _:
+                pass
         self._build_menu()
 
+    def _build_vanilla_source_menu(self, file_context:FileContext) -> list[ActionGroup]:
+        return [
+            ActionGroup(
+                "Source Options",
+                [
+                    Action(
+                        "Configure Loaded DLC", 
+                        lambda: ConfigureLoadedDLCForm(self.app_controller), 
+                        True
+                    )
+                ]
+            ),
+            ActionGroup(
+                "File Options",
+                file_context.context.get_actions(self.app_controller, file_context.target)
+            )
+        ]
+
+    def _build_mod_source_menu(self, file_context:FileContext) -> list[ActionGroup]:
+        return [
+            ActionGroup(
+                "Source Options",
+                [
+                    Action(
+                        "No Actions Available", 
+                        dummy, 
+                        False
+                    )
+                ]
+            ),
+            ActionGroup(
+                "File Options",
+                file_context.context.get_actions(self.app_controller, file_context.target)
+            )
+        ]
+    
+    def _build_directory_menu(self, file_context:FileContext)-> list[ActionGroup]:
+        return [
+            ActionGroup(
+                "Directory Options",
+                [
+                    Action(
+                        "Add to replace path",
+                        lambda: AddReplacePathForm(self.app_controller, file_context),
+                        False
+                    )
+                ]
+            ),
+            ActionGroup(
+                "File Options",
+                file_context.context.get_actions(self.app_controller, file_context.target)
+            )
+        ]
+
+    def _build_file_menu(self, file_context:FileContext) -> list[ActionGroup]:
+        return [
+            ActionGroup(
+                "File Options",
+                [
+                    Action(
+                        "Copy File to Source",
+                        lambda: CopyFileForm(self.app_controller, file_context),
+                        True
+                    ),
+                    *file_context.context.get_actions(self.app_controller, file_context.target)
+                ]
+            )
+        ]
+    
     def _get_context_menu_options(self, file_context: FileContext) -> None:
         return file_context.context.get_actions(self.app_controller, file_context.target)
 

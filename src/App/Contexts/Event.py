@@ -20,6 +20,7 @@ from App.GUI.Actions import Action, ActionsResult
 from App.PDXFactory.Blocks import Events
 from ParadoxParser.ParadoxNodes import GenericBlock, GenericKeyValue, GenericNode
 
+def dummy() -> None: return
 
 class EventContext(ParadoxContext):
     @staticmethod
@@ -50,7 +51,7 @@ class EventFileContext(ParadoxFileContext):
     def get_actions(app_controller: AppController, file: FileReference) -> ActionsResult:
         return [
             *ParadoxFileContext.get_actions(app_controller, file),
-            # Action("Inject Event Logs", dummy, False),
+            Action("Inject Event Logs", dummy, False),
         ]
 
 

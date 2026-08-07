@@ -1,4 +1,3 @@
-# TODO: query tree recrusion issue, may be duplicating operations
 from __future__ import annotations
 
 from typing import TYPE_CHECKING

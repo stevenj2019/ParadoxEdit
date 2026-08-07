@@ -240,8 +240,6 @@ class ScriptView(QWidget):
             self.edit_open_request.emit(InLineEditRequest(self.tree, item, node, target))
 
     def _request_context_menu(self, pos: QPoint) -> None:
-        # TODO should be passing through NullContext to these nodes on vanilla,
-        ##### we arent, and i am over it lol
         if self.read_only:
             return
         pos = self.tree.viewport().mapFrom(self, pos)

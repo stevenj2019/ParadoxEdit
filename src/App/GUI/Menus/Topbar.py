@@ -10,7 +10,7 @@ from PyQt5.QtWidgets import QAction, QMenu, QToolBar
 from App.Contracts.Enums import SaveTarget
 from App.GUI.Actions import Action, ActionGroup, ActionsResult
 from App.GUI.Help import HelpDialog
-
+from App.Loading.ParadoxSource import ParadoxVanilla
 
 class Topbar(QToolBar):
     request_load_mod = pyqtSignal()
@@ -81,8 +81,8 @@ class Topbar(QToolBar):
         menu.addAction(action)
 
     def _enable_actions(self) -> None:
+        vanilla_loaded = any(isinstance(source, ParadoxVanilla) 
+                             for source in self.app_controller.file_system.load_order.sources)
         self.actions["Save Open"].setEnabled(True)
         self.actions["Save All"].setEnabled(True)
-        self.actions["Configure Loaded DLC"].setEnabled(
-            True
-        )  # this is a lie, should be checking if vanilla is loaded....
+        self.actions["Configure Loaded DLC"].setEnabled(vanilla_loaded)

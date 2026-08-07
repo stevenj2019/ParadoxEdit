@@ -101,19 +101,20 @@ class SettingsForm(QDialog):
         self.form.addRow(self.button)
         self.button.accepted.connect(self.submit_form)
 
-    def _get_paradox_appdata(self) -> None:
+    def _get_paradox_appdata(self) -> Path|None:
         match sys.platform:
             case "win32":
-                return Path.home() / "Documents" / "Paradox Interactive" / "Hearts of Iron IV"
+                return (
+                    Path.home() / "Documents" / "Paradox Interactive" / "Hearts of Iron IV"
+                )
             case "darwin":
-                return Path.home() / "Documents" / "Paradox Interactive" / "Hearts of Iron IV"
+                return (
+                    Path.home() / "Documents" / "Paradox Interactive" / "Hearts of Iron IV"
+                )
             case "linux":
                 return (
                     Path.home() / ".local" / "share" / "Paradox Interactive" / "Hearts of Iron IV"
                 )
-            case _:
-                # flash error
-                return None
 
     def browse_game_install_path(self) -> None:
         path = select_hoi4_install_directory(self.app_controller.main)

@@ -57,7 +57,6 @@ class ParadoxLoadOrder:
             ]
 
             if not available:
-                # circular dependency / impossible order
                 raise Exception("Unable to resolve load order")
 
             available.sort(key=lambda source: source.source_name.lower())

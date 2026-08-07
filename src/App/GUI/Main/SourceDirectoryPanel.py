@@ -152,9 +152,7 @@ class SourceDirectoryTree(QWidget):
     def remove_file(self, obj: GenericDirectory | FileReference) -> None:
         if isinstance(obj, GenericDirectory):
             obj_parent = obj.parent if obj.parent else obj.source
-            # parent = self.node_to_item[obj.parent if obj.parent else obj.source]
         else:
-            # parent = self.node_to_item[obj.directory]
             obj_parent = obj.directory
         parent_item = self.node_to_item[obj_parent]
         item = self.node_to_item[obj]

@@ -41,14 +41,15 @@ class AppLogger:
         formatter = logging.Formatter(
             "[%(asctime)s] %(levelname)s: %(message)s", datefmt="%Y-%m-%d %H:%M:%S"
         )
-        # file out
+
         file_handler = logging.FileHandler(log_file, encoding="utf-8")
         file_handler.setFormatter(formatter)
         cls._logger.addHandler(file_handler)
-        # console out
+
         console_handler = logging.StreamHandler(sys.stdout)
         console_handler.setFormatter(formatter)
         cls._logger.addHandler(console_handler)
+
         cls.info(f"Logging initialised: {log_file}")
 
     @classmethod

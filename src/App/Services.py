@@ -121,7 +121,6 @@ class ChangeTracker:
                 pass
 
 
-# TODO needs updates
 class Workspace:
     @dataclass
     class _VanillaWorkspace:

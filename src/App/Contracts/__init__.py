@@ -22,8 +22,6 @@ from ParadoxParser import GenericBlock, GenericKeyValue, GenericNode
 class ModLoaderResult:
     workspace: Workspace
     load_order: ParadoxLoadOrder
-    # tokens: dict
-    # metadata: dict
 
 
 @dataclass

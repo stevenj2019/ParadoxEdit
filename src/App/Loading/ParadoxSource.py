@@ -1,4 +1,5 @@
 import os
+from collections.abc import Iterator
 from pathlib import Path
 from tempfile import TemporaryDirectory
 from zipfile import ZipFile
@@ -38,6 +39,7 @@ class ParadoxSource:
         self.source_name = name
         self.file_path = path
         self.read_only = read_only_override
+        self.context = context_override if context_override else ParadoxContext
 
         self.context_override = context_override
         self.read_only_override = read_only_override
@@ -71,7 +73,6 @@ class ParadoxSource:
                     parent.add_file(file_path, file_name)
 
     def _ensure_directory(self, path: Path) -> None:
-        # relative = path.relative_to(self.file_path)
         if path in self.directories:
             return self.directories[path]
         parent = self._ensure_directory(path.parent)
@@ -109,6 +110,9 @@ class ParadoxSource:
             removed.delete_file(path.name)
         except KeyError:
             pass
+
+    def iter_files(self) -> Iterator[FileReference]:
+        yield from self.root.iter_files()
 
 
 class ParadoxVanilla(ParadoxSource):
@@ -172,7 +176,6 @@ class ParadoxVanilla(ParadoxSource):
             if not dlc_obj:
                 continue
             self.dlcs.append(dlc_obj)
-            # self.dlcs[dlc_obj.identifier] = dlc_obj
             if dlc_obj.enabled:
                 _load_dlc_files(dlc_obj.path)
 
@@ -196,9 +199,6 @@ class ParadoxMod(ParadoxSource):
         self.file_path = Path(file_path.value.value) if file_path else None
 
         self.replace_paths = []
-        # replace_paths = find_keyvalue(descriptor_file, "replace_path")
-        # if replace_paths:
-        #     self.replace_paths = [node.value.value for node in replace_paths]
         for node in all_keyvalues(descriptor_file, "replace_path"):
             self.replace_paths.append(node.value.value)
 
@@ -207,3 +207,7 @@ class ParadoxMod(ParadoxSource):
         if dependency_block:
             self.dependencies = [node.value for node in dependency_block.nodes]
         AppLogger.info(f"loading {self.mod_name}@{self.file_path}")
+
+    def iter_files(self) -> Iterator[FileReference]:
+        yield self.descriptor_object
+        yield from super().iter_files()

@@ -1,4 +1,3 @@
-# TODO: come back to type hint
 from pathlib import Path
 
 from PyQt5.QtWidgets import QFileDialog, QMainWindow
