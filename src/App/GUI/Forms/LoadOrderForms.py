@@ -6,15 +6,17 @@ if TYPE_CHECKING:
     from App import AppController
 
 import copy
-
+from pathlib import Path
 from PyQt5.QtWidgets import QComboBox, QDialog, QFormLayout, QLineEdit, QPushButton
 
-from ParadoxParser.queries import all_nodes
+from ParadoxParser.queries import find_nodes
+from ParadoxParser.ParadoxNodes import GenericKeyValue, GenericString
 from App.Contracts import FileMutationRequest
 from App.Contracts.Enums import ChangeState
 from App.Loading.Models import FileReference, IconFile
-from App.Loading.ParadoxSource import ParadoxVanilla
-
+from App.Loading.ParadoxSource import ParadoxVanilla, ParadoxMod
+from App.Loading.Directories.Base import GenericDirectory
+from App.Contracts import BlockMutationRequest
 
 class CopyFileForm(QDialog):
     def __init__(self, app_controller: AppController, file: FileReference) -> None:
@@ -73,7 +75,7 @@ class CopyFileForm(QDialog):
         self.close()
 
 class AddReplacePathForm(QDialog):
-    def __init__(self, app_controller:AppController, file_reference:FileReference) -> None:
+    def __init__(self, app_controller:AppController, file_reference:GenericDirectory) -> None:
         super().__init__()
         self.app_controller = app_controller
         self.directory = file_reference.target
@@ -95,21 +97,41 @@ class AddReplacePathForm(QDialog):
         self.form.addRow("📦", self.copy_to_source_combo)
 
         self.submit_button = QPushButton("Copy")
-        # self.submit_button.clicked.connect(self._submit)
+        self.submit_button.clicked.connect(self._submit)
         self.form.addRow(self.submit_button)
         self.exec_()
 
-    # def _submit(self) -> None:
-    #     def _mutate_source_descriptor() -> None:
+    #TODO directory pruning? unsure how to do it, 
+    def _submit(self) -> None:
+        def _mutate_source_descriptor(source:ParadoxMod, directory:Path) -> None:
+            file = source.descriptor_object
+            descriptor_file = file.file
+            replace_paths = find_nodes(descriptor_file, GenericKeyValue, "replace_path")
+            index = descriptor_file.nodes.index(replace_paths[-1])+1
+            new_node = GenericKeyValue("replace_path", GenericString(str(directory)))
+            self.app_controller.request_block_mutation.emit(
+                BlockMutationRequest.add(
+                    file=file,
+                    parent=descriptor_file,
+                    index=index,
+                    payload=new_node
+                )
+            )
+        def _unload_from_prior_sources(source:ParadoxMod, directory:Path) -> None:
+            for c_source in self.load_order.all_dependent_sources(source):
+                source_directory = c_source.root.resolve_directory(directory)
+                if source_directory:
+                    for file in list(source_directory.iter_files()):
+                        self.app_controller.request_file_unload.emit(file)
 
-    #     directory_key = next(
-    #         key
-    #         for key, directory in self.file.directory.source.directories.items()
-    #         if directory is self.file.directory
-    #     )
-    #     source = self.copy_to_source_combo.currentData()
-        #TODO: complete
-        #mutate source.descriptor_object
-        #unload everything within directory_key, and prune
-        #update UI 
-        #complete.
+        directory_key = next(
+            key
+            for key, directory in self.directory.source.directories.items()
+            if directory is self.directory
+        )
+        source = self.copy_to_source_combo.currentData()
+        _mutate_source_descriptor(source, directory_key)
+        _unload_from_prior_sources(source, directory_key)
+
+        self.app_controller.request_registry_cache_rebuild.emit()
+        self.accept()

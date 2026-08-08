@@ -149,7 +149,7 @@ class SourceDirectoryTree(QWidget):
         self._build_file_item(item, file, file.read_only)
         item.sortChildren(0, Qt.AscendingOrder)
 
-    def remove_file(self, obj: GenericDirectory | FileReference) -> None:
+    def remove_file_item(self, obj: GenericDirectory | FileReference) -> None:
         if isinstance(obj, GenericDirectory):
             obj_parent = obj.parent if obj.parent else obj.source
         else:
@@ -159,7 +159,20 @@ class SourceDirectoryTree(QWidget):
         parent_item.removeChild(item)
         self.node_to_item.pop(obj)
         if obj_parent and parent_item.childCount() == 0:
-            self.remove_file(obj.parent)
+            self.remove_file_item(obj_parent)
+
+    def prune_directory_items(self, directory:GenericDirectory) -> None:
+        if directory.files or directory.directories:
+            return
+
+        parent = directory.parent if directory.parent else directory.source
+        parent_item = self.node_to_item[parent]
+        item = self.node_to_item[directory]
+
+        parent_item.removeChild(item)
+        self.node_to_item.pop(directory)
+        if isinstance(parent, GenericDirectory):
+            self.prune_directory_items(parent)
 
     def _propagate_state(self, item: QTreeWidgetItem) -> None:
         if item is None:

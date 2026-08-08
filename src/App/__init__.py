@@ -169,8 +169,9 @@ class AppController(QObject):
 
     def _refresh_file(self) -> None:
         for file in self._batch_file:
-            self.registry.purge_file_data(file)
-            self.registry.load_file_data(file.directory.source, file)
+            if file.directory:
+                self.registry.purge_file_data(file)
+                self.registry.load_file_data(file.directory.source, file)
             if file is self.file_system.open_file:
                 self.main.load_file(self.file_system.open_file)
         self._batch_file.clear()
@@ -271,10 +272,14 @@ class AppController(QObject):
     def _request_file_unload(self, file: FileReference) -> None:
         if self.file_system.open_file is file:
             self.main.contents_panel.script_view.unload_block()
-        self.main.directory_tree.remove_file(file)
-        file.directory.delete_file(file)
+        self.main.directory_tree.remove_file_item(file)
         self.file_system.change_tracker.clear_file_state(file)
         self.registry.purge_file_data(file)
+        file.directory.delete_file(file)
+
+        file.directory.prune()
+        self.main.directory_tree.prune_directory_items(file.directory)
+
 
     def _request_registry_rebuild(self) -> None:
         self.registry._build_registry_cache()

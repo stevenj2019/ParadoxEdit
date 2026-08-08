@@ -1,5 +1,5 @@
 from pathlib import Path
-
+from collections.abc import Iterator
 from App.Loading.Directories.Base import GenericDirectory
 from App.Loading.ParadoxSource import ParadoxMod, ParadoxSource, ParadoxVanilla
 from App.Services import Workspace
@@ -93,3 +93,9 @@ class ParadoxLoadOrder:
     def _clear_empty_directories(self) -> None:
         for source in self.sources:
             source.root.prune()
+
+    def all_dependent_sources(self, source:ParadoxSource) -> Iterator[ParadoxSource]:
+        for current in self.sources:
+            if current is source:
+                break
+            yield current

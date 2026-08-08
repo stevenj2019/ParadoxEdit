@@ -142,7 +142,7 @@ class GenericDirectoryMenu(GenericContextMenu):
                     Action(
                         "Add to replace path",
                         lambda: AddReplacePathForm(self.app_controller, file_context),
-                        False
+                        True
                     )
                 ]
             ),

@@ -76,6 +76,26 @@ class GenericDirectory:
 
         return not self.directories and not self.files
 
+    # def resolve_directory(self, path:Path) -> GenericDirectory:
+    #     directory = self
+    #     for i, parent in enumerate(path.parts):
+    #         directory_path = self.path / parent
+    #         if directory.path == directory_path:
+    #             return directory
+    #         directory = self.directories.get(directory_path)
+    #     return None
+        
+    def resolve_directory(self, path: Path) -> GenericDirectory | None:
+        directory = self
+
+        for part in path.parts:
+            directory_path = self.path / Path(*path.parts[:path.parts.index(part) + 1])
+            directory = directory.directories.get(directory_path)
+            if directory is None:
+                return None
+
+        return directory
+
     def token_collection(self, source: ParadoxSource, file: FileReference) -> dict[PDXTokens, set]:
         return {}
 
