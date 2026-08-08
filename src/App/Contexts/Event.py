@@ -20,6 +20,7 @@ from App.GUI.Actions import Action, ActionsResult
 from App.PDXFactory.Blocks import Events
 from ParadoxParser.ParadoxNodes import GenericBlock, GenericKeyValue, GenericNode
 
+
 def dummy() -> None: return
 
 class EventContext(ParadoxContext):

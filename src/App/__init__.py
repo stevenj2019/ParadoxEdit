@@ -25,19 +25,19 @@ from App.GUI.Forms.Settings import SettingsForm
 from App.GUI.Main import MainWindow
 from App.GUI.StyleManager import StyleManager
 from App.GUI.Widgets.PopupModels import setup_process_cancelled, unhandled_exception_popup
-from App.Loading.Process import LoadingDialog, LoadProcess
 from App.Loading.Directories.Base import GenericDirectory
-from App.Loading.Models import FileReference, UnloadedFile
+from App.Loading.Models import FileReference
 from App.Loading.ParadoxSource import ParadoxMod, ParadoxSource
+from App.Loading.Process import LoadingDialog, LoadProcess
 from App.Services import (
     ConfigurationManager,
     FilesystemMananger,
     ParadoxRegistry,
     Workspace,
 )
-
-from ParadoxParser import ParadoxScriptParser as PDXScriptFile
 from ParadoxParser import ParadoxLocParser as PDXLocFile
+from ParadoxParser import ParadoxScriptParser as PDXScriptFile
+
 
 class AppController(QObject):
     request_node_mutation = pyqtSignal(object)

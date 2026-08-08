@@ -3,8 +3,8 @@ from __future__ import annotations
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
-    from App.Loading.Directories.Base import GenericDirectory
     from App.Contexts.Base import ParadoxContext
+    from App.Loading.Directories.Base import GenericDirectory
 
 import shutil
 from dataclasses import dataclass
@@ -13,6 +13,7 @@ from typing import Optional
 
 from ParadoxParser import ParadoxLocParser as PDXLocFile
 from ParadoxParser import ParadoxScriptParser as PDXScriptFile
+
 
 @dataclass(frozen=True)
 class UnloadedFile:

@@ -6,6 +6,7 @@ from ParadoxParser.ParadoxNodes import (
     GenericToken,
 )
 
+
 def add_namespace_keyval(namespace_id: str = None) -> GenericKeyValue:
     namespace_id = namespace_id if namespace_id else "namespace_here"
     return GenericKeyValue("add_namespace", GenericToken(namespace_id))

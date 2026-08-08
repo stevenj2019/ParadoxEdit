@@ -12,6 +12,7 @@ from App.GUI.Actions import Action, ActionGroup, ActionsResult
 from App.GUI.Help import HelpDialog
 from App.Loading.ParadoxSource import ParadoxVanilla
 
+
 class Topbar(QToolBar):
     request_load_mod = pyqtSignal()
     request_load_vanilla = pyqtSignal()

@@ -1,4 +1,5 @@
 from __future__ import annotations
+
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
@@ -12,9 +13,8 @@ from PyQt5.QtCore import QObject, Qt, pyqtSignal
 from PyQt5.QtWidgets import QDialog, QLabel, QProgressBar, QVBoxLayout
 
 from App.Contracts import ModLoaderResult
-from App.Services import ParadoxRegistry, Workspace
-
 from App.Loading.LoadOrder import ParadoxLoadOrder
+from App.Services import ParadoxRegistry, Workspace
 
 
 class LoadingDialog(QDialog):

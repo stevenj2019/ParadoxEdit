@@ -21,10 +21,10 @@ from App.Contracts.Enums import ChangeState
 from App.GUI.Actions import Action, ActionGroup, ActionsResult, ActionSubMenu
 from App.GUI.Enums import ExpansionMode
 from App.GUI.Forms.DLCConfig import ConfigureLoadedDLCForm
-from App.GUI.Forms.LoadOrderForms import CopyFileForm, AddReplacePathForm
+from App.GUI.Forms.LoadOrderForms import AddReplacePathForm, CopyFileForm
 from App.Loading.Directories.Base import GenericDirectory
-from App.Loading.ParadoxSource import ParadoxMod, ParadoxVanilla
 from App.Loading.Models import FileReference
+from App.Loading.ParadoxSource import ParadoxMod, ParadoxVanilla
 from ParadoxParser import ParadoxScriptParser as PDXScriptFile
 from ParadoxParser.ParadoxNodes import GenericBlock
 

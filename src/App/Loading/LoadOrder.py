@@ -1,5 +1,6 @@
-from pathlib import Path
 from collections.abc import Iterator
+from pathlib import Path
+
 from App.Loading.Directories.Base import GenericDirectory
 from App.Loading.ParadoxSource import ParadoxMod, ParadoxSource, ParadoxVanilla
 from App.Services import Workspace

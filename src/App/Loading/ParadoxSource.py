@@ -12,7 +12,7 @@ from App.Loading.Models import FileReference, ParadoxDLC
 from App.Services import Workspace
 from ParadoxParser import ParadoxScriptParser
 from ParadoxParser.ParadoxNodes import GenericBlock, GenericKeyValue
-from ParadoxParser.queries import find_node, all_nodes
+from ParadoxParser.queries import all_nodes, find_node
 
 PARADOX_ROOT_DIRECTORIES = [
     "common",

@@ -243,7 +243,7 @@ class LocaliseEventForm(BaseLocaliseForm):
         ]
         for entry in loc_entries:
             if isinstance(entry, GenericBlock):
-                text_node = find_keyvalue(entry, loc_key)
+                text_node = find_node(entry, GenericKeyValue, loc_key)
                 if text_node:
                     loc_nodes.append(text_node)
             else:

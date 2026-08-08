@@ -7,16 +7,17 @@ if TYPE_CHECKING:
 
 import copy
 from pathlib import Path
+
 from PyQt5.QtWidgets import QComboBox, QDialog, QFormLayout, QLineEdit, QPushButton
 
-from ParadoxParser.queries import find_nodes
-from ParadoxParser.ParadoxNodes import GenericKeyValue, GenericString
-from App.Contracts import FileMutationRequest
+from App.Contracts import BlockMutationRequest, FileMutationRequest
 from App.Contracts.Enums import ChangeState
-from App.Loading.Models import FileReference, IconFile
-from App.Loading.ParadoxSource import ParadoxVanilla, ParadoxMod
 from App.Loading.Directories.Base import GenericDirectory
-from App.Contracts import BlockMutationRequest
+from App.Loading.Models import FileReference, IconFile
+from App.Loading.ParadoxSource import ParadoxMod, ParadoxVanilla
+from ParadoxParser.ParadoxNodes import GenericKeyValue, GenericString
+from ParadoxParser.queries import find_nodes
+
 
 class CopyFileForm(QDialog):
     def __init__(self, app_controller: AppController, file: FileReference) -> None:
