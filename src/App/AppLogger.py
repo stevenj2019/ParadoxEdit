@@ -6,7 +6,6 @@ if TYPE_CHECKING:
     from App.Loading.LoadOrder import ParadoxLoadOrder
     from App.Services import Workspace
 
-
 import logging
 import platform
 import sys
@@ -42,7 +41,7 @@ class AppLogger:
             "[%(asctime)s] %(levelname)s: %(message)s", datefmt="%Y-%m-%d %H:%M:%S"
         )
 
-        file_handler = logging.FileHandler(log_file, encoding="utf-8")
+        file_handler = logging.FileHandler(log_file, "w+", encoding="utf-8")
         file_handler.setFormatter(formatter)
         cls._logger.addHandler(file_handler)
 
@@ -92,7 +91,7 @@ class AppLogger:
             return f"{obj.filename}"
 
         if isinstance(obj, GenericBlock):
-            return f"{obj.key} {{...}}"
+            return f"{obj.key} = {{...}}"
 
         if isinstance(obj, GenericKeyValue):
             return f"{obj.key} = {obj.value}"

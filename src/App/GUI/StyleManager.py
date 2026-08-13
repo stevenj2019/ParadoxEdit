@@ -51,6 +51,8 @@ class StyleManager:
             ParadoxScriptParser: self.load_icon(self.icon_directory / "file-code.svg", colour),
             ParadoxLocParser: self.load_icon(self.icon_directory / "file-text.svg", colour),
         }
+        self._play_icon = self.load_icon(self.icon_directory / "play.svg", colour)
+        self._stop_icon = self.load_icon(self.icon_directory / "square.svg", colour)
 
     def load_icon(self, path: Path, colour: QColour) -> QIcon:
         renderer = QSvgRenderer(str(path))
@@ -84,3 +86,6 @@ class StyleManager:
                 return self._icons[GenericDirectory]
             case _:
                 return self._icons[type(entry.file)]
+
+    def get_play_icon(self) -> QIcon: return self._play_icon
+    def get_stop_icon(self) -> QIcon: return self._stop_icon

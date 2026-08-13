@@ -6,9 +6,9 @@ if TYPE_CHECKING:
     from App import AppController
     from App.Loading.Models import FileReference
 
-from PyQt5.QtCore import Qt, pyqtSignal
+from PyQt5.QtCore import QEvent, Qt, pyqtSignal
 from PyQt5.QtGui import QKeySequence
-from PyQt5.QtWidgets import QApplication, QMainWindow, QShortcut, QSplitter
+from PyQt5.QtWidgets import QApplication, QMainWindow, QShortcut, QSplitter, QToolBar
 
 from App.AppLogger import AppLogger
 from App.Contracts import PropagationRequest
@@ -21,6 +21,7 @@ from App.GUI.Main.Contents import ContentsPanel
 from App.GUI.Main.InlineEdit import InLineEditManager
 from App.GUI.Main.SourceDirectoryPanel import SourceDirectoryTree
 from App.GUI.Menus.Topbar import Topbar
+from App.GUI.Widgets.Custom.GameLaunch import PlayGameWidget
 from App.GUI.Widgets.FileDialogues import (
     select_mod_file,
     workspace_save_selector,
@@ -47,7 +48,8 @@ class MainWindow(QMainWindow):
         self.editor_session = InLineEditManager(self)
 
         self.setWindowTitle("ParadoxEdit")
-        self.showMaximized()
+        self.splitter = QSplitter(Qt.Horizontal)
+        self.setCentralWidget(self.splitter)
 
         self.topbar = Topbar(self.app_controller)
         self.addToolBar(self.topbar)
@@ -58,8 +60,9 @@ class MainWindow(QMainWindow):
         self.topbar.request_settings_window.connect(self._settings_window_requested)
         self.topbar.request_dlc_change.connect(lambda: ConfigureLoadedDLCForm(self.app_controller))
 
-        self.splitter = QSplitter(Qt.Horizontal)
-        self.setCentralWidget(self.splitter)
+        # self.start_game_button = PlayGameWidget(self.app_controller)
+        # self.start_game_button.setParent(self)
+        # self.start_game_button.show()
 
         self.directory_tree = SourceDirectoryTree(self.app_controller)
         self.directory_tree.setMinimumWidth(150)
@@ -71,14 +74,26 @@ class MainWindow(QMainWindow):
         self.splitter.addWidget(self.contents_panel)
         self.contents_panel.script_view.edit_open_request.connect(self.editor_session.open_request)
 
-        self.splitter.setSizes([200, 600])
-        self.showMaximized()
-
         self.request_propagation.connect(self._propogate_mutations)
         self.request_icon_preview.connect(self._preview_icon)
 
         self.search_shortcut = QShortcut(QKeySequence("Ctrl+F"), self)
         self.search_shortcut.activated.connect(self.handle_search)
+
+        self.splitter.setSizes([100, 600])
+        self.showMaximized()
+
+    def resizeEvent(self, event: QEvent) -> None:
+        super().resizeEvent(event)
+
+        # size = self.start_game_button.sizeHint()
+
+        # self.start_game_button.setGeometry(
+        #     self.width() - size.width() - 30,
+        #     self.topbar.y(),
+        #     size.width()+30,
+        #     self.topbar.height()
+        # )
 
     def _propogate_mutations(self, request: PropagationRequest) -> None:
         type = request.type
