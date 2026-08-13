@@ -154,7 +154,7 @@ jobs:
            pip install pyinstaller
 
       - name: Python Pre-Build
-        run: python build.py --write -commit=${{ steps.vars.outputs.sha_short }}"
+        run: python build.py --write -commit=${{ steps.vars.outputs.sha_short }}
         
       - name: Python Build
         run: |
