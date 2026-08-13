@@ -1,28 +1,12 @@
 # Version:0.1
 
 ## Changes: 
-* Formalised Context, split BlockContext+NodeContext to provide more actions
 * Added Legacy->modern loc converstion (removing :0 stuff)
 * Added Error-checking for missing loc keys
-* Added form to localise selected key
-* Removed category system, in favour of (significantly better) Directory Walk system.
+* Added form to localise selected key/object (only for events and focus tree for now)
+* Directory(Folder) View
 * Fixed Settings form on first launch being skip-able (will cause error only fixable with file deletion, and leave you unable to load mods)
 * Added Search Functionality (Project-Wide, not in file)
-* better loading bar (and process) for load order file processing
 * ctrl+c copy, ctrl+f search
-
-## Included Scripts 
-* Bulk-Add GFX files (file writes/ and icon copies)
-* Localisation tooling (for events only for now)
-
-## TODO
-### Generic
-### Contexts
-### LoadOrder Related
-* ability to add a directory to replace_path (in descriptor)
-* alphabetical sorting as second priority (sort by dependency, then by alphabetical) (done, i think?, there is a log i can use to test this)
-* DLC tooling
-### Architecture
-* Updates Actions Build Process
-### Fixes 
-* Global ExceptionHook 
+* Robust DLC Loader (including the archives) + Selector 
+* Bulk-addition for GFX Files/their definitions
