@@ -19,6 +19,10 @@ jobs:
       - name: Checkout Repo
         uses: actions/checkout@v4
 
+      - name: 
+        id: vars
+        run: echo "sha_short=$(git rev-parse --short HEAD)" >> $GITHUB_OUTPUT 
+
       - name: Setup Python
         uses: actions/setup-python@v5
         with: 
@@ -30,6 +34,9 @@ jobs:
            pip install -r requirements.txt
            pip install pyinstaller
 
+      - name: Python Pre-Build
+        run: python build.py --write -commit=${{ steps.vars.outputs.sha_short }}"
+        
       - name: Python Build
         run: |
           pyinstaller PDXEdit.spec
@@ -54,9 +61,18 @@ jobs:
       - name: Checkout Repo
         uses: actions/checkout@v4
 
-      - name: Get Release SHA
-        id: vars
-        run: echo "sha_short=$(git rev-parse --short HEAD)" >> $GITHUB_OUTPUT
+      - name: Get Release Version
+        id: release_var
+        run: echo "version=$(python build.py --get_version)" >> $GITHUB_OUTPUT
+
+      - name: Get Change Log
+        id: change_log
+        run: |
+          {
+            echo 'changes<<EOF'
+            python build.py --get_changes
+            echo 'EOF'
+          } >> "$GITHUB_OUTPUT"
 
       - name: Create Release
         id: release
@@ -64,8 +80,9 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          tag_name: ${{ steps.vars.outputs.sha_short }}
-          release_name: Release ${{ steps.vars.outputs.sha_short }}
+          tag_name: ${{ steps.release_var.outputs.version }}
+          release_name: Release ${{ steps.release_var.outputs.version }}
+          body: ${{ steps.change_log.outputs.changes }}
           draft: false
           prerelease: false
 
