@@ -1,0 +1,3 @@
+APPNAME = "ParadoxEdit"
+VERSION = "LOCAL"
+COMMIT = "LOCAL"

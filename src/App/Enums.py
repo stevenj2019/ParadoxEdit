@@ -1,34 +1,20 @@
-from PyQt5.QtCore import Qt
-from enum import Enum, auto, IntEnum
+from enum import Enum, auto
 
-class QtStorage(IntEnum):
-    def _generate_next_value_(name, start, count, last_values):
-        return Qt.UserRole + count
-    FILE = auto()
-    NODE = auto()
-    IS_BLOCK = auto()
+
+class PDXTokens(Enum):
+    EVENT = auto()
+    CHARACTER = auto()
+    COUNTRY = auto()
+    ORGANISATION = auto()
+    OPERATION = auto()
+    CONTRACTS = auto()
+    RAID = auto()
+    SPECIAL_PROJECT = auto()
     STATE = auto()
-    CATEGORY = auto()
-    IS_CATEGORY = auto()
-    CONTEXT = auto()
-    PARENT = auto()
-    INDEX = auto()
-    
-class ChangeState(Enum):
-    CLEAN = auto()
-    MODIFIED = auto()
-    ADDED = auto()
-    DELETED = auto()
+    STRATEGIC_REGION = auto()
 
-class ExpansionMode(Enum):
-    ALL = auto()
-    DEPTH = auto()
-    FROM_NODE = auto()
 
-class SaveTarget(Enum):
-    ALL = auto()
-    OPEN = auto()
-
-class PropagationType(Enum):
-    NODE = auto()
-    FILE = auto()
+class PDXMetadata(Enum):
+    GFXIcon = auto()
+    LocKey = auto()
+    LanguageKey = auto()

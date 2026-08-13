@@ -1,175 +1,287 @@
+from __future__ import annotations
+
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from App.Loading.LoadOrder import ParadoxLoadOrder
+    from App.Loading.ParadoxSource import ParadoxSource
+
 import json
+import sys
+from dataclasses import dataclass, field
 from pathlib import Path
+from typing import Self
+
 from platformdirs import user_config_dir
 
-from PyQt5.QtGui import QColor as QColour
-
-from ParadoxParser import ParadoxScriptParser as PDXScriptFile
-from ParadoxParser.ParadoxNodes import GenericBlock
-
+from App.AppData import APPNAME
+from App.AppLogger import AppLogger
 from App.Contracts import OpenFile
-from App.Enums import ChangeState
-from App.ModClasses import ParadoxMod
-from App.Contexts.FileContexts import ParadoxFileContext
+from App.Contracts.Enums import ChangeState
+from App.Enums import PDXMetadata, PDXTokens
+from App.Loading.Models import FileReference
+from ParadoxParser import ParadoxLocParser as PDXLocFile
+from ParadoxParser import ParadoxScriptParser as PDXScriptFile
+from ParadoxParser.ParadoxNodes import GenericBlock, GenericNode
 
-class Services:
-    def __init__(self, app):
-        self.configuration = app.configuration
-        self.file_system =   app.file_system
-        self.style_manager = app.style_manager
 
 class ConfigurationManager:
-    def __init__(self):
-        self.file_path:Path = Path(user_config_dir("PDXEdit"), "configuration.json")
-        self.game_install_path:Path = ""
-        self.mod_file_path:Path = ""
-        self.safe_mode:bool = True
-        self.dark_mode:bool = False
+    def __init__(self) -> None:
+        self.file_path: Path = Path(user_config_dir(APPNAME), "configuration.json")
+        self.game_install_path: Path = ""
+        self.appdata_path: Path = ""
+        self.safe_mode: bool = True
+        self.dark_mode: bool = False
+        self.initialised = False
 
         if self.file_path.exists():
             self.initialised = True
             self.read_file()
-        else:
-            self.initialised = False
-    
-    def change_setting(self, **kwargs):
+
+    def change_setting(self, **kwargs: Path | bool) -> None:
         for k, v in kwargs.items():
             if not hasattr(self, k):
                 raise AttributeError(f"Unknown setting: {k}")
             setattr(self, k, v)
 
-    def to_json(self):
+    def to_json(self) -> dict:
         return {
-            'safe_mode': self.safe_mode,
-            'game_install_path': str(self.game_install_path),
-            'mod_file_path': str(self.mod_file_path),
-            'dark_mode': self.dark_mode
+            "safe_mode": self.safe_mode,
+            "game_install_path": str(self.game_install_path),
+            "appdata_path": str(self.appdata_path),
+            "dark_mode": self.dark_mode,
         }
-    
-    def read_file(self):
-        settings = json.load(self.file_path.open())
-        self.safe_mode = settings['safe_mode']
-        self.game_install_path = Path(settings['game_install_path'])
-        self.mod_file_path = Path(settings['mod_file_path'])
-        self.dark_mode = settings['dark_mode']
 
-    def create_file(self):
+    def read_file(self) -> None:
+        try:
+            settings = json.load(self.file_path.open())
+        except json.decoder.JSONDecodeError as e:
+            AppLogger.error(f"Invalid file at {str(self.file_path)}")
+            AppLogger.exception(e)
+            sys.exit()
+
+        self.safe_mode = settings["safe_mode"]
+        self.game_install_path = Path(settings["game_install_path"])
+        self.appdata_path = Path(settings["appdata_path"])
+        self.dark_mode = settings["dark_mode"]
+
+    def create_file(self) -> None:
         self.safe_mode = True
         self.dark_mode = False
         self.file_path.parent.mkdir(exist_ok=True, parents=True)
         self.file_path.touch()
 
-        self.initialised = True
-
-    def write_file(self):
+    def write_file(self) -> None:
         with open(self.file_path, "w") as CONFIG_FILE:
             json.dump(self.to_json(), CONFIG_FILE)
+        self.initialised = True
 
-class StyleManager:
-    def __init__(self, configuration):
-        self.configuration = configuration
-        self.dark_mode_palette = {
-            ChangeState.MODIFIED: QColour("#545703"),
-            ChangeState.ADDED: QColour("#04450c"),
-            ChangeState.DELETED: QColour("#400308"),
-        }
-        self.light_mode_palette = {
-            ChangeState.MODIFIED: QColour("yellow"),
-            ChangeState.ADDED: QColour("green"),
-            ChangeState.DELETED: QColour("red"),
-        }
-
-    def get_node_state_colour(self, state):
-        if self.configuration.dark_mode:
-            return self.dark_mode_palette.get(state)
-        else:
-            return self.light_mode_palette.get(state)
 
 class ChangeTracker:
-    def __init__(self):
+    def __init__(self) -> None:
         self.node_changes = {}
         self.file_changes = {}
 
-    def node_is_dirty(self, node):
+    def node_is_dirty(self, node: GenericNode) -> bool:
         return self.get_node_state(node) is not None
 
-    def set_node_state(self, node, state):
-        print(f"Setting {node} to {state}")
+    def set_node_state(self, node: GenericNode, state: ChangeState) -> None:
+        AppLogger.mutation(node, state)
         self.node_changes[node] = state
 
-    def get_node_state(self, node):
+    def get_node_state(self, node: GenericNode) -> ChangeState:
         return self.node_changes.get(node, None)
 
-    def clear_node_state(self, node):
+    def clear_node_state(self, node: GenericNode) -> None:
         self.node_changes.pop(node, None)
 
-    def file_is_dirty(self, file):
+    def file_is_dirty(self, file: FileReference) -> bool:
         return self.get_file_state(file) is not None
 
-    def set_file_state(self, file, state):
-        print(f"Setting {file} to {state}")
+    def set_file_state(self, file: FileReference, state: ChangeState) -> None:
+        AppLogger.mutation(file, state)
         self.file_changes[file] = state
 
-    def get_file_state(self, file):
+    def get_file_state(self, file: FileReference) -> ChangeState:
         return self.file_changes.get(file, None)
 
-    def clear_file_state(self, file):
-        def recurse(node):
+    def clear_file_state(self, file: FileReference) -> None:
+        def recurse(node: GenericNode) -> None:
             self.clear_node_state(node)
             if isinstance(node, GenericBlock):
                 for _node in node.nodes:
                     recurse(_node)
+
         self.file_changes.pop(file, None)
         if file:
-            for node in file.nodes:
-                recurse(node)
+            try:
+                for node in file.file.nodes:
+                    recurse(node)
+            except AttributeError:
+                pass
+
+
+class Workspace:
+    @dataclass
+    class _VanillaWorkspace:
+        loaded: bool = False
+        dlcs: dict[str, bool] = field(default_factory=dict)
+
+        def _to_json(self) -> dict:
+            return {
+                "loaded": self.loaded,
+                "dlcs": dict(sorted(self.dlcs.items())),
+            }
+
+        @classmethod
+        def from_json(cls, data: dict) -> Self:
+            return cls(loaded=data["loaded"], dlcs=data["dlcs"])
+
+    def __init__(self) -> None:
+        self.vanilla = self._VanillaWorkspace()
+        self.mods: list[Path] = []
+
+    def set_vanilla_status(self, enabled: bool) -> None:
+        self.vanilla.loaded = enabled
+
+    def set_dlc_status(self, dlc: str, enabled: bool) -> None:
+        self.vanilla.dlcs[dlc] = enabled
+
+    def add_mod_to_workspace(self, descriptor_path: Path) -> None:
+        if descriptor_path not in self.mods:
+            self.mods.append(descriptor_path)
+
+    def _to_json(self) -> dict:
+        return {"vanilla": self.vanilla._to_json(), "mods": [str(mod) for mod in self.mods]}
+
+    def read_file(self, path: Path) -> None:
+        with path.open("r", encoding="UTF-8") as FILE:
+            config = json.load(FILE)
+
+        # self.vanilla = config["vanilla"]
+        self.vanilla = self._VanillaWorkspace.from_json(config["vanilla"])
+        for mod in config["mods"]:
+            mod_path = Path(mod)
+            self.mods.append(mod_path)
+
+    def write_file(self, path: Path) -> None:
+        with path.open("w", encoding="UTF-8") as CONFIG_FILE:
+            json.dump(self._to_json(), CONFIG_FILE, indent=4)
+
 
 class FilesystemMananger:
-    def __init__(self, configuration):
+    def __init__(self, configuration: ConfigurationManager) -> None:
+        self.workspace: Workspace = Workspace()
+        self.load_order: ParadoxLoadOrder = None
+
         self.configuration = configuration
         self.change_tracker = ChangeTracker()
-        self.mod = None
 
-        self.open_file:OpenFile = None
+        self.open_file: OpenFile = None
 
-    def load_mod(self, path):
-        self.mod = ParadoxMod(path)
+    def load_workspace(self, workspace: Workspace, load_order: ParadoxLoadOrder) -> None:
+        self.workspace = workspace
+        self.load_order = load_order
 
-    def load_file(self, file:OpenFile):
+    def load_file(self, file: OpenFile) -> None:
         self.open_file = file
 
-    def changed_file(self, file, node, status):
+    def changed_file(self, file: FileReference, node: GenericNode, status: ChangeState) -> None:
         self.change_tracker.set_file_state(file, status)
         self.change_tracker.set_node_state(node, status)
-        
-    def collect_deletion_nodes(self, file):
+
+    def collect_deletion_nodes(self, file: PDXScriptFile | PDXLocFile) -> None:
         deletions = []
-        def recurse(parent, node):
+
+        def recurse(parent: PDXScriptFile | PDXLocFile | GenericBlock, node: GenericNode) -> None:
             if self.change_tracker.get_node_state(node) == ChangeState.DELETED:
                 index = parent.nodes.index(node)
                 deletions.append((parent, index, node))
-                return 
+                return
             if isinstance(node, GenericBlock):
                 for child in node.nodes:
                     recurse(node, child)
-        for node in file.nodes:
-            recurse(file, node)
-        return deletions
-    
-    def cleanup_deletion_nodes(self, file):
+
+        try:
+            for node in file.nodes:
+                recurse(file, node)
+        except AttributeError:
+            return deletions
+
+    def cleanup_deletion_nodes(self, file: FileReference) -> None:
         deletions = self.collect_deletion_nodes(file)
+        try:
+            for parent, index, node in sorted(deletions, key=lambda x: x[1], reverse=True):
+                self.change_tracker.clear_node_state(node)
+                parent.nodes.pop(index)
+        except TypeError:
+            return
 
-        for parent, index, node in sorted(deletions, key=lambda x: x[1], reverse=True):
-            self.change_tracker.clear_node_state(node)
-            parent.nodes.pop(index)
-
-    def save_file(self, file=None):
-        self.cleanup_deletion_nodes(file)
-        if self.change_tracker.file_is_dirty(file):
+    def save_file(self, file: FileReference = None) -> bool:
+        self.cleanup_deletion_nodes(file.file)
+        if self.change_tracker.file_is_dirty(file) and not file.read_only:
+            file.file.filepath.parent.mkdir(parents=True, exist_ok=True)
             self.change_tracker.clear_file_state(file)
-            if self.configuration.safe_mode:
-                file.backup_file()
-            file.to_pdx_file()
+            file.commit(self.configuration.safe_mode)
             return True
         else:
             return False
+
+
+class ParadoxRegistry:
+    def __init__(self) -> None:
+        self.tokens: dict[PDXTokens, dict[FileReference, set]] = {}
+        self.metadata: dict[PDXMetadata, dict[FileReference, dict]] = {}
+
+        self.tokens_cache: dict[PDXTokens, set] = {}
+        self.metadata_cache: dict[PDXTokens, dict] = {}
+
+    def get_tokens(self, key: PDXTokens) -> None:
+        return self.tokens_cache.get(key, set())
+
+    def get_metadata(self, key: PDXMetadata) -> None:
+        return self.metadata_cache.get(key, dict())
+
+    def load_file_data(self, source: ParadoxSource, file: FileReference) -> None:
+        AppLogger.info(f"Registry building {file.file.filename} refs")
+        if isinstance(file.file, (PDXScriptFile, PDXLocFile)):
+            self._merge_registry(self.tokens, file, file.directory.token_collection(source, file))
+            self._merge_registry(
+                self.metadata, file, file.directory.metadata_collection(source, file)
+            )
+
+    def _merge_registry(self, target: dict, file: FileReference, insertions: dict) -> None:
+        if isinstance(insertions, dict):
+            for key, value in insertions.items():
+                if key not in target:
+                    target[key] = dict()
+                target[key][file] = value
+
+    def purge_file_data(self, file: FileReference) -> None:
+        AppLogger.info(f"Registry purged of {file.file.filename} refs")
+        for file_data in self.tokens.values():
+            file_data.pop(file, None)
+        for file_data in self.metadata.values():
+            file_data.pop(file, None)
+
+    def _build_registry_cache(self) -> None:
+        AppLogger.info("Rebuilding Registry cache")
+        self.tokens_cache.clear()
+        self.metadata_cache.clear()
+
+        for key, token in self.tokens.items():
+            merged = set()
+            for data in token.values():
+                merged.update(data)
+            self.tokens_cache[key] = merged
+
+        for key, metadata in self.metadata.items():
+            merged = type(next(iter(metadata.values())))()
+
+            for data in metadata.values():
+                if isinstance(data, dict):
+                    merged.update(data)
+                else:
+                    merged.update(data)
+
+            self.metadata_cache[key] = merged

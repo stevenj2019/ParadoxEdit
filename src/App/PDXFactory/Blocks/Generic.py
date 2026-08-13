@@ -1,4 +1,6 @@
 from ParadoxParser.ParadoxNodes import GenericComment
-def comment_node(value=None):
+
+
+def comment_node(value: str = None) -> None:
     value = value if value else "##COMMENT HERE##"
     return GenericComment(value)
